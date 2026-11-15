@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     # Apps del proyecto
     "core",
     "productos",
+    "clientes",
 
 ]
 
