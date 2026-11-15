@@ -47,16 +47,20 @@ class VehiculoTests(Base):
         self.auto.refresh_from_db()
         self.assertEqual(self.auto.km_actual, 15000)
 
-    def test_en_la_web_requiere_aprobacion(self):
-        self.auto.publicado_web = True
-        self.assertFalse(self.auto.esta_en_la_web)
-        self.auto.aprobado_por_taller = True
-        self.assertTrue(self.auto.esta_en_la_web)
+    def test_auto_de_carrera_sin_patente(self):
+        sin_patente = Vehiculo.objects.create(cliente=self.cliente, vin="CH-0042", marca="Tango", modelo="TC")
+        otro = Vehiculo.objects.create(cliente=self.cliente, vin="CH-0043", marca="Tango", modelo="TC")
+        self.assertEqual(sin_patente.identificacion, "VIN CH0042")
+        self.assertEqual((sin_patente.patente, otro.patente), ("", ""))  # varias sin patente conviven
+
+    def test_exige_patente_o_vin(self):
+        with self.assertRaises(ValidationError):
+            Vehiculo.objects.create(cliente=self.cliente, marca="X", modelo="Y")
 
 
 class TecnicoTests(Base):
-    def test_piloto_no_puede_ser_tecnico(self):
-        piloto = Usuario.objects.create_user("piloto", password="x", tipo=Usuario.Tipo.PILOTO)
+    def test_usuario_portal_no_puede_ser_tecnico(self):
+        piloto = Usuario.objects.create_user("piloto", password="x", tipo=Usuario.Tipo.PORTAL)
         with self.assertRaises(ValidationError):
             Tecnico.objects.create(nombre="X", usuario=piloto)
 

@@ -90,8 +90,8 @@ class CuentaCorrienteTests(TestCase):
         with self.assertRaises(ValidationError):
             m.save()
 
-    def test_piloto_no_registra_movimientos(self):
-        piloto = Usuario.objects.create_user("piloto", password="x", tipo=Usuario.Tipo.PILOTO)
+    def test_usuario_portal_no_registra_movimientos(self):
+        piloto = Usuario.objects.create_user("piloto", password="x", tipo=Usuario.Tipo.PORTAL)
         with self.assertRaises(ValidationError):
             self.mov("DEBITO", "100", user=piloto)
 

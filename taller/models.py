@@ -58,30 +58,26 @@ class Vehiculo(models.Model):
         HIBRIDO = "HIBRIDO", "Híbrido"
         OTRO = "OTRO", "Otro"
 
+    """
+    Ficha OPERATIVA del vehículo en el taller (patente, VIN, km, dueño).
+    La presentación pública del auto (número, categoría, fotos, descripción) vive en el
+    portal (portal.Auto), que puede vincularse a esta ficha cuando el auto entra al taller.
+    """
+
     cliente = models.ForeignKey(
         "clientes.Cliente", on_delete=models.PROTECT, related_name="vehiculos",
         help_text="Dueño actual del vehículo.",
     )
-    patente = models.CharField(max_length=15, unique=True, help_text="Se guarda en mayúsculas, sin espacios ni guiones.")
+    patente = models.CharField(
+        max_length=15, blank=True, default="",
+        help_text="Opcional (muchos autos de carrera no tienen). Mayúsculas, sin espacios ni guiones.",
+    )
     marca = models.CharField(max_length=60)
     modelo = models.CharField(max_length=80)
     anio = models.PositiveSmallIntegerField("año", null=True, blank=True, validators=[MinValueValidator(1900)])
     vin = models.CharField("VIN / chasis", max_length=30, blank=True, default="")
     combustible = models.CharField(max_length=10, choices=Combustible.choices, default=Combustible.NAFTA)
     km_actual = models.PositiveIntegerField("km actual", default=0)
-
-    # Competición
-    numero_competicion = models.CharField("número de competición", max_length=10, blank=True)
-    categoria = models.CharField("categoría", max_length=80, blank=True)
-
-    # Presentación web (la edita el piloto desde el portal; la aprueba el taller)
-    descripcion_web = models.TextField("descripción para la web", blank=True)
-    publicado_web = models.BooleanField(
-        "publicado en la web", default=False, help_text="Lo decide el piloto principal."
-    )
-    aprobado_por_taller = models.BooleanField(
-        default=False, help_text="Nada sale a la web sin aprobación del taller."
-    )
 
     activo = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -92,21 +88,33 @@ class Vehiculo(models.Model):
         indexes = [models.Index(fields=["cliente"]), models.Index(fields=["marca", "modelo"])]
         constraints = [
             models.UniqueConstraint(
+                fields=["patente"],
+                condition=~Q(patente=""),
+                name="uq_vehiculo_patente_no_vacia",
+                violation_error_message="Ya existe un vehículo con esta patente.",
+            ),
+            models.UniqueConstraint(
                 fields=["vin"],
                 condition=~Q(vin=""),
                 name="uq_vehiculo_vin_no_vacio",
                 violation_error_message="Ya existe un vehículo con este VIN.",
+            ),
+            models.CheckConstraint(
+                condition=~Q(patente="") | ~Q(vin=""),
+                name="ck_vehiculo_patente_o_vin",
+                violation_error_message="Cargá la patente o el VIN / chasis.",
             ),
         ]
         verbose_name = "vehículo"
         verbose_name_plural = "vehículos"
 
     def __str__(self) -> str:
-        return f"{self.patente} · {self.marca} {self.modelo}"
+        return f"{self.identificacion} · {self.marca} {self.modelo}"
 
     @property
-    def esta_en_la_web(self) -> bool:
-        return self.activo and self.publicado_web and self.aprobado_por_taller
+    def identificacion(self) -> str:
+        """Patente, o el VIN si no tiene patente."""
+        return self.patente or f"VIN {self.vin}"
 
     def _normalizar(self) -> None:
         self.patente = _normalizar_codigo(self.patente)
@@ -115,6 +123,8 @@ class Vehiculo(models.Model):
     def clean(self):
         super().clean()
         self._normalizar()
+        if not self.patente and not self.vin:
+            raise ValidationError("Cargá la patente o el VIN / chasis.")
         if self.anio and self.anio > _anio_maximo():
             raise ValidationError({"anio": f"El año no puede ser mayor que {_anio_maximo()}."})
 
@@ -158,8 +168,8 @@ class Tecnico(models.Model):
     def clean(self):
         super().clean()
         self.nombre = (self.nombre or "").strip()
-        if self.usuario_id and getattr(self.usuario, "es_piloto", False):
-            raise ValidationError({"usuario": "Un piloto no puede ser técnico."})
+        if self.usuario_id and getattr(self.usuario, "es_portal", False):
+            raise ValidationError({"usuario": "Un usuario del portal no puede ser técnico."})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -357,7 +367,7 @@ class OrdenTrabajo(models.Model):
         verbose_name_plural = "órdenes de trabajo"
 
     def __str__(self) -> str:
-        return f"OT #{self.numero} · {self.vehiculo.patente} · {self.get_estado_display()}"
+        return f"OT #{self.numero} · {self.vehiculo.identificacion} · {self.get_estado_display()}"
 
     @property
     def total_presupuestado(self) -> Decimal:

@@ -21,7 +21,7 @@ GRUPO_ADMINISTRACION = "administracion"
 
 def _es_gerente(user) -> bool:
     """Gerente: superusuario, permiso core.administrar_core o grupo 'gerente'."""
-    if getattr(user, "es_piloto", False):
+    if getattr(user, "es_portal", False):
         return False
     return bool(
         user.is_superuser
@@ -34,7 +34,7 @@ def _es_jefe(user) -> bool:
     """ Personal que opera la caja y ve su estructura (sucursales, cajas, sesiones):
     gerente, jefe, administración, o cualquiera con el permiso core.movimientos_caja.
     """
-    if getattr(user, "es_piloto", False):
+    if getattr(user, "es_portal", False):
         return False
     return bool(
         _es_gerente(user)
@@ -318,7 +318,7 @@ class CajaMovimientoAdmin(admin.ModelAdmin):
 
 
 # ============================================================
-# Usuario (personal y pilotos)
+# Usuario (personal y usuarios del portal)
 # ============================================================
 
 @admin.action(description="Desbloquear PIN seleccionado(s)")
@@ -340,15 +340,15 @@ class _ReglasUsuarioMixin:
         groups = cleaned.get("groups")
         tiene_grupos = groups is not None and groups.exists()
 
-        if tipo == Usuario.Tipo.PILOTO:
+        if tipo == Usuario.Tipo.PORTAL:
             if sucursal:
-                self.add_error("sucursal", "Un piloto no tiene sucursal fija.")
+                self.add_error("sucursal", "Un usuario del portal no tiene sucursal fija.")
             if tiene_grupos:
-                self.add_error("groups", "Un piloto no puede tener roles del personal.")
+                self.add_error("groups", "Un usuario del portal no puede tener roles del personal.")
             if cleaned.get("is_staff"):
-                self.add_error("is_staff", "Un piloto no puede entrar al administrador.")
+                self.add_error("is_staff", "Un usuario del portal no puede entrar al administrador.")
             if cleaned.get("is_superuser"):
-                self.add_error("is_superuser", "Un piloto no puede ser superusuario.")
+                self.add_error("is_superuser", "Un usuario del portal no puede ser superusuario.")
 
         elif tipo == Usuario.Tipo.STAFF:
             es_gerente_destino = groups is not None and groups.filter(name=GRUPO_GERENTE).exists()

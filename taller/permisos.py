@@ -4,7 +4,7 @@ Quién ve y opera cada orden de trabajo.
 - Superusuario y gerente: todas.
 - Personal con taller.cambiar_estado_orden (jefe, administración): las de su sucursal fija.
 - Mecánico (sólo taller.trabajar_orden): las órdenes asignadas a él (Tecnico.usuario).
-- Pilotos y el resto: ninguna (el portal tiene su propio control por dueño del dato).
+- Usuarios del portal y el resto: ninguna (el portal tiene su propio control por dueño del dato).
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ PERM_CANCELAR = "taller.cancelar_orden"
 
 
 def es_gerente(user) -> bool:
-    if not getattr(user, "is_authenticated", False) or getattr(user, "es_piloto", False):
+    if not getattr(user, "is_authenticated", False) or getattr(user, "es_portal", False):
         return False
     return bool(
         user.is_superuser
@@ -34,7 +34,7 @@ def es_solo_mecanico(user) -> bool:
 
 def ordenes_visibles(qs, user):
     """Filtra un queryset de OrdenTrabajo según quién mira."""
-    if getattr(user, "es_piloto", False) or not getattr(user, "is_authenticated", False):
+    if getattr(user, "es_portal", False) or not getattr(user, "is_authenticated", False):
         return qs.none()
     if es_gerente(user):
         return qs

@@ -225,9 +225,9 @@ class MovimientoCuentaCorriente(models.Model):
         if self.monto is None or self.monto <= 0:
             raise ValidationError({"monto": "El monto debe ser positivo."})
 
-        # Sólo el personal del taller registra movimientos (nunca un piloto).
-        if self.creado_por_id and getattr(self.creado_por, "es_piloto", False):
-            raise ValidationError({"creado_por": "Un piloto no puede registrar movimientos de cuenta corriente."})
+        # Sólo el personal del taller registra movimientos (nunca un usuario del portal).
+        if self.creado_por_id and getattr(self.creado_por, "es_portal", False):
+            raise ValidationError({"creado_por": "Un usuario del portal no puede registrar movimientos de cuenta corriente."})
 
     def save(self, *args, **kwargs):
         if self.pk is not None:

@@ -35,22 +35,19 @@ class _SinBorradoMixin:
 
 @admin.register(Vehiculo)
 class VehiculoAdmin(_SinBorradoMixin, admin.ModelAdmin):
-    list_display = ("patente", "marca", "modelo", "anio", "cliente", "numero_competicion", "km_actual", "en_la_web", "activo")
-    list_filter = ("activo", "combustible", "publicado_web", "aprobado_por_taller")
-    search_fields = ("patente", "vin", "marca", "modelo", "numero_competicion", "cliente__nombre")
+    list_display = ("patente", "vin", "marca", "modelo", "anio", "cliente", "km_actual", "activo")
+    list_filter = ("activo", "combustible")
+    search_fields = ("patente", "vin", "marca", "modelo", "cliente__nombre")
     list_select_related = ("cliente",)
     autocomplete_fields = ("cliente",)
     readonly_fields = ("created_at", "updated_at")
     fieldsets = (
-        (None, {"fields": ("cliente", "patente", "marca", "modelo", "anio", "vin", "combustible", "km_actual", "activo")}),
-        ("Competición", {"fields": ("numero_competicion", "categoria")}),
-        ("Web", {"fields": ("descripcion_web", "publicado_web", "aprobado_por_taller")}),
+        (None, {
+            "fields": ("cliente", "patente", "vin", "marca", "modelo", "anio", "combustible", "km_actual", "activo"),
+            "description": "Cargá la patente o el VIN / chasis (al menos uno).",
+        }),
         ("Auditoría", {"classes": ("collapse",), "fields": ("created_at", "updated_at")}),
     )
-
-    @admin.display(boolean=True, description="En la web")
-    def en_la_web(self, obj):
-        return obj.esta_en_la_web
 
 
 # ============================================================

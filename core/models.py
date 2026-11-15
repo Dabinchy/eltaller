@@ -4,7 +4,7 @@ Modelos base (CORE) del sistema del taller.
 
 Incluye:
 - Empresa (una sola fila) y Sucursal
-- Usuario (custom): tipo STAFF/PILOTO + PIN para acciones críticas (con bloqueo)
+- Usuario (custom): tipo STAFF/PORTAL + PIN para acciones críticas (con bloqueo)
 - Caja, SesionCaja, CajaMovimiento
 - PuntoVenta (AFIP: opcional, sin uso por ahora)
 
@@ -152,13 +152,14 @@ class Usuario(AbstractUser):
     Usuario único del sistema.
 
     - tipo STAFF: personal del taller (mecánicos, jefes, gerentes). Sus roles son Grupos de Django.
-    - tipo PILOTO: cliente que entra al portal.
+    - tipo PORTAL: pilotos, clientes y moderadores que entran al portal. Lo que pueden hacer
+      depende de lo que tengan asociado (perfil de piloto, acceso de cliente, membresía).
     - sucursal: sucursal fija opcional (para cajeros/encargados).
     """
 
     class Tipo(models.TextChoices):
         STAFF = "STAFF", "Personal del taller"
-        PILOTO = "PILOTO", "Piloto"
+        PORTAL = "PORTAL", "Usuario del portal"
 
     tipo = models.CharField(max_length=10, choices=Tipo.choices, default=Tipo.STAFF)
 
@@ -188,8 +189,8 @@ class Usuario(AbstractUser):
         ]
 
     @property
-    def es_piloto(self) -> bool:
-        return self.tipo == self.Tipo.PILOTO
+    def es_portal(self) -> bool:
+        return self.tipo == self.Tipo.PORTAL
 
     @property
     def es_personal(self) -> bool:
@@ -197,8 +198,8 @@ class Usuario(AbstractUser):
 
     def clean(self):
         super().clean()
-        if self.es_piloto and self.sucursal_id is not None:
-            raise ValidationError({"sucursal": "Un piloto no puede tener sucursal fija."})
+        if self.es_portal and self.sucursal_id is not None:
+            raise ValidationError({"sucursal": "Un usuario del portal no puede tener sucursal fija."})
 
     # --- Gestión de PIN y bloqueo ---
     PIN_MIN_LEN = 4
@@ -206,8 +207,8 @@ class Usuario(AbstractUser):
     PIN_LOCK_MINUTES = 15
 
     def set_action_pin(self, pin: str) -> None:
-        if self.es_piloto:
-            raise ValidationError("Los pilotos no usan PIN.")
+        if self.es_portal:
+            raise ValidationError("Los usuarios del portal no usan PIN.")
         if not pin or len(pin) < self.PIN_MIN_LEN or not pin.isdigit():
             raise ValidationError(
                 f"El PIN debe tener sólo dígitos y al menos {self.PIN_MIN_LEN} de largo."
@@ -437,8 +438,8 @@ class CajaMovimiento(models.Model):
 
         # Alcance del usuario que registra
         if self.creado_por_id and not self.creado_por.is_superuser:
-            if self.creado_por.es_piloto:
-                raise ValidationError({"creado_por": "Un piloto no puede registrar movimientos de caja."})
+            if self.creado_por.es_portal:
+                raise ValidationError({"creado_por": "Un usuario del portal no puede registrar movimientos de caja."})
             if self.creado_por.sucursal_id and self.caja.sucursal_id != self.creado_por.sucursal_id:
                 raise ValidationError({"creado_por": "No puede registrar movimientos en una caja de otra sucursal."})
 
@@ -569,8 +570,8 @@ class SesionCaja(models.Model):
         def _check_usuario_scope(user, field_name: str):
             if not user or getattr(user, "is_superuser", False):
                 return
-            if user.es_piloto:
-                raise ValidationError({field_name: "Un piloto no puede operar cajas."})
+            if user.es_portal:
+                raise ValidationError({field_name: "Un usuario del portal no puede operar cajas."})
             # Si el usuario tiene sucursal fija (cajero/encargado), debe coincidir.
             if user.sucursal_id and caja_sucursal_id is not None and user.sucursal_id != caja_sucursal_id:
                 raise ValidationError({field_name: "El usuario pertenece a otra sucursal."})
@@ -637,8 +638,8 @@ class SesionCaja(models.Model):
         # Permisos
         if not (usuario.is_superuser or usuario.has_perm("core.abrir_caja")):
             raise PermissionDenied("No tiene permisos para abrir caja.")
-        if usuario.es_piloto:
-            raise PermissionDenied("Los pilotos no pueden operar cajas.")
+        if usuario.es_portal:
+            raise PermissionDenied("Los usuarios del portal no pueden operar cajas.")
         if not usuario.is_superuser:
             if usuario.sucursal_id and caja.sucursal_id != usuario.sucursal_id:
                 raise PermissionDenied("No puede abrir cajas de otra sucursal.")
@@ -703,8 +704,8 @@ class SesionCaja(models.Model):
         """
         if not (usuario.is_superuser or usuario.has_perm("core.cerrar_caja")):
             raise PermissionDenied("No tiene permisos para cerrar caja.")
-        if usuario.es_piloto:
-            raise PermissionDenied("Los pilotos no pueden operar cajas.")
+        if usuario.es_portal:
+            raise PermissionDenied("Los usuarios del portal no pueden operar cajas.")
         if not usuario.is_superuser:
             if usuario.sucursal_id and self.caja.sucursal_id != usuario.sucursal_id:
                 raise PermissionDenied("No puede cerrar cajas de otra sucursal.")

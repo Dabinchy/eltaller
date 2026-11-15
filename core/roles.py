@@ -1,7 +1,7 @@
 # core/roles.py
 """
 Nombres de los grupos (roles) del personal y utilidad para sincronizar sus permisos.
-El piloto NO es un grupo: se distingue por Usuario.tipo.
+Los usuarios del portal (pilotos, clientes, moderadores) NO usan grupos: se distinguen por Usuario.tipo = PORTAL.
 """
 from __future__ import annotations
 
