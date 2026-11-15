@@ -118,6 +118,12 @@ class Sucursal(models.Model):
     nombre = models.CharField(max_length=120, unique=True)
     direccion = models.CharField(max_length=255, blank=True)
     activa = models.BooleanField(default=True)
+    cupo_turnos = models.PositiveSmallIntegerField(
+        "cupo de turnos",
+        null=True,
+        blank=True,
+        help_text="Turnos que la sucursal atiende al mismo tiempo. Vacío = sin límite.",
+    )
 
     class Meta:
         verbose_name = "sucursal"

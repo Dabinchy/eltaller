@@ -118,10 +118,14 @@ class EmpresaAdmin(admin.ModelAdmin):
 
 @admin.register(Sucursal)
 class SucursalAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "direccion", "activa")
+    list_display = ("nombre", "direccion", "cupo", "activa")
     list_filter = ("activa",)
     search_fields = ("nombre", "direccion")
     ordering = ("nombre",)
+
+    @admin.display(description="Cupo de turnos")
+    def cupo(self, obj):
+        return obj.cupo_turnos if obj.cupo_turnos is not None else "Sin límite"
 
     def has_module_permission(self, request):
         return _es_jefe(request.user)
