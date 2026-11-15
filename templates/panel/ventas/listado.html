@@ -1,0 +1,39 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <h1 class="h4 mb-3">Ventas</h1>
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-6 col-md-2"><input class="form-control" type="date" name="desde" value="{{ desde.isoformat }}" aria-label="Desde"></div>
+    <div class="col-6 col-md-2"><input class="form-control" type="date" name="hasta" value="{{ hasta.isoformat }}" aria-label="Hasta"></div>
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="estado" aria-label="Estado">
+        <option value="">Todas</option>
+        {% for valor, nombre in estados %}<option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-4"><input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Número o cliente"></div>
+    <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-secondary" type="submit">Filtrar</button></div>
+  </form>
+  <p class="small text-body-secondary">Cobrado en el período: <strong>{{ total_finalizadas|money_ar }}</strong></p>
+  <div class="card"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Venta</th><th class="d-none d-md-table-cell">Origen</th><th>Cliente</th><th>Estado</th><th class="text-end">Total</th></tr></thead>
+      <tbody>
+        {% for v in ventas %}
+          <tr>
+            <td><a href="{% url 'ventas:venta' v.pk %}">#{{ v.pk }}</a><div class="small text-body-secondary">{{ v.creada_el|date:"d/m H:i" }} · {{ v.sucursal }}</div></td>
+            <td class="d-none d-md-table-cell">{{ v.observacion|default:"—" }}</td>
+            <td>{{ v.cliente|default:"Consumidor final" }}</td>
+            <td>{{ v.get_estado_display }}</td>
+            <td class="text-end">{{ v.total|money_ar }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-body-secondary">No hay ventas en ese período.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

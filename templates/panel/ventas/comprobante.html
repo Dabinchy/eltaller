@@ -1,0 +1,57 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block extra_css %}
+<style>
+  @media print {
+    .cc-flyout, .cc-flyout-backdrop, .cc-chrome, .cc-bottomnav, .cc-flash, .no-imprimir { display: none !important; }
+    body, .cc-content { background: #fff !important; color: #000 !important; }
+    .comprobante { border: none !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:720px">
+  <div class="d-flex justify-content-between mb-3 no-imprimir">
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'ventas:venta' venta.pk %}">Volver</a>
+    <button class="btn btn-primary btn-sm" type="button" onclick="window.print()"><i class="bi bi-printer me-1" aria-hidden="true"></i>Imprimir</button>
+  </div>
+  <div class="card comprobante"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <img src="{{ marca.logo }}" alt="{{ marca.nombre }}" style="height:56px;width:auto">
+        {% if empresa %}
+          <div class="small mt-1">{% if empresa.razon_social %}{{ empresa.razon_social }}{% else %}{{ empresa.nombre }}{% endif %}{% if empresa.cuit %} · CUIT {{ empresa.cuit }}{% endif %}</div>
+          <div class="small">{{ empresa.direccion }}{% if empresa.localidad %}, {{ empresa.localidad }}{% endif %}{% if empresa.telefono %} · {{ empresa.telefono }}{% endif %}</div>
+        {% endif %}
+      </div>
+      <div class="text-end">
+        <div class="fw-bold">Comprobante de venta #{{ venta.pk }}</div>
+        <div class="small">{{ venta.finalizada_el|default:venta.creada_el|date:"d/m/Y H:i" }}</div>
+        <div class="small">{{ venta.sucursal }} · Caja {{ venta.caja.numero }}</div>
+        {% if venta.estado == "ANULADA" %}<div class="text-danger fw-bold">ANULADA</div>{% endif %}
+      </div>
+    </div>
+    <p class="mb-2"><strong>Cliente:</strong> {{ venta.cliente|default:"Consumidor final" }}
+      {% if orden %} · <strong>Orden:</strong> #{{ orden.numero }} · {{ orden.vehiculo.identificacion }} {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}{% endif %}</p>
+    <table class="table table-sm">
+      <thead><tr><th>Descripción</th><th class="text-end">Cant.</th><th class="text-end">Precio</th><th class="text-end">Importe</th></tr></thead>
+      <tbody>
+        {% for d in detalles %}
+          <tr><td>{{ d.descripcion_afip }}</td><td class="text-end">{{ d.cantidad|floatformat:"-3" }}</td>
+            <td class="text-end">{{ d.precio_unitario|money_ar }}</td><td class="text-end">{{ d.importe|money_ar }}</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="3" class="text-end">Total</th><th class="text-end">{{ venta.total|money_ar }}</th></tr></tfoot>
+    </table>
+    <div class="small">
+      {% if venta.monto_efectivo %}Efectivo {{ venta.monto_efectivo|money_ar }} · {% endif %}
+      {% if venta.monto_tarjeta %}Tarjeta {{ venta.monto_tarjeta|money_ar }} · {% endif %}
+      {% if venta.monto_transferencia %}Transferencia {{ venta.monto_transferencia|money_ar }} · {% endif %}
+      {% if venta.monto_ctacte %}Cuenta corriente {{ venta.monto_ctacte|money_ar }}{% endif %}
+    </div>
+    <p class="small text-body-secondary mt-3 mb-0">Documento no válido como factura.</p>
+  </div></div>
+</div>
+{% endblock %}

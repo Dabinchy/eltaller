@@ -1,0 +1,32 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">Por cobrar</h1>
+    {% if perms.ventas.crear_venta %}
+      <a class="btn btn-primary btn-sm" href="{% url 'ventas:mostrador' %}"><i class="bi bi-bag-plus me-1" aria-hidden="true"></i>Venta de mostrador</a>
+    {% endif %}
+  </div>
+  <div class="card"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Venta</th><th>Origen</th><th class="d-none d-md-table-cell">Cliente</th><th class="d-none d-sm-table-cell">Caja</th><th class="text-end">Total</th><th></th></tr></thead>
+      <tbody>
+        {% for v in ventas %}
+          <tr>
+            <td>#{{ v.pk }}<div class="small text-body-secondary">{{ v.creada_el|date:"d/m H:i" }}</div></td>
+            <td>{{ v.observacion|default:"—" }}</td>
+            <td class="d-none d-md-table-cell">{{ v.cliente|default:"Consumidor final" }}</td>
+            <td class="d-none d-sm-table-cell">Caja {{ v.caja.numero }}</td>
+            <td class="text-end fw-semibold">{{ v.total|money_ar }}</td>
+            <td class="text-end"><a class="btn btn-sm btn-success" href="{% url 'ventas:venta' v.pk %}">Cobrar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-body-secondary">No hay ventas pendientes de cobro.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

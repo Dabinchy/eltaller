@@ -1,0 +1,182 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Venta #{{ venta.pk }}
+        {% if venta.estado == "ABIERTA" %}<span class="badge text-bg-warning">Por cobrar</span>
+        {% elif venta.estado == "FINALIZADA" %}<span class="badge text-bg-success">Cobrada</span>
+        {% else %}<span class="badge text-bg-dark">Anulada</span>{% endif %}
+      </h1>
+      <div class="small text-body-secondary">
+        {{ venta.sucursal }} · Caja {{ venta.caja.numero }} · {{ venta.creada_el|date:"d/m/Y H:i" }}
+        {% if orden %} · <a href="{% url 'taller:orden' orden.pk %}">Orden #{{ orden.numero }}</a>{% endif %}
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if venta.estado != "ABIERTA" %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'ventas:comprobante' venta.pk %}"><i class="bi bi-printer me-1" aria-hidden="true"></i>Comprobante</a>{% endif %}
+      {% if editable %}
+        <form method="post" action="{% url 'ventas:descartar' venta.pk %}" onsubmit="return confirm('¿Descartar esta venta?');">{% csrf_token %}
+          <button class="btn btn-outline-danger btn-sm" type="submit">Descartar</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-7">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Detalle</h2>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Producto</th><th class="text-end">Cant.</th><th class="text-end">Precio</th><th class="text-end">Importe</th>{% if ver_costos %}<th class="text-end">Costo</th>{% endif %}<th></th></tr></thead>
+            <tbody>
+              {% for d in detalles %}
+                <tr>
+                  <td>{{ d.descripcion_afip }}</td>
+                  <td class="text-end">{{ d.cantidad|floatformat:"-3" }}</td>
+                  <td class="text-end">{% if d.precio_unitario == 0 %}Sin cargo{% else %}{{ d.precio_unitario|money_ar }}{% endif %}</td>
+                  <td class="text-end">{{ d.importe|money_ar }}</td>
+                  {% if ver_costos %}<td class="text-end small text-body-secondary">{{ d.costo_total|money_ar }}</td>{% endif %}
+                  <td class="text-end">
+                    {% if editable %}
+                      <form method="post" action="{% url 'ventas:item_borrar' venta.pk d.pk %}">{% csrf_token %}
+                        <button class="btn btn-sm btn-link text-danger p-0" type="submit" aria-label="Quitar"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6" class="text-body-secondary">Agregá productos a la venta.</td></tr>
+              {% endfor %}
+            </tbody>
+            <tfoot><tr><th colspan="3" class="text-end">Total</th><th class="text-end fs-5">{{ venta.total|money_ar }}</th><th colspan="2"></th></tr></tfoot>
+          </table>
+        </div>
+      </div></div>
+
+      {% if editable %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Agregar producto</h2>
+          <form method="post" action="{% url 'ventas:item_agregar' venta.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/_form.html" with form=form_item %}
+            <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar</button>
+          </form>
+        </div></div>
+      {% endif %}
+    </div>
+
+    <div class="col-12 col-xl-5">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Cliente</h2>
+        {% if editable %}
+          <form method="post" action="{% url 'ventas:cliente' venta.pk %}" class="d-flex gap-2">
+            {% csrf_token %}
+            {% with campo=form_cliente.cliente %}
+              <select class="form-select" name="{{ campo.html_name }}" aria-label="Cliente">
+                {% for valor, nombre in campo.field.choices %}<option value="{{ valor }}" {% if valor|stringformat:"s" == venta.cliente_id|stringformat:"s" %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+              </select>
+            {% endwith %}
+            <button class="btn btn-outline-secondary" type="submit">Usar</button>
+          </form>
+        {% else %}
+          <p class="mb-0">{{ venta.cliente|default:"Consumidor final" }}</p>
+        {% endif %}
+        {% if cuenta %}
+          <p class="small text-body-secondary mt-2 mb-0">
+            Cuenta corriente: debe {{ cuenta.saldo|money_ar }} · límite {{ venta.cliente.limite_credito|money_ar }} ·
+            <strong>disponible {{ disponible|money_ar }}</strong>
+          </p>
+        {% endif %}
+      </div></div>
+
+      {% if puede_cobrar %}
+        <div class="card border-success mb-3"><div class="card-body">
+          <h2 class="h6">Cobrar {{ venta.total|money_ar }}</h2>
+          <form method="post" action="{% url 'ventas:cobrar' venta.pk %}" id="formCobro" data-total="{{ venta.total|stringformat:'s' }}" novalidate>
+            {% csrf_token %}
+            {% include "partials/_form.html" with form=form_cobro %}
+            <div class="mb-3">
+              <label class="form-label" for="recibido">El cliente entrega (para calcular el vuelto)</label>
+              <input class="form-control" id="recibido" inputmode="decimal" placeholder="0,00">
+            </div>
+            <div class="d-flex justify-content-between small mb-1"><span>Cargado</span><strong id="cobroCargado">$ 0,00</strong></div>
+            <div class="d-flex justify-content-between small mb-1"><span id="cobroFaltaEtiqueta">Falta</span><strong id="cobroFalta"></strong></div>
+            <div class="d-flex justify-content-between small mb-3"><span>Vuelto</span><strong id="cobroVuelto">$ 0,00</strong></div>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="todoEfectivo">Todo en efectivo</button>
+              <button class="btn btn-success" type="submit"{% if not detalles %} disabled{% endif %}><i class="bi bi-cash-coin me-1" aria-hidden="true"></i>Cobrar</button>
+            </div>
+            <p class="small text-body-secondary mt-2 mb-0">Si no cargás ningún medio, se cobra todo en efectivo.</p>
+          </form>
+        </div></div>
+      {% endif %}
+
+      {% if venta.estado == "FINALIZADA" %}
+        <div class="card mb-3"><div class="card-body small">
+          <h2 class="h6">Pagos</h2>
+          <div class="d-flex justify-content-between"><span>Efectivo</span><span>{{ venta.monto_efectivo|money_ar }}</span></div>
+          <div class="d-flex justify-content-between"><span>Tarjeta</span><span>{{ venta.monto_tarjeta|money_ar }}</span></div>
+          <div class="d-flex justify-content-between"><span>Transferencia</span><span>{{ venta.monto_transferencia|money_ar }}</span></div>
+          <div class="d-flex justify-content-between"><span>Cuenta corriente</span><span>{{ venta.monto_ctacte|money_ar }}</span></div>
+          <div class="text-body-secondary mt-1">Cobró {{ venta.finalizada_por.username }} el {{ venta.finalizada_el|date:"d/m/Y H:i" }}</div>
+        </div></div>
+      {% endif %}
+
+      {% if puede_anular %}
+        <div class="card border-danger"><div class="card-body">
+          <h2 class="h6 text-danger">Anular venta</h2>
+          <p class="small">Devuelve el stock, saca el efectivo de la caja y revierte la cuenta corriente. La caja tiene que estar abierta.</p>
+          <form method="post" action="{% url 'ventas:anular' venta.pk %}" class="d-flex gap-2" onsubmit="return confirm('¿Anular la venta #{{ venta.pk }}?');">
+            {% csrf_token %}
+            <input class="form-control" type="password" name="pin" inputmode="numeric" autocomplete="off" placeholder="Tu PIN" aria-label="PIN">
+            <button class="btn btn-danger" type="submit">Anular</button>
+          </form>
+        </div></div>
+      {% endif %}
+      {% if venta.estado == "ANULADA" %}
+        <div class="alert alert-dark">Anulada por {{ venta.anulada_por.username }} el {{ venta.anulada_el|date:"d/m/Y H:i" }}.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var form = document.getElementById("formCobro");
+    if (!form) return;
+    var total = parseFloat(form.dataset.total) || 0;
+    var campos = ["monto_efectivo", "monto_tarjeta", "monto_transferencia", "monto_ctacte"].map(function (n) {
+      return form.querySelector('[name="' + n + '"]');
+    });
+    var recibido = document.getElementById("recibido");
+    var leer = function (el) { // "1.234,56" -> 1234.56
+      var v = (el && el.value || "").trim().replace(/\./g, "").replace(",", ".");
+      var n = parseFloat(v); return isNaN(n) ? 0 : n;
+    };
+    var fmt = function (n) {
+      return "$ " + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+    var actualizar = function () {
+      var cargado = campos.reduce(function (s, el) { return s + leer(el); }, 0);
+      var falta = total - cargado;
+      document.getElementById("cobroCargado").textContent = fmt(cargado);
+      document.getElementById("cobroFaltaEtiqueta").textContent = falta < 0 ? "Sobra" : "Falta";
+      document.getElementById("cobroFalta").textContent = fmt(Math.abs(falta));
+      var vuelto = leer(recibido) - leer(campos[0]);
+      document.getElementById("cobroVuelto").textContent = fmt(vuelto > 0 ? vuelto : 0);
+    };
+    campos.concat([recibido]).forEach(function (el) { if (el) el.addEventListener("input", actualizar); });
+    document.getElementById("todoEfectivo").addEventListener("click", function () {
+      campos.forEach(function (el, i) { if (el) el.value = i === 0 ? total.toFixed(2).replace(".", ",") : ""; });
+      actualizar();
+    });
+    actualizar();
+  })();
+</script>
+{% endblock %}

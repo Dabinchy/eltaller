@@ -1,0 +1,19 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:520px">
+  <h1 class="h4">Venta de mostrador</h1>
+  {% if not sesiones %}
+    <div class="alert alert-warning">No hay ninguna caja abierta en tu sucursal. <a href="{% url 'core:caja' %}">Abrí una caja</a> para vender.</div>
+  {% else %}
+    <p>Elegí en qué caja se va a cobrar.</p>
+    <form method="post">
+      {% csrf_token %}
+      <select class="form-select mb-3" name="sesion" aria-label="Caja">
+        {% for s in sesiones %}<option value="{{ s.pk }}">{{ s.caja.sucursal }} · Caja {{ s.caja.numero }}</option>{% endfor %}
+      </select>
+      <button class="btn btn-primary" type="submit">Empezar venta</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
