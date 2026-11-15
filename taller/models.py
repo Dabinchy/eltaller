@@ -446,6 +446,21 @@ class OrdenTrabajo(models.Model):
         self.save(update_fields=["estado", "updated_at", *campos])
         OrdenEstadoLog.objects.create(orden=self, estado_anterior=anterior, estado_nuevo=nuevo, usuario=user)
 
+    @classmethod
+    def _puede_pasar(cls, user, desde: str, nuevo: str) -> bool:
+        """Permiso para un paso puntual (sin mirar el alcance de la orden)."""
+        if user.is_superuser:
+            return True
+        if nuevo == cls.E.CANCELADA:
+            return user.has_perm(permisos.PERM_CANCELAR)
+        if (desde, nuevo) in cls.PASOS_MECANICO:
+            return user.has_perm(permisos.PERM_CAMBIAR_ESTADO) or user.has_perm(permisos.PERM_TRABAJAR)
+        return user.has_perm(permisos.PERM_CAMBIAR_ESTADO)
+
+    def transiciones_para(self, user) -> list[str]:
+        """Estados a los que este usuario puede llevar la orden ahora (para mostrar los botones)."""
+        return [n for n in self.TRANSICIONES[self.estado] if self._puede_pasar(user, self.estado, n)]
+
     def cambiar_estado(self, nuevo: str, *, user) -> "OrdenTrabajo":
         """Cambia el estado respetando TRANSICIONES y los permisos de cada paso."""
         with transaction.atomic():
@@ -459,13 +474,7 @@ class OrdenTrabajo(models.Model):
                     f"No se puede pasar de {orden.get_estado_display()} a {self.Estado(nuevo).label}."
                 )
 
-            if nuevo == self.E.CANCELADA:
-                permitido = user.has_perm(permisos.PERM_CANCELAR)
-            elif (orden.estado, nuevo) in self.PASOS_MECANICO:
-                permitido = user.has_perm(permisos.PERM_CAMBIAR_ESTADO) or user.has_perm(permisos.PERM_TRABAJAR)
-            else:
-                permitido = user.has_perm(permisos.PERM_CAMBIAR_ESTADO)
-            if not (user.is_superuser or permitido):
+            if not self._puede_pasar(user, orden.estado, nuevo):
                 raise PermissionDenied("No tiene permiso para ese cambio de estado.")
 
             if nuevo == self.E.APROBADA:
@@ -666,3 +675,18 @@ class OrdenEstadoLog(models.Model):
 
     def __str__(self) -> str:
         return f"OT #{self.orden.numero}: {self.estado_anterior or '-'} -> {self.estado_nuevo}"
+
+    @staticmethod
+    def _texto(valor: str) -> str:
+        try:
+            return OrdenTrabajo.Estado(valor).label
+        except ValueError:
+            return valor or ""
+
+    @property
+    def anterior_display(self) -> str:
+        return self._texto(self.estado_anterior)
+
+    @property
+    def nuevo_display(self) -> str:
+        return self._texto(self.estado_nuevo)

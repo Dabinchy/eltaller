@@ -1,0 +1,51 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">{{ vehiculo.identificacion }} · {{ vehiculo.marca }} {{ vehiculo.modelo }}</h1>
+      <div class="small text-body-secondary">{{ vehiculo.cliente }}{% if vehiculo.anio %} · {{ vehiculo.anio }}{% endif %} · {{ vehiculo.km_actual }} km</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if puede_orden %}<a class="btn btn-primary btn-sm" href="{% url 'taller:orden_nueva' %}?vehiculo={{ vehiculo.pk }}">Nueva orden</a>{% endif %}
+      {% if puede_editar %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'taller:vehiculo_editar' vehiculo.pk %}">Editar</a>{% endif %}
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Órdenes</h2>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>OT</th><th>Ingreso</th><th>Estado</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+              {% for o in ordenes %}
+                <tr><td><a href="{% url 'taller:orden' o.pk %}">#{{ o.numero }}</a></td><td>{{ o.fecha_ingreso|date:"d/m/Y" }}</td>
+                  <td>{% include "panel/taller/_estado.html" %}</td><td class="text-end">{{ o.total|money_ar }}</td></tr>
+              {% empty %}
+                <tr><td colspan="4" class="text-body-secondary">Sin órdenes.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Datos</h2>
+        <dl class="small mb-0">
+          <dt>Patente</dt><dd>{{ vehiculo.patente|default:"—" }}</dd>
+          <dt>VIN / chasis</dt><dd>{{ vehiculo.vin|default:"—" }}</dd>
+          <dt>Combustible</dt><dd>{{ vehiculo.get_combustible_display }}</dd>
+        </dl>
+        <h2 class="h6 mt-3">Últimos turnos</h2>
+        <ul class="list-unstyled small mb-0">
+          {% for t in turnos %}<li>{{ t.inicio|date:"d/m/Y H:i" }} · {{ t.get_estado_display }}</li>{% empty %}<li class="text-body-secondary">Sin turnos.</li>{% endfor %}
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:640px">
+  <h1 class="h4">Nueva orden de trabajo</h1>
+  {% if turno %}<p class="text-body-secondary">Desde el turno del {{ turno.inicio|date:"d/m H:i" }} · {{ turno.vehiculo }}</p>{% endif %}
+  <p class="small text-body-secondary">
+    ¿El vehículo no está cargado? <a href="{% url 'taller:vehiculo_nuevo' %}">Cargalo primero</a>.
+  </p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Crear orden</button>
+      <a class="btn btn-outline-secondary" href="{% url 'taller:ordenes' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

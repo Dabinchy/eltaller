@@ -1,0 +1,15 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:600px">
+  <h1 class="h4">{{ titulo }}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-outline-secondary" href="{% if vehiculo %}{% url 'taller:vehiculo' vehiculo.pk %}{% else %}{% url 'taller:vehiculos' %}{% endif %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "portal",
     "campeonatos",
     "sitio",
+    "panel",
 
 ]
 

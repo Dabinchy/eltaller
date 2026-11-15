@@ -1,0 +1,209 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  {# ---------- Encabezado y acciones ---------- #}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">OT #{{ orden.numero }} {% include "panel/taller/_estado.html" with o=orden %}</h1>
+      <div class="small text-body-secondary">
+        <a href="{% url 'taller:vehiculo' orden.vehiculo_id %}">{{ orden.vehiculo }}</a> ·
+        {{ orden.cliente }} · {{ orden.sucursal }}
+        {% if orden.tecnico %} · Técnico: {{ orden.tecnico }}{% endif %}
+      </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% for estado, etiqueta, clase, icono in pasos %}
+        <form method="post" action="{% url 'taller:orden_estado' orden.pk %}"
+              {% if estado == "CANCELADA" %}onsubmit="return confirm('¿Cancelar la orden #{{ orden.numero }}?');"{% endif %}>
+          {% csrf_token %}
+          <input type="hidden" name="estado" value="{{ estado }}">
+          <button class="btn btn-sm {{ clase }}" type="submit"><i class="bi {{ icono }} me-1" aria-hidden="true"></i>{{ etiqueta }}</button>
+        </form>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if orden.estado == "TERMINADA" and perms.taller.entregar_orden %}
+    <div class="card border-warning mb-3"><div class="card-body">
+      <h2 class="h6"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Entregar</h2>
+      {% if sesiones %}
+        <form class="row g-2 align-items-end" method="post" action="{% url 'taller:orden_entregar' orden.pk %}">
+          {% csrf_token %}
+          <div class="col-12 col-md-6">
+            <label class="form-label small" for="sesionEntrega">Caja donde se va a cobrar</label>
+            <select class="form-select" id="sesionEntrega" name="sesion">
+              {% for s in sesiones %}<option value="{{ s.pk }}">Caja {{ s.caja.numero }}{% if s.caja.nombre %} · {{ s.caja.nombre }}{% endif %}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <button class="btn btn-warning" type="submit">Entregar y generar la venta ({{ orden.total|money_ar }})</button>
+          </div>
+        </form>
+        <p class="small text-body-secondary mt-2 mb-0">Se genera una venta con los ítems aprobados; el stock se descuenta al cobrarla.</p>
+      {% else %}
+        <p class="mb-0">No hay ninguna caja abierta en {{ orden.sucursal }}. <a href="{% url 'core:caja' %}">Abrí una caja</a> para poder entregar.</p>
+      {% endif %}
+    </div></div>
+  {% endif %}
+
+  {% if orden.venta %}
+    <div class="alert alert-success py-2">Entregada el {{ orden.fecha_egreso|date:"d/m/Y H:i" }} · Venta #{{ orden.venta_id }} ({{ orden.venta.get_estado_display }}).</div>
+  {% endif %}
+
+  <div class="row g-3">
+    {# ---------- Ítems ---------- #}
+    <div class="col-12 col-xl-8">
+      <div class="card mb-3"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2 class="h6 mb-0">Trabajos y repuestos</h2>
+          {% if puede_aprobar %}
+            <form method="post" action="{% url 'taller:orden_aprobar_items' orden.pk %}">{% csrf_token %}
+              <button class="btn btn-sm btn-success" type="submit">Aprobar ítems pendientes</button>
+            </form>
+          {% endif %}
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead><tr>
+              <th>Descripción</th><th class="text-end">Cant.</th><th class="text-end">Precio</th><th class="text-end">Importe</th>
+              {% if ver_costos %}<th class="text-end">Costo</th>{% endif %}<th></th>
+            </tr></thead>
+            <tbody>
+              {% for it in items %}
+                <tr>
+                  <td>
+                    {{ it.descripcion }}
+                    <div class="small text-body-secondary">
+                      {% if it.producto.es_servicio %}Mano de obra{% else %}Repuesto{% endif %}
+                      {% if it.tecnico %} · {{ it.tecnico }}{% endif %}
+                      {% if not it.aprobado %} · <span class="text-warning">pendiente de aprobación</span>{% endif %}
+                      {% if it.falta_stock and orden.estado != "ENTREGADA" %} · <span class="text-danger">sin stock suficiente ({{ it.stock_disponible }})</span>{% endif %}
+                    </div>
+                  </td>
+                  <td class="text-end">{{ it.cantidad|floatformat:"-3" }}</td>
+                  <td class="text-end">{% if it.precio_unitario == 0 %}Sin cargo{% else %}{{ it.precio_unitario|money_ar }}{% endif %}</td>
+                  <td class="text-end">{{ it.importe|money_ar }}</td>
+                  {% if ver_costos %}<td class="text-end small text-body-secondary">{{ it.costo_unitario|money_ar }}</td>{% endif %}
+                  <td class="text-end">
+                    {% if puede_borrar_items %}
+                      <form method="post" action="{% url 'taller:item_borrar' orden.pk it.pk %}" onsubmit="return confirm('¿Quitar este ítem?');">{% csrf_token %}
+                        <button class="btn btn-sm btn-link text-danger p-0" type="submit" aria-label="Quitar"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6" class="text-body-secondary">Todavía no hay ítems. Cargá repuestos y mano de obra para armar el presupuesto.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="row mt-3 small">
+          <div class="col-6 col-md-3"><span class="text-body-secondary">Repuestos</span><div class="fw-semibold">{{ orden.total_repuestos|money_ar }}</div></div>
+          <div class="col-6 col-md-3"><span class="text-body-secondary">Mano de obra</span><div class="fw-semibold">{{ orden.total_mano_obra|money_ar }}</div></div>
+          <div class="col-6 col-md-3"><span class="text-body-secondary">Total aprobado</span><div class="fw-bold fs-5">{{ orden.total|money_ar }}</div></div>
+          <div class="col-6 col-md-3"><span class="text-body-secondary">Presupuestado</span><div>{{ orden.total_presupuestado|money_ar }}</div></div>
+        </div>
+      </div></div>
+
+      {% if form_item %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Agregar ítem</h2>
+          <form method="post" action="{% url 'taller:item_agregar' orden.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/_form.html" with form=form_item %}
+            <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar</button>
+          </form>
+        </div></div>
+      {% endif %}
+
+      {# ---------- Comentarios ---------- #}
+      <div class="card mb-3" id="comentarios"><div class="card-body">
+        <h2 class="h6">Comentarios</h2>
+        {% for c in comentarios %}
+          <div class="border-start border-3 {% if c.visible_piloto %}border-info{% else %}border-secondary{% endif %} ps-2 mb-2">
+            <div class="small text-body-secondary">
+              {{ c.autor.get_full_name|default:c.autor.username }} · {{ c.fecha|date:"d/m H:i" }}
+              {% if c.visible_piloto %}<span class="badge text-bg-info">visible para el cliente</span>{% else %}<span class="badge text-bg-secondary">interno</span>{% endif %}
+            </div>
+            <div>{{ c.texto|linebreaksbr }}</div>
+          </div>
+        {% empty %}
+          <p class="text-body-secondary small">Sin comentarios.</p>
+        {% endfor %}
+        <form method="post" action="{% url 'taller:orden_comentar' orden.pk %}" class="mt-2">
+          {% csrf_token %}
+          {% include "partials/_form.html" with form=form_comentario %}
+          <button class="btn btn-outline-primary btn-sm" type="submit">Comentar</button>
+        </form>
+      </div></div>
+
+      {# ---------- Fotos y documentos ---------- #}
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Fotos y documentos</h2>
+        <div class="row g-2 mb-3">
+          {% for a in archivos %}
+            <div class="col-6 col-md-3">
+              <a href="{% url 'archivo' a.pk %}" target="_blank" rel="noopener" class="text-decoration-none">
+                {% if a.miniatura %}
+                  <img src="{% url 'archivo' a.pk %}?mini=1" alt="{{ a.titulo }}" class="img-fluid rounded" loading="lazy">
+                {% else %}
+                  <div class="border rounded p-3 text-center"><i class="bi bi-file-earmark fs-3" aria-hidden="true"></i></div>
+                {% endif %}
+                <div class="small">{{ a.titulo }}</div>
+              </a>
+              <span class="badge {% if a.visibilidad == 'PILOTO' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{% if a.visibilidad == 'PILOTO' %}cliente{% else %}interno{% endif %}</span>
+            </div>
+          {% empty %}
+            <p class="text-body-secondary small mb-0">Sin archivos.</p>
+          {% endfor %}
+        </div>
+        <form method="post" action="{% url 'taller:orden_archivo' orden.pk %}" enctype="multipart/form-data" class="row g-2">
+          {% csrf_token %}
+          {% include "partials/_form.html" with form=form_archivo %}
+          <div><button class="btn btn-outline-primary btn-sm" type="submit"><i class="bi bi-upload me-1" aria-hidden="true"></i>Subir</button></div>
+        </form>
+      </div></div>
+    </div>
+
+    {# ---------- Datos e historial ---------- #}
+    <div class="col-12 col-xl-4">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Datos de la orden</h2>
+        <dl class="small mb-3">
+          <dt>Ingreso</dt><dd>{{ orden.fecha_ingreso|date:"d/m/Y H:i" }}{% if orden.km_ingreso %} · {{ orden.km_ingreso }} km{% endif %}</dd>
+          {% if orden.fecha_prometida %}<dt>Prometida</dt><dd>{{ orden.fecha_prometida|date:"d/m/Y H:i" }}</dd>{% endif %}
+          <dt>Motivo del cliente</dt><dd>{{ orden.motivo_cliente|default:"—"|linebreaksbr }}</dd>
+          <dt>Diagnóstico</dt><dd>{{ orden.diagnostico|default:"—"|linebreaksbr }}</dd>
+        </dl>
+        {% if form_orden %}
+          <details>
+            <summary class="small">{% if mecanico %}Escribir diagnóstico{% else %}Editar datos{% endif %}</summary>
+            <form method="post" action="{% url 'taller:orden_editar' orden.pk %}" class="mt-2" novalidate>
+              {% csrf_token %}
+              {% include "partials/_form.html" with form=form_orden %}
+              <button class="btn btn-outline-primary btn-sm" type="submit">Guardar</button>
+            </form>
+          </details>
+        {% endif %}
+      </div></div>
+
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Historial</h2>
+        <ul class="list-unstyled small mb-0">
+          {% for h in historial %}
+            <li class="mb-1">
+              <span class="text-body-secondary">{{ h.fecha|date:"d/m H:i" }}</span>
+              {% if h.estado_anterior %}{{ h.anterior_display }} → {% endif %}<strong>{{ h.nuevo_display }}</strong>
+              <span class="text-body-secondary">· {{ h.usuario.username|default:"sistema" }}{% if h.usuario.es_portal %} (cliente){% endif %}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

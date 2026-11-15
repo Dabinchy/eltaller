@@ -16,6 +16,7 @@ urlpatterns = [
     # Áreas
     path("panel/", include("core.urls_panel")),
     path("panel/", include("core.urls")),
+    path("panel/taller/", include("panel.urls_taller")),
     path("portal/", include("portal.urls")),
 
     # Archivos privados (cada pedido verifica permisos)

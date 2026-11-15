@@ -1,0 +1,50 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">{{ titulo }}</h1>
+    {% if puede_crear %}
+      <a class="btn btn-primary btn-sm" href="{% url 'taller:orden_nueva' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nueva orden</a>
+    {% endif %}
+  </div>
+
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-12 col-md-5">
+      <input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Número, patente, VIN o cliente">
+    </div>
+    <div class="col-8 col-md-4">
+      <select class="form-select" name="estado">
+        <option value="curso" {% if estado == "curso" %}selected{% endif %}>En curso</option>
+        <option value="todas" {% if estado == "todas" %}selected{% endif %}>Todas</option>
+        {% for valor, nombre in estados %}
+          <option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-4 col-md-3 d-grid"><button class="btn btn-outline-secondary" type="submit">Buscar</button></div>
+  </form>
+
+  <div class="card"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>OT</th><th>Vehículo</th><th class="d-none d-md-table-cell">Cliente</th><th class="d-none d-lg-table-cell">Técnico</th><th>Estado</th><th class="text-end d-none d-sm-table-cell">Total</th></tr></thead>
+      <tbody>
+        {% for o in ordenes %}
+          <tr>
+            <td><a class="fw-semibold" href="{% url 'taller:orden' o.pk %}">#{{ o.numero }}</a>
+              <div class="small text-body-secondary">{{ o.fecha_ingreso|date:"d/m" }}</div></td>
+            <td>{{ o.vehiculo.identificacion }}<div class="small text-body-secondary">{{ o.vehiculo.marca }} {{ o.vehiculo.modelo }}</div></td>
+            <td class="d-none d-md-table-cell">{{ o.cliente }}</td>
+            <td class="d-none d-lg-table-cell">{{ o.tecnico|default:"—" }}</td>
+            <td>{% include "panel/taller/_estado.html" %}</td>
+            <td class="text-end d-none d-sm-table-cell">{{ o.total|money_ar }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-body-secondary">No hay órdenes con ese filtro.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

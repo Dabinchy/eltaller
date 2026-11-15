@@ -1,0 +1,7 @@
+{# Etiqueta de color según el estado de la orden. Uso: {% include "panel/taller/_estado.html" with o=orden %} #}
+{% if o.estado == "PRESUPUESTO" %}<span class="badge text-bg-secondary">Presupuesto</span>
+{% elif o.estado == "APROBADA" %}<span class="badge text-bg-info">Aprobada</span>
+{% elif o.estado == "EN_PROCESO" %}<span class="badge text-bg-primary">En proceso</span>
+{% elif o.estado == "TERMINADA" %}<span class="badge text-bg-warning">Terminada</span>
+{% elif o.estado == "ENTREGADA" %}<span class="badge text-bg-success">Entregada</span>
+{% else %}<span class="badge text-bg-dark">Cancelada</span>{% endif %}
