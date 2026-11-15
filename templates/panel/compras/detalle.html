@@ -1,0 +1,57 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Compra #{{ c.pk }}
+        <span class="badge {% if c.estado == 'CONFIRMADA' %}text-bg-success{% elif c.estado == 'BORRADOR' %}text-bg-warning{% else %}text-bg-dark{% endif %}">{{ c.get_estado_display }}</span></h1>
+      <div class="small text-body-secondary">{{ c.proveedor }} · {{ c.sucursal }} · {{ c.fecha|date:"d/m/Y" }}
+        {% if c.documento_adjunto %} · <a href="{% url 'compras:adjunto' c.pk %}"><i class="bi bi-paperclip" aria-hidden="true"></i> factura</a>{% endif %}</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if borrador %}
+        <form method="post" action="{% url 'compras:confirmar' c.pk %}" onsubmit="return confirm('¿Confirmar la compra? Suma el stock y no se puede editar más.');">{% csrf_token %}
+          <button class="btn btn-success btn-sm" type="submit"{% if not items %} disabled{% endif %}>Confirmar (suma stock)</button>
+        </form>
+      {% endif %}
+      {% if puede_anular %}
+        <form method="post" action="{% url 'compras:anular' c.pk %}" onsubmit="return confirm('¿Anular la compra #{{ c.pk }}?');">{% csrf_token %}
+          <button class="btn btn-outline-danger btn-sm" type="submit">Anular</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% if c.observaciones %}<p class="small">{{ c.observaciones|linebreaksbr }}</p>{% endif %}
+
+  <div class="card mb-3"><div class="card-body">
+    <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Producto</th><th class="text-end">Cant.</th><th class="text-end">Costo unit.</th><th class="text-end">IVA</th><th class="text-end">Total</th><th></th></tr></thead>
+      <tbody>
+        {% for it in items %}
+          <tr><td>{{ it.producto.nombre }}</td><td class="text-end">{{ it.cantidad|floatformat:"-3" }}</td><td class="text-end">{{ it.costo_unitario|money_ar }}</td>
+            <td class="text-end">{{ it.iva_tasa }} %</td><td class="text-end">{{ it.total|money_ar }}</td>
+            <td class="text-end">{% if borrador %}<form method="post" action="{% url 'compras:item_borrar' c.pk it.pk %}">{% csrf_token %}<button class="btn btn-sm btn-link text-danger p-0" type="submit" aria-label="Quitar"><i class="bi bi-trash" aria-hidden="true"></i></button></form>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="6" class="text-body-secondary">Cargá los productos de la factura.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="4" class="text-end">Subtotal</td><td class="text-end">{{ c.subtotal|money_ar }}</td><td></td></tr>
+        <tr><td colspan="4" class="text-end">IVA</td><td class="text-end">{{ c.iva_total|money_ar }}</td><td></td></tr>
+        <tr><th colspan="4" class="text-end">Total</th><th class="text-end">{{ c.total|money_ar }}</th><td></td></tr>
+      </tfoot>
+    </table></div>
+  </div></div>
+
+  {% if form_item %}
+    <div class="card"><div class="card-body">
+      <h2 class="h6">Agregar producto</h2>
+      <form method="post" action="{% url 'compras:item_agregar' c.pk %}" novalidate>
+        {% csrf_token %}
+        {% include "partials/_form.html" with form=form_item %}
+        <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar</button>
+      </form>
+    </div></div>
+  {% endif %}
+</div>
+{% endblock %}

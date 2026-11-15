@@ -1,0 +1,26 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:560px">
+  <h1 class="h4">{{ p.nombre }}</h1>
+  <p class="text-body-secondary">{{ sucursal }} · stock actual: <strong>{% if actual %}{{ actual.stock|floatformat:"-3" }}{% else %}0{% endif %}</strong></p>
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6">Ajustar stock</h2>
+    <p class="small text-body-secondary">Para mercadería que entra por compra usá Compras (actualiza el costo). Esto es para inventario, roturas o correcciones: queda registrado con tu usuario.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/_form.html" with form=form %}
+      <button class="btn btn-primary btn-sm" type="submit">Ajustar</button>
+    </form>
+  </div></div>
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6">Stock mínimo</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/_form.html" with form=form_minimo %}
+      <button class="btn btn-outline-primary btn-sm" type="submit">Guardar mínimo</button>
+    </form>
+  </div></div>
+  <a href="{% url 'productos:detalle' p.pk %}">Volver al producto</a>
+</div>
+{% endblock %}

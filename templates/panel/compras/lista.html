@@ -1,0 +1,41 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">Compras</h1>
+    <div class="d-flex gap-2">
+      {% if perms.compras.gestionar_proveedores %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'compras:proveedores' %}">Proveedores</a>{% endif %}
+      <a class="btn btn-primary btn-sm" href="{% url 'compras:nueva' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nueva compra</a>
+    </div>
+  </div>
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-12 col-md-6"><input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Proveedor u observación"></div>
+    <div class="col-8 col-md-3">
+      <select class="form-select" name="estado" aria-label="Estado">
+        <option value="">Todas</option>
+        {% for valor, nombre in estados %}<option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-4 col-md-3 d-grid"><button class="btn btn-outline-secondary" type="submit">Buscar</button></div>
+  </form>
+  <div class="card"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Compra</th><th>Proveedor</th><th class="d-none d-md-table-cell">Sucursal</th><th>Estado</th><th class="text-end">Total</th></tr></thead>
+      <tbody>
+        {% for c in compras %}
+          <tr>
+            <td><a href="{% url 'compras:detalle' c.pk %}">#{{ c.pk }}</a><div class="small text-body-secondary">{{ c.fecha|date:"d/m/Y" }}</div></td>
+            <td>{{ c.proveedor }}</td><td class="d-none d-md-table-cell">{{ c.sucursal }}</td>
+            <td><span class="badge {% if c.estado == 'CONFIRMADA' %}text-bg-success{% elif c.estado == 'BORRADOR' %}text-bg-warning{% else %}text-bg-dark{% endif %}">{{ c.get_estado_display }}</span></td>
+            <td class="text-end">{{ c.total|money_ar }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-body-secondary">No hay compras.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

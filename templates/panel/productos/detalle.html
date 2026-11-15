@@ -1,0 +1,71 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">{{ p.nombre }}{% if not p.activo %} <span class="badge text-bg-secondary">inactivo</span>{% endif %}</h1>
+      <div class="small text-body-secondary">{% if p.es_servicio %}Servicio / mano de obra{% else %}Repuesto{% endif %}{% if p.marca %} · {{ p.marca }}{% endif %}</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if puede_stock %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'productos:ajustar' p.pk %}">Ajustar stock</a>{% endif %}
+      {% if puede_editar %}<a class="btn btn-outline-primary btn-sm" href="{% url 'productos:editar' p.pk %}">Editar</a>{% endif %}
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="card"><div class="card-body">
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.nombre }}" class="img-fluid rounded mb-2">{% endif %}
+        <dl class="small mb-0">
+          <dt>Precio vigente</dt><dd class="fs-5">{{ p.precio_vigente|money_ar }}</dd>
+          <dt>IVA</dt><dd>{{ p.iva_tasa }} %{% if p.precio_incluye_impuestos %} (incluido){% endif %}</dd>
+          <dt>Código de barras / SKU</dt><dd>{{ p.codigo_barras|default:"—" }} / {{ p.sku|default:"—" }}</dd>
+          <dt>Unidad</dt><dd>{{ p.presentacion }}</dd>
+          <dt>Controla stock</dt><dd>{{ p.controla_stock|yesno:"Sí,No" }}</dd>
+        </dl>
+      </div></div>
+    </div>
+    <div class="col-12 col-lg-8">
+      {% if p.controla_stock %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Stock</h2>
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Sucursal</th><th class="text-end">Stock</th><th class="text-end">Mínimo</th>{% if ver_costos %}<th class="text-end">Costo prom.</th>{% endif %}</tr></thead>
+            <tbody>
+              {% for s in stocks %}
+                <tr><td>{{ s.sucursal }}</td><td class="text-end {% if s.en_rojo %}text-danger fw-semibold{% endif %}">{{ s.stock|floatformat:"-3" }}</td>
+                  <td class="text-end">{{ s.stock_minimo|floatformat:"-3" }}</td>{% if ver_costos %}<td class="text-end">{{ s.costo_promedio|money_ar }}</td>{% endif %}</tr>
+              {% empty %}<tr><td colspan="4" class="text-body-secondary">Sin stock cargado.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div></div>
+      {% endif %}
+      {% if ver_movimientos and movimientos %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Últimos movimientos</h2>
+          <div class="table-responsive"><table class="table table-sm mb-0">
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th class="text-end">Cant.</th><th class="text-end">Queda</th></tr></thead>
+            <tbody>{% for m in movimientos %}
+              <tr><td class="text-nowrap">{{ m.fecha|date:"d/m H:i" }}</td><td>{{ m.get_tipo_display }}</td><td class="small">{{ m.descripcion }}{% if m.creado_por %} · {{ m.creado_por.username }}{% endif %}</td>
+                <td class="text-end">{{ m.cantidad|floatformat:"-3" }}</td><td class="text-end">{{ m.stock_nuevo|floatformat:"-3" }}</td></tr>
+            {% endfor %}</tbody>
+          </table></div>
+        </div></div>
+      {% endif %}
+      {% if precios %}
+        <div class="card"><div class="card-body">
+          <h2 class="h6">Precios</h2>
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Lista</th><th>Tipo</th><th class="text-end">Precio</th><th>Vigencia</th></tr></thead>
+            <tbody>{% for pr in precios %}
+              <tr><td>{{ pr.lista }}</td><td>{{ pr.get_tipo_display }}</td><td class="text-end">{{ pr.precio|money_ar }}</td>
+                <td class="small">{{ pr.desde|date:"d/m/Y" }}{% if pr.hasta %} → {{ pr.hasta|date:"d/m/Y" }}{% endif %}{% if pr.esta_activo %} <span class="badge text-bg-success">vigente</span>{% endif %}</td></tr>
+            {% endfor %}</tbody>
+          </table>
+        </div></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
