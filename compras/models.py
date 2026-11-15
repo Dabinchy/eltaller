@@ -3,7 +3,7 @@ Proveedores y compras del taller.
 
 Portado del POS original sin la FK a Empresa. Cambios respecto del original:
 - Sin vencimiento de lote (se eliminó StockLote) ni la columna legacy total_linea.
-- confirmar() y anular() son métodos del modelo y hacen todo en una transacción
+- confirmar() y anular() son métodos del modelo y hacen t odo en una transacción
   (antes el stock lo aplicaba una señal después de guardar).
 - Se registra quién confirmó/anuló y los movimientos de stock llevan el usuario.
 - Los ítems sólo se modifican mientras la compra está en BORRADOR.
@@ -200,7 +200,7 @@ class Compra(models.Model):
     # ------------ operaciones de negocio ------------
 
     def confirmar(self, *, user) -> "Compra":
-        """BORRADOR → CONFIRMADA: suma stock y actualiza costo promedio, todo o nada."""
+        """BORRADOR → CONFIRMADA: suma stock y actualiza costo promedio, t odo o nada."""
         if not (user.is_superuser or user.has_perm("compras.registrar_compras")):
             raise PermissionDenied("No tiene permiso para confirmar compras.")
 
