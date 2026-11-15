@@ -16,7 +16,7 @@ from core.roles import (
 # El gerente sólo los consulta desde el admin (y puede moderar por portal/permisos.py).
 _CONSULTA = [
     f"campeonatos.view_{m}"
-    for m in ("campeonato", "puntajeposicion", "categoria", "fecha", "carrera", "inscripcion")
+    for m in ("campeonato", "puntajeposicion", "categoria", "fecha", "carrera", "inscripcion", "resultado")
 ]
 
 PERMISOS_CAMPEONATOS_POR_GRUPO = {

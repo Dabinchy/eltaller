@@ -273,3 +273,112 @@ class Inscripcion(models.Model):
         if not kwargs.get("update_fields"):
             self.full_clean()
         super().save(*args, **kwargs)
+
+
+# ===========================
+# Resultado
+# ===========================
+
+class Resultado(models.Model):
+    """
+    Lo carga cada piloto (sólo el suyo). Los puntos los calcula el sistema.
+    - PROVISORIO: suma en la tabla al instante.
+    - VALIDADO: lo confirmó un moderador o venció el plazo sin conflictos.
+    - OBSERVADO: no suma hasta que se resuelva (conflicto automático o un moderador).
+    - ANULADO: no suma.
+    """
+
+    class Condicion(models.TextChoices):
+        FINALIZO = "FINALIZO", "Finalizó"
+        ABANDONO = "ABANDONO", "Abandonó"
+        NO_LARGO = "NO_LARGO", "No largó"
+        DESCALIFICADO = "DESCALIFICADO", "Descalificado"
+
+    class Estado(models.TextChoices):
+        PROVISORIO = "PROVISORIO", "Provisorio"
+        VALIDADO = "VALIDADO", "Validado"
+        OBSERVADO = "OBSERVADO", "Observado"
+        ANULADO = "ANULADO", "Anulado"
+
+    ESTADOS_QUE_SUMAN = (Estado.PROVISORIO, Estado.VALIDADO)
+
+    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, related_name="resultados")
+    inscripcion = models.ForeignKey(Inscripcion, on_delete=models.PROTECT, related_name="resultados")
+    posicion = models.PositiveSmallIntegerField("posición", null=True, blank=True, validators=[MinValueValidator(1)])
+    condicion = models.CharField("condición", max_length=14, choices=Condicion.choices, default=Condicion.FINALIZO)
+    pole = models.BooleanField(default=False)
+    vuelta_rapida = models.BooleanField("vuelta rápida", default=False)
+
+    puntos = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False)
+    estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PROVISORIO, editable=False)
+    observado_por_conflicto = models.BooleanField(default=False, editable=False)
+    motivo = models.CharField(max_length=255, blank=True, editable=False, help_text="Por qué está observado o anulado.")
+
+    cargado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+", editable=False,
+    )
+    cargado_el = models.DateTimeField(auto_now_add=True)
+    modificado_el = models.DateTimeField(auto_now=True)
+    validado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+", editable=False,
+    )
+    validado_el = models.DateTimeField(null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ("carrera", "posicion", "id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["carrera", "inscripcion"], name="uq_resultado_carrera_inscripcion",
+                violation_error_message="Ya cargaste tu resultado en esta carrera.",
+            ),
+        ]
+        indexes = [models.Index(fields=["carrera", "estado"])]
+        verbose_name = "resultado"
+        verbose_name_plural = "resultados"
+
+    def __str__(self) -> str:
+        pos = f"{self.posicion}°" if self.posicion else self.get_condicion_display()
+        return f"{self.carrera} · #{self.inscripcion.numero} {self.inscripcion.piloto} · {pos}"
+
+    @property
+    def clasificado(self) -> bool:
+        """Ocupa una posición en el orden de llegada (y por eso puede chocar con otro piloto)."""
+        return bool(self.posicion) and self.condicion in (self.Condicion.FINALIZO, self.Condicion.ABANDONO)
+
+    def calcular_puntos(self) -> Decimal:
+        fecha = self.carrera.fecha
+        campeonato = fecha.campeonato
+        C = self.Condicion
+        base = Decimal("0")
+        if self.condicion == C.FINALIZO or (self.condicion == C.ABANDONO and campeonato.abandonos_suman):
+            base = campeonato.puntos_por_posicion(self.carrera.tipo, self.posicion)
+        bonus = Decimal("0")
+        if self.carrera.otorga_bonus and self.condicion != C.DESCALIFICADO:
+            if self.pole:
+                bonus += campeonato.puntos_pole
+            if self.vuelta_rapida:
+                bonus += campeonato.puntos_vuelta_rapida
+        return ((base + bonus) * fecha.multiplicador).quantize(Decimal("0.01"))
+
+    def clean(self):
+        super().clean()
+        C = self.Condicion
+        if self.condicion == C.FINALIZO and not self.posicion:
+            raise ValidationError({"posicion": "Indicá en qué posición terminaste."})
+        if self.condicion in (C.NO_LARGO, C.DESCALIFICADO):
+            self.posicion = None
+        if self.condicion == C.NO_LARGO and (self.pole or self.vuelta_rapida):
+            raise ValidationError("Si no largaste no podés tener vuelta rápida ni pole en carrera.")
+        if self.carrera_id and self.inscripcion_id:
+            if not self.carrera.fecha.corre_categoria(self.inscripcion.categoria):
+                raise ValidationError("Tu categoría no corre en esta fecha.")
+            if self.inscripcion.estado != Inscripcion.Estado.ACTIVA:
+                raise ValidationError("La inscripción está dada de baja.")
+            if (self.pole or self.vuelta_rapida) and not self.carrera.otorga_bonus:
+                raise ValidationError("Esta carrera no otorga pole ni vuelta rápida.")
+
+    def save(self, *args, **kwargs):
+        if not kwargs.get("update_fields"):
+            self.full_clean()
+            self.puntos = self.calcular_puntos()
+        super().save(*args, **kwargs)
