@@ -43,7 +43,7 @@ class ClienteTests(TestCase):
 class CuentaCorrienteTests(TestCase):
     def setUp(self):
         self.user = Usuario.objects.create_user("caja", password="x")
-        self.cc = crear_cliente(self).cuenta_corriente
+        self.cc = crear_cliente(self, limite_credito=Decimal("1000")).cuenta_corriente
 
     def mov(self, tipo, monto, user=None):
         return MovimientoCuentaCorriente.objects.create(
@@ -63,6 +63,26 @@ class CuentaCorrienteTests(TestCase):
         self.cc.refresh_from_db()
         self.assertEqual(self.cc.saldo, Decimal("100.00"))
         self.assertEqual(self.cc.movimientos.count(), 1)
+
+    def test_puede_llegar_justo_al_limite(self):
+        self.mov("DEBITO", "1000")
+        self.cc.refresh_from_db()
+        self.assertEqual(self.cc.saldo, Decimal("1000.00"))
+
+    def test_no_supera_el_limite(self):
+        self.mov("DEBITO", "800")
+        with self.assertRaises(ValidationError):
+            self.mov("DEBITO", "201")
+        self.cc.refresh_from_db()
+        self.assertEqual(self.cc.saldo, Decimal("800.00"))
+        self.assertEqual(self.cc.movimientos.count(), 1)
+
+    def test_sin_limite_no_hay_credito(self):
+        cc = crear_cliente(self, nombre="Sin crédito").cuenta_corriente
+        with self.assertRaises(ValidationError):
+            MovimientoCuentaCorriente.objects.create(
+                cuenta=cc, tipo="DEBITO", monto=Decimal("1"), creado_por=self.user
+            )
 
     def test_movimiento_no_se_edita(self):
         m = self.mov("DEBITO", "100")
@@ -102,12 +122,14 @@ class AdminPorRolTests(TestCase):
 
     def test_registrar_pago_desde_admin(self):
         adm = self.usuario("adm", "administracion")
-        cc = crear_cliente(self).cuenta_corriente
+        cc = crear_cliente(self, limite_credito=Decimal("600")).cuenta_corriente
         MovimientoCuentaCorriente.objects.create(cuenta=cc, tipo="DEBITO", monto=500, creado_por=adm)
         self.client.force_login(adm)
 
         url = "/admin/clientes/movimientocuentacorriente/add/"
         base = {"cuenta": cc.pk, "fecha_0": "15/11/2026", "fecha_1": "10:00:00", "descripcion": "Pago"}
+        r = self.client.post(url, {**base, "tipo": "DEBITO", "monto": "101"})  # supera el límite
+        self.assertContains(r, "Supera el límite de crédito")
         r = self.client.post(url, {**base, "tipo": "CREDITO", "monto": "800"})
         self.assertEqual(r.status_code, 200)  # vuelve al formulario con el error
         r = self.client.post(url, {**base, "tipo": "CREDITO", "monto": "200"})

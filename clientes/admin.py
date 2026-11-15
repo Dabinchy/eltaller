@@ -109,6 +109,10 @@ class MovimientoCCAdminForm(forms.ModelForm):
             raise forms.ValidationError(
                 f"El pago ({monto}) supera la deuda actual del cliente ({cuenta.saldo})."
             )
+        if cuenta and monto and tipo == MovimientoCuentaCorriente.Tipo.DEBITO:
+            error = MovimientoCuentaCorriente.error_limite(cuenta.saldo, monto, cuenta.cliente.limite_credito)
+            if error:
+                raise forms.ValidationError(error)
         return datos
 
 

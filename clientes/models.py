@@ -202,6 +202,23 @@ class MovimientoCuentaCorriente(models.Model):
         signo = "+" if self.tipo == self.Tipo.DEBITO else "-"
         return f"{self.fecha:%Y-%m-%d} {signo}{self.monto} · {self.cuenta}"
 
+    @staticmethod
+    def error_limite(deuda: Decimal, monto: Decimal, limite: Decimal) -> str | None:
+        """
+        Mensaje de error si un débito deja la deuda por encima del límite de crédito
+        (límite 0 = el cliente no tiene crédito). None si está permitido.
+        """
+        limite = limite or Decimal("0.00")
+        if limite <= 0:
+            return "El cliente no tiene crédito habilitado (límite de crédito 0)."
+        if deuda + monto > limite:
+            disponible = max(limite - deuda, Decimal("0.00"))
+            return (
+                f"Supera el límite de crédito del cliente: límite {limite}, "
+                f"deuda actual {deuda}, disponible {disponible}."
+            )
+        return None
+
     def clean(self):
         super().clean()
 
@@ -225,6 +242,10 @@ class MovimientoCuentaCorriente(models.Model):
             deuda = cta.saldo or Decimal("0.00")
 
             if self.tipo == self.Tipo.DEBITO:
+                limite = Cliente.objects.values_list("limite_credito", flat=True).get(pk=cta.cliente_id)
+                error = MovimientoCuentaCorriente.error_limite(deuda, self.monto, limite)
+                if error:
+                    raise ValidationError({"monto": error})
                 cta.saldo = deuda + self.monto
             else:
                 if self.monto > deuda:
