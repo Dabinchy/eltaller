@@ -190,3 +190,144 @@ def desvincular_vehiculo(auto: Auto, actor) -> Auto:
     auto.save(update_fields=["vehiculo_taller", "updated_at"])
     registrar(actor, A.DESVINCULAR, auto, motivo=f"Vehículo {anterior}")
     return auto
+
+
+# ============================================================
+# Archivos
+# ============================================================
+
+from django.db.models import Sum  # noqa: E402
+
+from .models_contenido import Archivo  # noqa: E402
+
+V = Archivo.Visibilidad
+VISIBILIDADES_PILOTO = (V.PRIVADO, V.PILOTO, V.PUBLICO)
+VISIBILIDADES_ORDEN = (V.INTERNO, V.PILOTO)
+MB = 1024 * 1024
+
+
+def uso_cuota(perfil: PerfilPiloto) -> tuple[int, int]:
+    """(bytes usados, bytes disponibles en total) de lo que subió el piloto."""
+    usados = Archivo.objects.filter(subido_por=perfil.usuario).aggregate(t=Sum("tamano_bytes"))["t"] or 0
+    return usados, perfil.cuota_efectiva_mb * MB
+
+
+def _verificar_cuota(perfil: PerfilPiloto, nuevo_bytes: int) -> None:
+    usados, total = uso_cuota(perfil)
+    if usados + nuevo_bytes > total:
+        raise ValidationError(
+            f"No te alcanza el espacio: usaste {usados / MB:.1f} de {total / MB:.0f} MB "
+            f"y el archivo pesa {nuevo_bytes / MB:.1f} MB."
+        )
+
+
+@transaction.atomic
+def subir_archivo_piloto(
+    perfil: PerfilPiloto, *, tipo: str, titulo: str, visibilidad: str = V.PRIVADO,
+    archivo=None, url_video: str = "", auto: Auto | None = None, descripcion: str = "",
+) -> Archivo:
+    """Sube un archivo a un auto (siendo piloto aceptado) o al propio perfil (si auto es None)."""
+    verificar_habilitado(perfil)
+    if visibilidad not in VISIBILIDADES_PILOTO:
+        raise ValidationError("Visibilidad no permitida.")
+    if auto is not None and not auto.pilotos.filter(piloto=perfil, estado=EP.ACEPTADA).exists():
+        raise PermissionDenied("Sólo los pilotos del auto pueden subir archivos a ese auto.")
+    if archivo is not None:
+        _verificar_cuota(perfil, archivo.size)
+    obj = Archivo(
+        subido_por=perfil.usuario, auto=auto, piloto=None if auto else perfil,
+        tipo=tipo, titulo=titulo, descripcion=descripcion, visibilidad=visibilidad,
+        archivo=archivo, url_video=url_video,
+    )
+    obj.save()
+    return obj
+
+
+@transaction.atomic
+def subir_archivo_orden(orden, actor, *, tipo: str, titulo: str, archivo, visibilidad: str = V.INTERNO,
+                        descripcion: str = "") -> Archivo:
+    """El personal con la orden en su alcance (incluido el mecánico asignado) sube fotos o documentos."""
+    from taller import permisos as permisos_taller
+
+    if getattr(actor, "es_portal", True) or not permisos_taller.puede_operar(actor, orden):
+        raise PermissionDenied("Esta orden no está dentro de tu alcance.")
+    if tipo not in (Archivo.Tipo.FOTO, Archivo.Tipo.DOCUMENTO):
+        raise ValidationError("En una orden se suben fotos o documentos.")
+    if visibilidad not in VISIBILIDADES_ORDEN:
+        raise ValidationError("En una orden el archivo es interno o compartido con el cliente.")
+    obj = Archivo(subido_por=actor, orden=orden, tipo=tipo, titulo=titulo, descripcion=descripcion,
+                  visibilidad=visibilidad, archivo=archivo)
+    obj.save()
+    return obj
+
+
+def _verificar_dueno(archivo: Archivo, perfil: PerfilPiloto) -> None:
+    if archivo.subido_por_id != perfil.usuario_id:
+        raise PermissionDenied("Sólo quien subió el archivo puede cambiarlo.")
+
+
+def cambiar_visibilidad(archivo: Archivo, perfil: PerfilPiloto, visibilidad: str) -> Archivo:
+    _verificar_dueno(archivo, perfil)
+    verificar_habilitado(perfil)
+    if archivo.orden_id or visibilidad not in VISIBILIDADES_PILOTO:
+        raise ValidationError("Visibilidad no permitida.")
+    archivo.visibilidad = visibilidad
+    archivo.save()  # si pasa a público, queda pendiente de aprobación
+    return archivo
+
+
+@transaction.atomic
+def eliminar_archivo(archivo: Archivo, actor) -> None:
+    """Lo borra quien lo subió, el piloto principal del auto o el personal con acceso a la orden."""
+    from taller import permisos as permisos_taller
+
+    permitido = archivo.subido_por_id == actor.pk
+    if not permitido and archivo.auto_id:
+        permitido = archivo.auto.pilotos.filter(piloto__usuario=actor, principal=True).exists()
+    if not permitido and archivo.orden_id and not getattr(actor, "es_portal", True):
+        permitido = permisos_taller.puede_operar(actor, archivo.orden)
+    if not permitido:
+        raise PermissionDenied("No podés borrar este archivo.")
+    archivo.delete()  # los archivos físicos se borran en la señal post_delete
+
+
+def elegir_portada(auto: Auto, perfil: PerfilPiloto, foto: Archivo | None) -> Auto:
+    verificar_principal(auto, perfil)
+    auto.portada = foto
+    auto.save()  # valida que sea una foto de este auto
+    return auto
+
+
+def _verificar_puede_moderar_archivo(archivo: Archivo, actor):
+    if archivo.visibilidad != V.PUBLICO:
+        raise ValidationError("Sólo se moderan archivos públicos.")
+    perfil = getattr(archivo.subido_por, "perfil_piloto", None) if archivo.subido_por_id else None
+    if perfil is None:
+        raise ValidationError("El archivo no tiene un piloto como autor.")
+    if archivo.subido_por_id == actor.pk or (
+        archivo.auto_id and archivo.auto.pilotos.filter(piloto__usuario=actor).exists()
+    ):
+        raise PermissionDenied("No podés moderar un archivo tuyo o de un auto en el que sos piloto.")
+    asociaciones = list(perfil.asociaciones_aprobadas())
+    permisos.verificar_puede_moderar(actor, asociaciones)
+    moderadas = set(permisos.asociaciones_moderadas(actor).values_list("pk", flat=True))
+    return next(a for a in asociaciones if a.pk in moderadas)
+
+
+@transaction.atomic
+def aprobar_archivo(archivo: Archivo, actor) -> Archivo:
+    asociacion = _verificar_puede_moderar_archivo(archivo, actor)
+    archivo.aprobado, archivo.aprobado_por, archivo.aprobado_el = True, actor, timezone.now()
+    archivo.save(update_fields=["aprobado", "aprobado_por", "aprobado_el"])
+    registrar(actor, A.APROBAR, archivo, asociacion)
+    return archivo
+
+
+@transaction.atomic
+def retirar_aprobacion_archivo(archivo: Archivo, actor, motivo: str) -> Archivo:
+    asociacion = _verificar_puede_moderar_archivo(archivo, actor)
+    motivo = _exigir_motivo(motivo)
+    archivo.aprobado = False
+    archivo.save(update_fields=["aprobado"])
+    registrar(actor, A.RETIRAR, archivo, asociacion, motivo)
+    return archivo

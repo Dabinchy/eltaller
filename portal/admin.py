@@ -16,7 +16,7 @@ from taller.models import Vehiculo
 
 from . import servicios, servicios_contenido
 from .models import AccesoCliente, Asociacion, Membresia, PerfilPiloto, RegistroModeracion
-from .models_contenido import Auto, Palmares, PilotoAuto
+from .models_contenido import Archivo, Auto, Palmares, PilotoAuto
 
 MOTIVO_ADMIN = "Resuelto desde el administrador"
 
@@ -221,6 +221,48 @@ class AutoAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False  # los autos los crean los pilotos
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+
+@admin.register(Archivo)
+class ArchivoAdmin(admin.ModelAdmin):
+    """Los archivos son privados: el admin muestra el nombre, nunca un link directo."""
+
+    list_display = ("titulo", "tipo", "visibilidad", "aprobado", "destino", "subido_por", "tamano_kb", "subido_el")
+    list_filter = ("tipo", "visibilidad", "aprobado")
+    search_fields = ("titulo", "subido_por__username", "auto__marca", "auto__modelo", "piloto__nombre_publico")
+    list_select_related = ("subido_por", "auto", "piloto", "orden")
+    actions = [
+        _accion(servicios_contenido.aprobar_archivo, "Aprobar (públicos)"),
+        _accion(servicios_contenido.retirar_aprobacion_archivo, "Retirar aprobación", con_motivo=True),
+    ]
+    fields = ("titulo", "descripcion", "tipo", "visibilidad", "destino", "nombre", "url_video",
+              "tamano_kb", "subido_por", "subido_el", "aprobado", "aprobado_por", "aprobado_el")
+
+    @admin.display(description="Pertenece a")
+    def destino(self, obj):
+        return obj.auto or obj.orden or obj.piloto
+
+    @admin.display(description="Archivo")
+    def nombre(self, obj):
+        return f"{obj.nombre_archivo} (privado)" if obj.archivo else "—"
+
+    @admin.display(description="Tamaño (KB)")
+    def tamano_kb(self, obj):
+        return round(obj.tamano_bytes / 1024)
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.fields
+
+    def has_add_permission(self, request):
+        return False
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser

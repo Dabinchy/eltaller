@@ -58,3 +58,59 @@ def puede_gestionar_accesos(user) -> bool:
 def verificar_gestiona_accesos(user) -> None:
     if not puede_gestionar_accesos(user):
         raise PermissionDenied("Sólo el personal del taller gestiona los accesos de clientes.")
+
+
+# ============================================================
+# Quién ve cada archivo (lo usa la vista de descarga)
+# ============================================================
+
+def _es_personal(user) -> bool:
+    return getattr(user, "is_authenticated", False) and not getattr(user, "es_portal", True) and user.is_active
+
+
+def _es_piloto_del_destino(user, archivo) -> bool:
+    """Piloto aceptado del auto del archivo, o el piloto dueño del perfil."""
+    from .models_contenido import PilotoAuto
+
+    if archivo.auto_id:
+        return PilotoAuto.objects.filter(
+            auto_id=archivo.auto_id, piloto__usuario=user, estado=PilotoAuto.Estado.ACEPTADA
+        ).exists()
+    return bool(archivo.piloto_id and archivo.piloto.usuario_id == user.pk)
+
+
+def _modera_al_autor(user, archivo) -> bool:
+    perfil = getattr(archivo.subido_por, "perfil_piloto", None) if archivo.subido_por_id else None
+    if perfil is None:
+        return False
+    return asociaciones_moderadas(user).filter(pk__in=perfil.asociaciones_aprobadas()).exists()
+
+
+def puede_ver_archivo(user, archivo) -> bool:
+    from taller.permisos import ordenes_visibles
+
+    V = type(archivo).Visibilidad
+    if archivo.visibilidad == V.PUBLICO and archivo.aprobado:
+        return True
+    if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return False
+    if archivo.subido_por_id == user.pk:
+        return True
+
+    if archivo.orden_id:  # archivos de órdenes: INTERNO o PILOTO
+        orden = archivo.orden
+        if _es_personal(user):
+            return ordenes_visibles(type(orden).objects.filter(pk=orden.pk), user).exists()
+        if archivo.visibilidad == V.PILOTO:
+            from .acceso_taller import ordenes_del_cliente
+
+            return ordenes_del_cliente(user).filter(pk=orden.pk).exists()
+        return False
+
+    if archivo.visibilidad == V.PRIVADO:
+        return _es_piloto_del_destino(user, archivo)
+    if archivo.visibilidad == V.PILOTO:
+        return _es_piloto_del_destino(user, archivo) or _es_personal(user)
+    if archivo.visibilidad == V.PUBLICO:  # pendiente de aprobación
+        return _es_piloto_del_destino(user, archivo) or _modera_al_autor(user, archivo)
+    return False

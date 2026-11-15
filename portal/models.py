@@ -406,4 +406,4 @@ class AccesoCliente(models.Model):
 
 
 # Modelos de contenido (autos, palmarés, archivos) en un módulo aparte para no alargar este archivo.
-from .models_contenido import Auto, Palmares, PilotoAuto, piloto_habilitado  # noqa: E402,F401
+from .models_contenido import Archivo, Auto, Palmares, PilotoAuto, piloto_habilitado  # noqa: E402,F401
