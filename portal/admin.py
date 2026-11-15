@@ -11,7 +11,9 @@ from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied, ValidationError
 
 from . import servicios
-from .models import Asociacion, Membresia, PerfilPiloto, RegistroModeracion
+from core.models import Usuario
+
+from .models import AccesoCliente, Asociacion, Membresia, PerfilPiloto, RegistroModeracion
 
 MOTIVO_ADMIN = "Resuelto desde el administrador"
 
@@ -123,6 +125,45 @@ class PerfilPilotoAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+
+@admin.register(AccesoCliente)
+class AccesoClienteAdmin(admin.ModelAdmin):
+    """El personal identifica al cliente, elige el rol y aprueba (o rechaza / revoca)."""
+
+    list_display = ("usuario", "nombre_declarado", "doc_declarado", "cliente", "rol", "estado", "solicitado_el")
+    list_filter = ("estado", "rol")
+    search_fields = ("usuario__username", "usuario__dni", "nombre_declarado", "doc_declarado", "cliente__nombre")
+    list_select_related = ("usuario", "cliente")
+    autocomplete_fields = ("usuario", "cliente")
+    fields = ("usuario", "nombre_declarado", "doc_declarado", "nota", "cliente", "rol",
+              "estado", "motivo", "solicitado_el", "resuelto_por", "resuelto_el")
+    actions = [
+        _accion(servicios.aprobar_acceso, "Aprobar (con el cliente elegido)"),
+        _accion(servicios.rechazar_acceso, "Rechazar", con_motivo=True),
+        _accion(servicios.revocar_acceso, "Revocar", con_motivo=True),
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        fijos = ["estado", "motivo", "solicitado_el", "resuelto_por", "resuelto_el"]
+        if obj:
+            fijos += ["usuario", "nombre_declarado", "doc_declarado", "nota"]
+            if obj.estado != AccesoCliente.Estado.PENDIENTE:
+                fijos += ["cliente", "rol"]  # para cambiarlo: revocar y crear otro
+        return fijos
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "usuario":
+            kwargs["queryset"] = Usuario.objects.filter(tipo=Usuario.Tipo.PORTAL)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser

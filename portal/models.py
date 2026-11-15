@@ -327,3 +327,77 @@ class RegistroModeracion(models.Model):
 
     def __str__(self) -> str:
         return f"{self.fecha:%d/%m/%Y %H:%M} · {self.actor} · {self.get_accion_display()} · {self.descripcion_objeto}"
+
+
+# ===========================
+# Acceso de cliente ("Mi taller")
+# ===========================
+
+class AccesoCliente(models.Model):
+    """
+    Une a un usuario del portal con un cliente del taller.
+    - TITULAR: ve todo lo del cliente y puede aprobar presupuestos.
+    - PILOTO: ve sólo los autos que maneja (por ejemplo, un piloto de un equipo).
+    Mientras está PENDIENTE puede no tener cliente: el personal elige el correcto al aprobar.
+    """
+
+    class Rol(models.TextChoices):
+        TITULAR = "TITULAR", "Titular"
+        PILOTO = "PILOTO", "Piloto del equipo"
+
+    class Estado(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        APROBADO = "APROBADO", "Aprobado"
+        RECHAZADO = "RECHAZADO", "Rechazado"
+        REVOCADO = "REVOCADO", "Revocado"
+
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="accesos_cliente")
+    cliente = models.ForeignKey(
+        "clientes.Cliente", on_delete=models.PROTECT, null=True, blank=True, related_name="accesos_portal",
+    )
+    rol = models.CharField(max_length=10, choices=Rol.choices, default=Rol.TITULAR)
+    estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE, editable=False)
+
+    # Lo que declaró la persona al pedir el acceso (para que el taller la identifique).
+    nombre_declarado = models.CharField(max_length=150, blank=True)
+    doc_declarado = models.CharField("documento declarado", max_length=15, blank=True)
+    nota = models.TextField(blank=True, help_text="Ej.: 'Traje el Fiesta rojo en marzo'.")
+
+    motivo = models.TextField(blank=True, editable=False)
+    solicitado_el = models.DateTimeField(auto_now_add=True)
+    resuelto_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+", editable=False,
+    )
+    resuelto_el = models.DateTimeField(null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ("estado", "-solicitado_el")
+        permissions = [("gestionar_accesos_cliente", "Puede aprobar y revocar accesos de clientes al portal")]
+        constraints = [
+            models.CheckConstraint(
+                condition=~Q(estado="APROBADO") | Q(cliente__isnull=False),
+                name="ck_acceso_aprobado_con_cliente",
+                violation_error_message="Un acceso aprobado tiene que tener cliente.",
+            ),
+            models.UniqueConstraint(
+                fields=["usuario", "cliente"], condition=Q(cliente__isnull=False),
+                name="uq_acceso_usuario_cliente",
+                violation_error_message="Esa cuenta ya tiene acceso a ese cliente.",
+            ),
+        ]
+        verbose_name = "acceso de cliente"
+        verbose_name_plural = "accesos de clientes"
+
+    def __str__(self) -> str:
+        cliente = self.cliente or f"(declarado: {self.nombre_declarado or '—'})"
+        return f"{self.usuario} → {cliente} · {self.get_estado_display()}"
+
+    def clean(self):
+        super().clean()
+        if self.usuario_id and not self.usuario.es_portal:
+            raise ValidationError({"usuario": "Sólo los usuarios del portal pueden tener acceso de cliente."})
+
+    def save(self, *args, **kwargs):
+        if not kwargs.get("update_fields"):
+            self.full_clean()
+        super().save(*args, **kwargs)
