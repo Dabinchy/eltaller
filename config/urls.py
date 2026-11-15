@@ -8,9 +8,6 @@ from core import views as core_views
 from portal import views as portal_views
 
 urlpatterns = [
-    # Sitio público (portada mínima hasta el paso 6)
-    path("", core_views.portada, name="portada"),
-
     # Ingreso único para personal, pilotos y clientes
     path("ingresar/", auth_views.LoginView.as_view(redirect_authenticated_user=True), name="login"),
     path("salir/", auth_views.LogoutView.as_view(), name="logout"),
@@ -25,6 +22,9 @@ urlpatterns = [
     path("archivos/pilotos/<slug:slug>/foto/", portal_views.foto_perfil, name="foto_perfil"),
 
     path("admin/", admin.site.urls),
+
+    # Sitio público del taller (al final: sus direcciones no deben tapar las anteriores)
+    path("", include("sitio.urls")),
 ]
 
 if settings.DEBUG:

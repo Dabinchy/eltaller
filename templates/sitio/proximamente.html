@@ -1,0 +1,9 @@
+{% extends "layouts/base_sitio.html" %}
+
+{% block content %}
+<section class="container py-5 text-center">
+  <h1 class="h3">{{ seccion }}</h1>
+  <p class="text-body-secondary">Estamos preparando esta sección. Volvé pronto.</p>
+  <a class="btn btn-outline-light" href="{% url 'sitio:inicio' %}">Volver al inicio</a>
+</section>
+{% endblock %}

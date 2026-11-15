@@ -1,5 +1,6 @@
 """
-Vistas generales: portada, redirección después de ingresar e inicio del panel interno.
+Vistas generales: redirección después de ingresar e inicio del panel interno.
+(La portada es el sitio público: app sitio.)
 """
 from __future__ import annotations
 
@@ -8,11 +9,6 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from .acceso import solo_personal
-
-
-def portada(request):
-    """Portada mínima hasta que esté el sitio público (paso 6)."""
-    return render(request, "core/portada.html")
 
 
 @login_required

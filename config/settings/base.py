@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "taller",
     "portal",
     "campeonatos",
+    "sitio",
 
 ]
 
@@ -102,7 +103,7 @@ PRIVATE_X_ACCEL_PREFIX = os.environ.get("PRIVATE_X_ACCEL_PREFIX", "")
 # Ingreso único: cada uno va a su lugar según su tipo de usuario.
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "redireccion"
-LOGOUT_REDIRECT_URL = "portada"
+LOGOUT_REDIRECT_URL = "sitio:inicio"
 
 # Marcas (se pueden cambiar sin tocar templates). Siempre se usan éstas, aunque Empresa tenga logo.
 TALLER_MARCA_NOMBRE = "El Taller"
