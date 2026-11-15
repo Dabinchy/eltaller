@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "ventas",
     "compras",
     "taller",
+    "portal",
 
 ]
 
@@ -95,3 +96,17 @@ PRIVATE_MEDIA_ROOT = BASE_DIR / "privado"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "core.Usuario"
+
+# Caché en base de datos: compartida entre los procesos de gunicorn (límite de registros por IP).
+# Requiere una vez: python manage.py createcachetable
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_django",
+    }
+}
+
+# Portal de pilotos
+PORTAL_CUOTA_MB_POR_DEFECTO = 500   # si la asociación no define cuota
+PORTAL_EDAD_MAYORIA = 18            # menores necesitan consentimiento del tutor para publicar
+PORTAL_REGISTROS_POR_IP_HORA = 3    # anti-spam en el registro

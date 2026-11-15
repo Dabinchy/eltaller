@@ -373,7 +373,7 @@ class UsuarioAdminCreationForm(_ReglasUsuarioMixin, UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Usuario
         fields = (
-            "username", "first_name", "last_name", "email",
+            "username", "first_name", "last_name", "email", "dni",
             "tipo", "sucursal", "is_active", "is_staff", "groups",
         )
 
@@ -403,6 +403,7 @@ class UsuarioAdmin(DjangoUserAdmin):
         "pin_failed_attempts", "pin_locked_until", "pin_configurado",
     )
     list_filter = ("tipo", "sucursal", "is_staff", "is_active", "groups")
+    search_fields = ("username", "first_name", "last_name", "email", "dni")
     ordering = ("username",)
 
     @admin.display(boolean=True, description="PIN set")
@@ -424,7 +425,7 @@ class UsuarioAdmin(DjangoUserAdmin):
         return form
 
     def get_fieldsets(self, request, obj=None):
-        personal = (_("Personal info"), {"fields": ("first_name", "last_name", "email")})
+        personal = (_("Personal info"), {"fields": ("first_name", "last_name", "email", "dni")})
         ubicacion = (_("Tipo y ubicación"), {"fields": ("tipo", "sucursal")})
 
         if request.user.is_superuser:

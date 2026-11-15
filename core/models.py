@@ -17,6 +17,7 @@ Notas de diseño:
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -163,6 +164,13 @@ class Usuario(AbstractUser):
 
     tipo = models.CharField(max_length=10, choices=Tipo.choices, default=Tipo.STAFF)
 
+    # Dato PRIVADO: obligatorio al registrarse en el portal; nunca se muestra en la web.
+    # Lo ven el propio usuario, el personal del taller y los moderadores de su asociación.
+    dni = models.CharField(
+        "DNI / documento", max_length=15, blank=True, default="",
+        help_text="Sólo dígitos y letras, sin puntos ni espacios. Privado.",
+    )
+
     sucursal = models.ForeignKey(
         "core.Sucursal",
         on_delete=models.PROTECT,
@@ -186,6 +194,13 @@ class Usuario(AbstractUser):
                 condition=~Q(action_pin_fingerprint=""),
                 name="uq_usuario_pin_fingerprint",
             ),
+            # Un DNI no puede estar en dos cuentas (evita duplicados y registros falsos).
+            UniqueConstraint(
+                fields=["dni"],
+                condition=~Q(dni=""),
+                name="uq_usuario_dni_no_vacio",
+                violation_error_message="Ya existe una cuenta con este DNI / documento.",
+            ),
         ]
 
     @property
@@ -196,8 +211,20 @@ class Usuario(AbstractUser):
     def es_personal(self) -> bool:
         return self.tipo == self.Tipo.STAFF
 
+    @staticmethod
+    def normalizar_dni(valor: str) -> str:
+        """'20.123.456' → '20123456'; 'aa 123456' → 'AA123456'."""
+        return re.sub(r"[^0-9A-Za-z]", "", valor or "").upper()
+
+    def save(self, *args, **kwargs):
+        self.dni = self.normalizar_dni(self.dni)
+        super().save(*args, **kwargs)
+
     def clean(self):
         super().clean()
+        self.dni = self.normalizar_dni(self.dni)
+        if self.dni and not 6 <= len(self.dni) <= 15:
+            raise ValidationError({"dni": "El documento debe tener entre 6 y 15 caracteres."})
         if self.es_portal and self.sucursal_id is not None:
             raise ValidationError({"sucursal": "Un usuario del portal no puede tener sucursal fija."})
 
