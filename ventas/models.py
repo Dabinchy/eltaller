@@ -360,7 +360,10 @@ class VentaDetalle(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT, related_name="ventas_detalle")
 
     cantidad = models.DecimalField(max_digits=12, decimal_places=3, default=Decimal("1.000"))
-    precio_unitario = models.DecimalField(max_digits=14, decimal_places=2, default=CERO)
+    precio_unitario = models.DecimalField(
+        max_digits=14, decimal_places=2, null=True, blank=True,
+        help_text="Vacío = precio vigente del producto. 0 = sin cargo.",
+    )
     importe = models.DecimalField(max_digits=14, decimal_places=2, default=CERO)
 
     # AFIP (sin uso)
@@ -421,8 +424,11 @@ class VentaDetalle(models.Model):
             raise ValidationError({"producto": "No se puede vender un producto inactivo."})
 
         # Precio por defecto: precio vigente del producto
-        if not self.precio_unitario or self.precio_unitario < 0:
+        # Vacío → precio vigente del producto. Un 0 explícito se respeta (sin cargo).
+        if self.precio_unitario is None:
             self.precio_unitario = _q2(producto.precio_vigente)
+        if self.precio_unitario < 0:
+            raise ValidationError({"precio_unitario": "El precio no puede ser negativo."})
         self.importe = _q2(self.precio_unitario * self.cantidad)
 
         # Datos AFIP por línea

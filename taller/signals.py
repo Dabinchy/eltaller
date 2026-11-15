@@ -23,13 +23,37 @@ _VEHICULOS_Y_TURNOS = [
 
 _TECNICOS = ["taller.view_tecnico", "taller.add_tecnico", "taller.change_tecnico"]
 
+# Gestión completa de órdenes (el alcance por sucursal lo aplica taller/permisos.py).
+_ORDENES = [
+    "taller.view_ordentrabajo",
+    "taller.add_ordentrabajo",
+    "taller.change_ordentrabajo",
+    "taller.view_ordenitem",
+    "taller.add_ordenitem",
+    "taller.change_ordenitem",
+    "taller.delete_ordenitem",
+    "taller.view_ordenestadolog",
+    "taller.aprobar_items",
+    "taller.cambiar_estado_orden",
+    "taller.entregar_orden",
+    "taller.cancelar_orden",
+]
+
 PERMISOS_TALLER_POR_GRUPO = {
-    GRUPO_GERENTE: _VEHICULOS_Y_TURNOS + _TECNICOS,
-    GRUPO_JEFE: _VEHICULOS_Y_TURNOS + _TECNICOS,
-    # Crea turnos y atiende clientes; ve los técnicos para asignar trabajo.
-    GRUPO_ADMINISTRACION: _VEHICULOS_Y_TURNOS + ["taller.view_tecnico"],
-    # Trabaja desde sus órdenes asignadas (se agregan con las órdenes de trabajo).
-    GRUPO_MECANICO: [],
+    GRUPO_GERENTE: _VEHICULOS_Y_TURNOS + _TECNICOS + _ORDENES,
+    GRUPO_JEFE: _VEHICULOS_Y_TURNOS + _TECNICOS + _ORDENES,
+    # Turnos, órdenes y presupuestos de su sucursal; aprueba ítems y entrega; ve técnicos.
+    GRUPO_ADMINISTRACION: _VEHICULOS_Y_TURNOS + ["taller.view_tecnico"] + _ORDENES,
+    # Sólo sus órdenes asignadas: escribe el diagnóstico, carga ítems y empieza/termina el trabajo.
+    GRUPO_MECANICO: [
+        "taller.view_ordentrabajo",
+        "taller.change_ordentrabajo",
+        "taller.view_ordenitem",
+        "taller.add_ordenitem",
+        "taller.change_ordenitem",
+        "taller.view_ordenestadolog",
+        "taller.trabajar_orden",
+    ],
 }
 
 
