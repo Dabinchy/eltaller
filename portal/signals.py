@@ -22,7 +22,7 @@ _ACCESOS_CLIENTE = [
 ]
 
 # Ver los autos del portal y vincularlos con la ficha del taller.
-_AUTOS = ["portal.view_auto", "portal.change_auto", "portal.view_pilotoauto"]
+_AUTOS = ["portal.view_auto", "portal.change_auto", "portal.view_pilotoauto", "portal.view_ordencomentario"]
 
 PERMISOS_PORTAL_POR_GRUPO = {
     # Crea asociaciones, nombra moderadores y puede moderar todo.

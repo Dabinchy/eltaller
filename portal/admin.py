@@ -16,7 +16,7 @@ from taller.models import Vehiculo
 
 from . import servicios, servicios_contenido
 from .models import AccesoCliente, Asociacion, Membresia, PerfilPiloto, RegistroModeracion
-from .models_contenido import Archivo, Auto, Palmares, PilotoAuto
+from .models_contenido import Archivo, Auto, OrdenComentario, Palmares, PilotoAuto
 
 MOTIVO_ADMIN = "Resuelto desde el administrador"
 
@@ -330,3 +330,32 @@ class RegistroModeracionAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(OrdenComentario)
+class OrdenComentarioAdmin(admin.ModelAdmin):
+    """Conversación de las órdenes (se escribe desde el panel y el portal; acá sólo se consulta)."""
+
+    list_display = ("fecha", "orden", "autor", "visible_piloto", "texto")
+    list_filter = ("visible_piloto",)
+    search_fields = ("orden__numero", "autor__username", "texto")
+    list_select_related = ("orden", "autor")
+
+    def get_queryset(self, request):
+        from taller.permisos import ordenes_visibles
+        from taller.models import OrdenTrabajo
+
+        visibles = ordenes_visibles(OrdenTrabajo.objects.all(), request.user)
+        return super().get_queryset(request).filter(orden__in=visibles)
+
+    def get_readonly_fields(self, request, obj=None):
+        return ("fecha", "orden", "autor", "visible_piloto", "texto")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser

@@ -383,6 +383,41 @@ class Archivo(models.Model):
         super().save(*args, **kwargs)
 
 
+# ===========================
+# Comentarios en órdenes
+# ===========================
+
+class OrdenComentario(models.Model):
+    """
+    Conversación sobre una orden entre el taller y el cliente.
+    Lo que escribe el personal es interno salvo que lo marque visible; lo del cliente siempre se ve.
+    """
+
+    orden = models.ForeignKey("taller.OrdenTrabajo", on_delete=models.CASCADE, related_name="comentarios")
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    texto = models.TextField(validators=[MaxLengthValidator(2000)])
+    visible_piloto = models.BooleanField("visible para el cliente", default=False)
+    fecha = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ("fecha", "id")
+        verbose_name = "comentario de orden"
+        verbose_name_plural = "comentarios de órdenes"
+
+    def __str__(self) -> str:
+        return f"OT #{self.orden.numero} · {self.autor} · {self.texto[:40]}"
+
+    def clean(self):
+        super().clean()
+        self.texto = (self.texto or "").strip()
+        if not self.texto:
+            raise ValidationError({"texto": "Escribí el comentario."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
 def piloto_habilitado(perfil: PerfilPiloto) -> bool:
     """Puede subir y editar contenido: cuenta activa y al menos una membresía de piloto aprobada."""
     return perfil.usuario.is_active and perfil.usuario.membresias.filter(

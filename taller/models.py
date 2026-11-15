@@ -469,13 +469,33 @@ class OrdenTrabajo(models.Model):
                 raise PermissionDenied("No tiene permiso para ese cambio de estado.")
 
             if nuevo == self.E.APROBADA:
-                if not orden.items.exists():
-                    raise ValidationError("El presupuesto no tiene ítems.")
-                orden.items.update(aprobado=True)
-                orden.recalcular_totales()
+                orden._aprobar_todos_los_items()
 
             orden._registrar_estado(nuevo, user)
 
+        self.refresh_from_db()
+        return self
+
+    def _aprobar_todos_los_items(self) -> None:
+        if not self.items.exists():
+            raise ValidationError("El presupuesto no tiene ítems.")
+        self.items.update(aprobado=True)
+        self.recalcular_totales()
+
+    def aprobar_presupuesto_por_cliente(self, *, user) -> "OrdenTrabajo":
+        """
+        El cliente aprueba el presupuesto desde el portal: mismo efecto que la aprobación del taller
+        (aprueba todos los ítems y pasa a APROBADA) y queda en el historial con su usuario.
+
+        El permiso (ser TITULAR del cliente de la orden) lo verifica quien llama: el portal,
+        que es quien conoce los accesos de clientes (taller nunca depende de portal).
+        """
+        with transaction.atomic():
+            orden = OrdenTrabajo.objects.select_for_update().get(pk=self.pk)
+            if orden.estado != self.E.PRESUPUESTO:
+                raise ValidationError("Este presupuesto ya no está esperando aprobación.")
+            orden._aprobar_todos_los_items()
+            orden._registrar_estado(self.E.APROBADA, user)
         self.refresh_from_db()
         return self
 
