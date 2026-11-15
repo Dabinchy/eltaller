@@ -308,6 +308,8 @@ class RegistroModeracion(models.Model):
         CONSENTIMIENTO = "CONSENTIMIENTO", "Registrar consentimiento del tutor"
         CUOTA = "CUOTA", "Cambiar cuota"
         REVOCAR = "REVOCAR", "Revocar acceso"
+        VINCULAR = "VINCULAR", "Vincular con el taller"
+        DESVINCULAR = "DESVINCULAR", "Desvincular del taller"
 
     fecha = models.DateTimeField(default=timezone.now)
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
@@ -401,3 +403,7 @@ class AccesoCliente(models.Model):
         if not kwargs.get("update_fields"):
             self.full_clean()
         super().save(*args, **kwargs)
+
+
+# Modelos de contenido (autos, palmarés, archivos) en un módulo aparte para no alargar este archivo.
+from .models_contenido import Auto, Palmares, PilotoAuto, piloto_habilitado  # noqa: E402,F401

@@ -7,13 +7,16 @@ Admin del portal (sólo personal del taller).
 """
 from __future__ import annotations
 
+from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied, ValidationError
 
-from . import servicios
 from core.models import Usuario
+from taller.models import Vehiculo
 
+from . import servicios, servicios_contenido
 from .models import AccesoCliente, Asociacion, Membresia, PerfilPiloto, RegistroModeracion
+from .models_contenido import Auto, Palmares, PilotoAuto
 
 MOTIVO_ADMIN = "Resuelto desde el administrador"
 
@@ -85,12 +88,32 @@ class MembresiaAdmin(admin.ModelAdmin):
         return actions
 
 
+class _SoloLecturaInline(admin.TabularInline):
+    extra = 0
+    can_delete = False
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+class PalmaresInline(_SoloLecturaInline):
+    model = Palmares
+    fields = ("anio", "campeonato", "categoria", "resultado", "detalle")
+
+
 @admin.register(PerfilPiloto)
 class PerfilPilotoAdmin(admin.ModelAdmin):
     list_display = ("nombre_publico", "usuario", "perfil_publico", "aprobado", "cambio_tras_aprobacion", "menor")
     list_filter = ("aprobado", "perfil_publico", "cambio_tras_aprobacion")
     search_fields = ("nombre_publico", "usuario__username", "usuario__dni", "licencia")
     list_select_related = ("usuario",)
+    inlines = [PalmaresInline]
     actions = [
         _accion(servicios.aprobar_perfil, "Aprobar perfil"),
         _accion(servicios.retirar_aprobacion_perfil, "Retirar aprobación", con_motivo=True),
@@ -125,6 +148,79 @@ class PerfilPilotoAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+
+class PilotoAutoInline(_SoloLecturaInline):
+    model = PilotoAuto
+    fields = ("piloto", "principal", "estado", "invitado_por", "created_at")
+
+
+class AutoAdminForm(forms.ModelForm):
+    vehiculo = forms.ModelChoiceField(
+        queryset=Vehiculo.objects.filter(activo=True), required=False,
+        label="Vehículo del taller",
+        help_text="Vinculalo cuando el auto entra al taller. Vacío = sin vínculo.",
+    )
+
+    class Meta:
+        model = Auto
+        fields = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["vehiculo"].initial = self.instance.vehiculo_taller_id
+
+
+@admin.register(Auto)
+class AutoAdmin(admin.ModelAdmin):
+    """El contenido es del piloto: el personal lo ve, lo modera y lo vincula con el taller."""
+
+    form = AutoAdminForm
+    list_display = ("__str__", "principal", "publicado", "aprobado", "cambio_tras_aprobacion", "vehiculo_taller", "activo")
+    list_filter = ("aprobado", "publicado", "cambio_tras_aprobacion", "activo")
+    search_fields = ("marca", "modelo", "numero_competicion", "pilotos__piloto__nombre_publico")
+    inlines = [PilotoAutoInline]
+    actions = [
+        _accion(servicios_contenido.aprobar_auto, "Aprobar auto"),
+        _accion(servicios_contenido.retirar_aprobacion_auto, "Retirar aprobación", con_motivo=True),
+        _accion(servicios_contenido.marcar_auto_revisado, "Marcar cambios como revisados"),
+    ]
+    fieldsets = (
+        ("Presentación (la edita el piloto)", {"fields": (
+            "marca", "modelo", "anio", "numero_competicion", "categoria", "descripcion", "slug",
+        )}),
+        ("Estado", {"fields": ("publicado", "aprobado", "aprobado_por", "aprobado_el", "cambio_tras_aprobacion", "activo")}),
+        ("Taller", {"fields": ("vehiculo_taller", "vehiculo")}),
+    )
+
+    @admin.display(description="Principal")
+    def principal(self, obj):
+        return obj.principal or "—"
+
+    def get_readonly_fields(self, request, obj=None):
+        return [f for _, opts in self.fieldsets for f in opts["fields"] if f != "vehiculo"]
+
+    def save_model(self, request, obj, form, change):
+        nuevo = form.cleaned_data.get("vehiculo")
+        try:
+            if nuevo and nuevo.pk != obj.vehiculo_taller_id:
+                servicios_contenido.vincular_vehiculo(obj, nuevo, request.user)
+            elif not nuevo and obj.vehiculo_taller_id:
+                servicios_contenido.desvincular_vehiculo(obj, request.user)
+        except (ValidationError, PermissionDenied) as e:
+            self.message_user(request, _mensaje(e), messages.ERROR)
+
+    def has_add_permission(self, request):
+        return False  # los autos los crean los pilotos
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser

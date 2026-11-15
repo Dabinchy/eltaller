@@ -21,6 +21,9 @@ _ACCESOS_CLIENTE = [
     "portal.change_accesocliente",
 ]
 
+# Ver los autos del portal y vincularlos con la ficha del taller.
+_AUTOS = ["portal.view_auto", "portal.change_auto", "portal.view_pilotoauto"]
+
 PERMISOS_PORTAL_POR_GRUPO = {
     # Crea asociaciones, nombra moderadores y puede moderar todo.
     GRUPO_GERENTE: [
@@ -31,10 +34,11 @@ PERMISOS_PORTAL_POR_GRUPO = {
         "portal.add_membresia",
         "portal.change_membresia",
         "portal.view_perfilpiloto",
+        "portal.view_palmares",
         "portal.view_registromoderacion",
-    ] + _ACCESOS_CLIENTE,
-    GRUPO_JEFE: list(_ACCESOS_CLIENTE),
-    GRUPO_ADMINISTRACION: list(_ACCESOS_CLIENTE),
+    ] + _ACCESOS_CLIENTE + _AUTOS,
+    GRUPO_JEFE: _ACCESOS_CLIENTE + _AUTOS,
+    GRUPO_ADMINISTRACION: _ACCESOS_CLIENTE + _AUTOS,
     GRUPO_MECANICO: [],
 }
 
