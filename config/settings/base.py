@@ -104,7 +104,7 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "redireccion"
 LOGOUT_REDIRECT_URL = "portada"
 
-# Marcas (se pueden cambiar sin tocar templates). Si Empresa tiene logo, reemplaza al del taller.
+# Marcas (se pueden cambiar sin tocar templates). Siempre se usan éstas, aunque Empresa tenga logo.
 TALLER_MARCA_NOMBRE = "El Taller"
 TALLER_MARCA_LOGO = "img/brand/el-taller.jpg"
 PORTAL_MARCA_NOMBRE = "El Prepa"

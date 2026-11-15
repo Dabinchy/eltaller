@@ -55,8 +55,16 @@ class IngresoTests(Base):
         self.assertRedirects(self.client.get("/panel/"), "/ingresar/?next=/panel/")
 
     def test_portada_y_marca_por_area(self):
+        from core.models import Empresa
+
+        # Aunque Empresa tenga otro logo cargado, la marca es siempre El Taller.
+        if Empresa.objects.exists():
+            Empresa.objects.update(logo="empresa/otro_logo.png")
+        else:
+            Empresa(nombre="Otro nombre", logo="empresa/otro_logo.png").save()
         r = self.client.get("/")
         self.assertContains(r, "el-taller.jpg")
+        self.assertNotContains(r, "otro_logo")
         self.client.force_login(self.piloto)
         self.assertContains(self.client.get("/portal/"), "el-prepa.jpg")
         self.client.force_login(self.adm)
