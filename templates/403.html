@@ -1,0 +1,12 @@
+{% extends "layouts/base_auth.html" %}
+{% block title %}No tenés permiso{% endblock %}
+{% block content %}
+<div class="cc-auth-wrap">
+  <div class="cc-auth-card text-center" role="region" aria-label="Error 403">
+    <p class="display-4 fw-bold mb-1">403</p>
+    <h1 class="cc-auth-title">No tenés permiso</h1>
+    <p class="cc-auth-sub">Esta página no está disponible para tu usuario.</p>
+    <a class="btn cc-auth-btn mt-2" href="/">Volver al inicio</a>
+  </div>
+</div>
+{% endblock %}

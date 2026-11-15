@@ -1,0 +1,38 @@
+<!doctype html>
+{# Layout del panel interno y del portal (mismo diseño; el menú cambia según el área y los permisos). #}
+{% load static %}
+<html lang="es" data-bs-theme="dark">
+<head>
+  {% include "partials/_head.html" %}
+  <title>{% block title %}{{ titulo|default:"Inicio" }}{% endblock %} · {{ marca.nombre }}</title>
+  <link rel="stylesheet" href="{% static 'css/components/topbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/chips.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/nav.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="cc-app cc-area-{{ menu.area }} {% block body_class %}{% endblock %}">
+  <a class="cc-skip" href="#mainContent">Saltar al contenido</a>
+
+  <div id="layout" class="cc-layout">
+    {% include "partials/nav/flyout.html" %}
+
+    <div class="cc-main">
+      <div class="cc-chrome">
+        {% include "partials/topbar.html" %}
+      </div>
+
+      <main id="mainContent" class="cc-content" tabindex="-1">
+        {% include "partials/_flash.html" %}
+        {% block content %}{% endblock %}
+      </main>
+
+      {% include "partials/nav/bottomnav.html" %}
+    </div>
+  </div>
+
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

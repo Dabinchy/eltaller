@@ -1,0 +1,20 @@
+{% load static %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="referrer" content="same-origin">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+<link rel="icon" href="{{ marca.logo }}">
+<script>
+  /* Tema antes de pintar la página (evita el parpadeo). Por defecto: oscuro. */
+  (function () {
+    var tema = "dark";
+    try { tema = localStorage.getItem("taller-tema") || "dark"; } catch (e) {}
+    document.documentElement.setAttribute("data-bs-theme", tema);
+  })();
+</script>
+<link rel="stylesheet" href="{% static 'css/app/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/bootstrap_overrides.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/flash.css' %}">
+<link rel="stylesheet" href="{% static 'css/app/comun.css' %}">

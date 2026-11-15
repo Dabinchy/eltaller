@@ -1,0 +1,68 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 860px">
+  <h1 class="h4">Hola, {{ user.first_name|default:user.username }}</h1>
+
+  {% if estado.pendientes %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h6"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i> En revisión</h2>
+        <ul class="mb-0">
+          {% for p in estado.pendientes %}
+            <li>
+              {% if p.asociacion %}
+                Tu solicitud como {{ p.get_rol_display|lower }} de <strong>{{ p.asociacion }}</strong>
+                la tienen que aprobar sus moderadores.
+              {% else %}
+                Tu acceso como cliente del taller lo tiene que aprobar el personal del taller.
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if not estado.es_piloto and not estado.es_cliente and not estado.es_moderador %}
+    {% if not estado.pendientes %}
+      <div class="alert alert-warning">
+        Tu cuenta no tiene ningún acceso activo. Si creés que es un error, contactá a tu asociación o al taller.
+      </div>
+    {% else %}
+      <p class="text-body-secondary">Mientras tanto no podés subir ni publicar nada. Te avisamos acá cuando esté aprobada.</p>
+    {% endif %}
+  {% else %}
+    <div class="row g-3">
+      {% if estado.es_piloto %}
+        <div class="col-12 col-md-6">
+          <div class="card h-100"><div class="card-body">
+            <h2 class="h6"><i class="bi bi-person-badge me-1" aria-hidden="true"></i> Piloto</h2>
+            <p class="small text-body-secondary mb-0">Tu perfil, tus autos, tus archivos y tus campeonatos.</p>
+          </div></div>
+        </div>
+      {% endif %}
+      {% if estado.es_cliente %}
+        <div class="col-12 col-md-6">
+          <div class="card h-100"><div class="card-body">
+            <h2 class="h6"><i class="bi bi-wrench me-1" aria-hidden="true"></i> Cliente del taller</h2>
+            <p class="small text-body-secondary mb-0">Tus vehículos, órdenes, presupuestos y turnos.</p>
+          </div></div>
+        </div>
+      {% endif %}
+      {% if estado.es_moderador %}
+        <div class="col-12 col-md-6">
+          <div class="card h-100"><div class="card-body">
+            <h2 class="h6"><i class="bi bi-shield-check me-1" aria-hidden="true"></i> Moderación</h2>
+            <p class="small text-body-secondary mb-0">Cuentas, contenido y resultados de tu asociación.</p>
+          </div></div>
+        </div>
+      {% endif %}
+    </div>
+    <p class="text-body-secondary small mt-4 mb-0">
+      <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+      Las secciones del portal se van sumando al menú a medida que se terminan.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

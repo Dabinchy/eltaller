@@ -1,0 +1,40 @@
+{% extends "layouts/base_auth.html" %}
+{% load static %}
+
+{% block title %}Bienvenido{% endblock %}
+
+{% block content %}
+<div class="cc-auth-wrap">
+  <div class="cc-auth-card text-center" role="region" aria-label="Bienvenida">
+    <img src="{{ marca.logo }}" alt="{{ marca.nombre }}"
+         style="height:150px;width:auto;max-width:100%;object-fit:contain;border-radius:8px">
+    {% if empresa.descripcion_web %}
+      <p class="cc-auth-sub mt-3">{{ empresa.descripcion_web|linebreaksbr }}</p>
+    {% endif %}
+
+    <div class="d-grid gap-2 mt-3">
+      {% if user.is_authenticated %}
+        <a class="btn cc-auth-btn" href="{% url 'redireccion' %}">
+          <i class="bi bi-arrow-right-circle me-1" aria-hidden="true"></i> Ir a mi espacio
+        </a>
+      {% else %}
+        <a class="btn cc-auth-btn" href="{% url 'login' %}">
+          <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Ingresar
+        </a>
+      {% endif %}
+    </div>
+
+    <hr class="my-4">
+    <p class="small text-body-secondary mb-2">Portal de pilotos y campeonatos</p>
+    <img src="{% static 'img/brand/el-prepa.jpg' %}" alt="El Prepa"
+         style="height:32px;width:auto;max-width:100%;object-fit:contain;border-radius:4px">
+
+    {% if empresa.whatsapp or empresa.telefono %}
+      <p class="small text-body-secondary mt-4 mb-0">
+        {% if empresa.whatsapp %}<i class="bi bi-whatsapp me-1" aria-hidden="true"></i>{{ empresa.whatsapp }}{% endif %}
+        {% if empresa.telefono %}<span class="ms-2"><i class="bi bi-telephone me-1" aria-hidden="true"></i>{{ empresa.telefono }}</span>{% endif %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

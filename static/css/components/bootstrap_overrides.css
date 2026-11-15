@@ -1,0 +1,187 @@
+/* static/css/components/bootstrap_overrides.css
+   CajaClara POS v2 — Bootstrap components polish (Apple business)
+   - Solo CSS: no toca seguridad ni lógica
+   - Se apoya en tokens (superficies + módulos)
+
+   Nota: agregado 2025-12-26
+   - Alerts (Bootstrap .alert) para que se vean igual de "premium" que el resto.
+*/
+
+/* Dropdown */
+.dropdown-menu{
+  border-radius: 18px;
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-rgb), .92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+  padding: 8px;
+}
+.dropdown-divider{ border-top-color: rgba(var(--cc-text-rgb), .10); }
+.dropdown-item{
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: rgba(var(--cc-text-rgb), .90);
+}
+.dropdown-item:hover, .dropdown-item:focus{
+  background: color-mix(in srgb, var(--cc-mod) 12%, rgba(var(--cc-surface-2-rgb), .42));
+  color: rgba(var(--cc-text-rgb), .96);
+}
+.dropdown-item.active, .dropdown-item:active{
+  background: color-mix(in srgb, var(--cc-mod) 16%, rgba(var(--cc-surface-2-rgb), .42));
+  color: rgba(var(--cc-text-rgb), .98);
+}
+
+/* Offcanvas */
+.offcanvas{
+  border-color: rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-bg-rgb), .94);
+  color: rgba(var(--cc-text-rgb), .92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.offcanvas-header{
+  border-bottom: 1px solid rgba(var(--cc-text-rgb), .10);
+}
+.offcanvas-title{
+  font-weight: 820;
+  letter-spacing: .2px;
+}
+.offcanvas-backdrop.show{ opacity: .62; }
+
+/* Modal */
+.modal-content{
+  border-radius: 22px;
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-rgb), .94);
+  color: rgba(var(--cc-text-rgb), .92);
+  box-shadow: 0 26px 90px rgba(0,0,0,.44);
+  overflow: hidden;
+}
+.modal-header{
+  border-bottom: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-2-rgb), .38);
+}
+.modal-footer{
+  border-top: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-2-rgb), .28);
+}
+.modal-title{
+  font-weight: 850;
+  letter-spacing: .2px;
+}
+
+/* Close button */
+.btn-close{
+  filter: invert(1) grayscale(1);
+  opacity: .78;
+}
+.btn-close:hover{ opacity: 1; }
+html[data-bs-theme="light"] .btn-close{ filter: none; }
+
+/* Toast */
+.toast{
+  border-radius: 18px;
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-rgb), .92);
+  color: rgba(var(--cc-text-rgb), .92);
+  box-shadow: 0 18px 60px rgba(0,0,0,.28);
+}
+.toast-header{
+  border-bottom: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-2-rgb), .30);
+  color: rgba(var(--cc-text-rgb), .92);
+}
+
+/* Tabs */
+.nav-tabs{
+  border-bottom: 1px solid rgba(var(--cc-text-rgb), .10);
+}
+.nav-tabs .nav-link{
+  border: 1px solid transparent;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  color: rgba(var(--cc-text-rgb), .74);
+}
+.nav-tabs .nav-link:hover{
+  color: rgba(var(--cc-text-rgb), .92);
+  background: rgba(var(--cc-surface-2-rgb), .24);
+}
+.nav-tabs .nav-link.active{
+  color: rgba(var(--cc-text-rgb), .96);
+  background: rgba(var(--cc-surface-rgb), .74);
+  border-color: rgba(var(--cc-text-rgb), .10);
+  box-shadow: inset 0 -3px 0 rgba(var(--cc-mod-rgb), .75);
+}
+
+/* Pagination */
+.pagination .page-link{
+  border-radius: 14px;
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  background: rgba(var(--cc-surface-2-rgb), .30);
+  color: rgba(var(--cc-text-rgb), .86);
+}
+.pagination .page-link:hover{
+  background: rgba(var(--cc-surface-2-rgb), .44);
+  border-color: var(--cc-mod-border);
+}
+.pagination .page-item.active .page-link{
+  background: color-mix(in srgb, var(--cc-mod) 18%, rgba(var(--cc-surface-2-rgb), .30));
+  border-color: var(--cc-mod-border);
+  color: rgba(var(--cc-text-rgb), .96);
+}
+
+/* Tooltips (simple) */
+.tooltip .tooltip-inner{
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(var(--cc-surface-rgb), .94);
+  color: rgba(var(--cc-text-rgb), .92);
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  box-shadow: 0 14px 40px rgba(0,0,0,.24);
+}
+
+/* =====================================
+   Alerts (Bootstrap)
+   - Esto arregla el "mensaje de error" cuando usás .alert (ej: #posAlert)
+   - Respeta tokens y estados semánticos
+   ===================================== */
+
+.alert{
+  border-radius: var(--cc-r-2);
+  border: 1px solid rgba(var(--cc-text-rgb), .12);
+  border-left-width: 4px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--cc-surface-rgb), .86),
+    rgba(var(--cc-surface-2-rgb), .58)
+  );
+  color: rgba(var(--cc-text-rgb), .92);
+  box-shadow: var(--cc-shadow-1);
+}
+
+.alert a{ color: rgba(var(--cc-text-rgb), .96); text-decoration: underline; }
+
+.alert-success{
+  border-color: rgba(var(--cc-success-rgb), .26);
+  border-left-color: rgba(var(--cc-success-rgb), .78);
+}
+.alert-danger{
+  border-color: rgba(var(--cc-danger-rgb), .28);
+  border-left-color: rgba(var(--cc-danger-rgb), .82);
+}
+.alert-warning{
+  border-color: rgba(var(--cc-warning-rgb), .30);
+  border-left-color: rgba(var(--cc-warning-rgb), .86);
+}
+.alert-info{
+  border-color: rgba(var(--cc-info-rgb), .26);
+  border-left-color: rgba(var(--cc-info-rgb), .80);
+}
+
+/* Botón close en alerts */
+.alert .btn-close{
+  filter: invert(1) grayscale(1);
+  opacity: .78;
+}
+.alert .btn-close:hover{ opacity: 1; }

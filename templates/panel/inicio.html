@@ -1,0 +1,48 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h4 mb-0">Hola, {{ user.first_name|default:user.username }}</h1>
+      <p class="text-body-secondary small mb-0">
+        {% if user.sucursal %}Sucursal {{ user.sucursal }}{% else %}Todas las sucursales{% endif %}
+      </p>
+    </div>
+  </div>
+
+  {% if tarjetas %}
+    <div class="row g-3">
+      {% for t in tarjetas %}
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <span class="text-body-secondary">{{ t.titulo }}</span>
+                <i class="bi {{ t.icono }} fs-4 text-body-secondary" aria-hidden="true"></i>
+              </div>
+              <p class="display-6 fw-semibold mb-1">{{ t.valor }}</p>
+              {% if t.detalle %}
+                <ul class="list-unstyled small mb-0">
+                  {% for nombre, cantidad in t.detalle %}
+                    <li class="d-flex justify-content-between"><span>{{ nombre }}</span><span>{{ cantidad }}</span></li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      Tu usuario todavía no tiene un rol asignado. Pedile a la gerencia que te asigne uno.
+    </div>
+  {% endif %}
+
+  <p class="text-body-secondary small mt-4 mb-0">
+    <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+    Las pantallas de caja, taller, ventas y stock se van sumando al menú a medida que se terminan.
+  </p>
+</div>
+{% endblock %}

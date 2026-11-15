@@ -67,6 +67,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.empresa",
+                "core.context_processors.menu",
             ],
         },
     },
@@ -93,6 +95,22 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Archivos privados (facturas, archivos internos): fuera de MEDIA_ROOT y sin URL pública.
 PRIVATE_MEDIA_ROOT = BASE_DIR / "privado"
+# En producción nginx entrega los archivos privados (X-Accel-Redirect) después de que Django
+# verifica los permisos. Ej.: "/_privado/" (location internal en nginx). Vacío = los sirve Django.
+PRIVATE_X_ACCEL_PREFIX = os.environ.get("PRIVATE_X_ACCEL_PREFIX", "")
+
+# Ingreso único: cada uno va a su lugar según su tipo de usuario.
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "redireccion"
+LOGOUT_REDIRECT_URL = "portada"
+
+# Marcas (se pueden cambiar sin tocar templates). Si Empresa tiene logo, reemplaza al del taller.
+TALLER_MARCA_NOMBRE = "El Taller"
+TALLER_MARCA_LOGO = "img/brand/el-taller.jpg"
+PORTAL_MARCA_NOMBRE = "El Prepa"
+PORTAL_MARCA_LOGO = "img/brand/el-prepa.jpg"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

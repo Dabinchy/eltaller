@@ -1,0 +1,15 @@
+<div class="cc-flyout-backdrop" data-cc-flyout-close aria-hidden="true"></div>
+<aside id="ccFlyout" class="cc-flyout" role="dialog" aria-modal="true" aria-labelledby="ccFlyoutTitle" aria-hidden="true">
+  <div class="cc-flyout-head">
+    <a class="cc-wordmark" href="{{ menu.inicio }}" aria-label="Ir al inicio">
+      {% include "partials/_marca.html" with alto=34 %}
+      <span class="visually-hidden" id="ccFlyoutTitle">{{ marca.nombre }}</span>
+    </a>
+    <button class="cc-x" type="button" data-cc-flyout-close aria-label="Cerrar menú" title="Cerrar (Esc)">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+  <nav class="cc-flyout-body" aria-label="Navegación principal">
+    {% include "partials/nav/menu_acordeon.html" with acc_id="ccNavMain" %}
+  </nav>
+</aside>

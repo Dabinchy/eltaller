@@ -1,0 +1,93 @@
+{% extends "layouts/base_auth.html" %}
+
+{% block title %}Ingresar{% endblock %}
+
+{% block content %}
+<div class="cc-auth-wrap">
+  <div class="cc-auth-card" role="region" aria-label="Ingreso">
+    {% load static %}
+    <div class="cc-auth-head">
+      <img src="{{ marca.logo }}" alt="{{ marca.nombre }}"
+           style="height:110px;width:auto;max-width:100%;object-fit:contain;border-radius:8px">
+      <h1 class="cc-auth-title mt-2">Ingresar</h1>
+      <p class="cc-auth-sub">Personal del taller, pilotos y clientes: ingresá con tu usuario.</p>
+      <div class="d-flex align-items-center justify-content-center gap-2 small text-body-secondary">
+        <span>Portal de pilotos</span>
+        <img src="{% static 'img/brand/el-prepa.jpg' %}" alt="El Prepa"
+             style="height:20px;width:auto;object-fit:contain;border-radius:3px">
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="cc-auth-alert" role="alert">{{ form.non_field_errors|striptags }}</div>
+    {% elif form.errors %}
+      <div class="cc-auth-alert" role="alert">Revisá los datos e intentá nuevamente.</div>
+    {% endif %}
+
+    {% if next and not user.is_authenticated %}
+      <p class="cc-auth-note">Tenés que ingresar para ver esa página.</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}" class="cc-auth-form" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="id_username">Usuario</label>
+        <input type="text" name="{{ form.username.html_name }}" id="id_username"
+               class="form-control{% if form.username.errors %} is-invalid{% endif %}"
+               autocomplete="username" spellcheck="false" required autofocus
+               value="{{ form.username.value|default_if_none:'' }}">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label" for="id_password">Contraseña</label>
+        <div class="cc-auth-pass">
+          <input type="password" name="{{ form.password.html_name }}" id="id_password"
+                 class="form-control{% if form.password.errors %} is-invalid{% endif %}"
+                 autocomplete="current-password" required>
+          <button class="cc-auth-eye" type="button" id="ccPassToggle" aria-label="Mostrar contraseña">
+            <i class="bi bi-eye" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="cc-auth-caps" id="ccCaps" aria-live="polite" hidden>
+          <i class="bi bi-capslock-fill me-1" aria-hidden="true"></i> Bloq Mayús activado
+        </div>
+      </div>
+
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      <div class="d-grid mt-3">
+        <button type="submit" class="btn cc-auth-btn">
+          <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Entrar
+        </button>
+      </div>
+    </form>
+
+    {% url 'portal:registro' as url_registro %}
+    {% if url_registro %}
+      <p class="cc-auth-help mt-3 text-center">
+        ¿Sos piloto o cliente y no tenés cuenta? <a href="{{ url_registro }}">Registrate</a>
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    var pass = document.getElementById("id_password");
+    var btn = document.getElementById("ccPassToggle");
+    var caps = document.getElementById("ccCaps");
+    if (!pass || !btn) return;
+    btn.addEventListener("click", function () {
+      var mostrar = pass.type === "password";
+      pass.type = mostrar ? "text" : "password";
+      btn.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+      btn.querySelector("i").className = mostrar ? "bi bi-eye-slash" : "bi bi-eye";
+    });
+    pass.addEventListener("keyup", function (e) {
+      if (caps && e.getModifierState) caps.hidden = !e.getModifierState("CapsLock");
+    });
+  })();
+</script>
+{% endblock %}

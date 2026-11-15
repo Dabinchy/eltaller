@@ -1,0 +1,21 @@
+<!doctype html>
+{# Pantallas sin menú: ingreso, registro, errores. #}
+{% load static %}
+<html lang="es" data-bs-theme="dark">
+<head>
+  {% include "partials/_head.html" %}
+  <title>{% block title %}Ingresar{% endblock %} · {{ marca.nombre }}</title>
+  <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="cc-app">
+  <a class="cc-skip" href="#mainContent">Saltar al contenido</a>
+  <main id="mainContent" class="cc-auth" tabindex="-1">
+    {% include "partials/_flash.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

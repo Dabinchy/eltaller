@@ -1,0 +1,449 @@
+/* static/css/components/nav.css
+   CajaClara POS v2 — Navigation (v2 "Apple business")
+   Flyout + Accordion + Bottomnav + More offcanvas
+   Mantener comportamiento: #layout.cc-flyout-open + [data-cc-flyout-close]
+   NO tocar JS / IDs / data-attributes
+*/
+
+/* Scroll lock cuando el menú está abierto */
+.cc-scroll-lock{ overflow: hidden; }
+
+/* -----------------------------
+   Flyout backdrop
+------------------------------ */
+.cc-flyout-backdrop{
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(1200px 900px at 10% 10%, rgba(0,0,0,.35), rgba(0,0,0,.70));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--cc-t-med) var(--cc-ease);
+  z-index: 1044;
+}
+
+/* -----------------------------
+   Flyout panel
+------------------------------ */
+.cc-flyout{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  width: min(var(--cc-flyout-w), 92vw);
+  background:
+    linear-gradient(180deg,
+      rgba(var(--cc-surface-rgb), .92),
+      rgba(var(--cc-surface-rgb), .86) 36%,
+      rgba(var(--cc-bg-rgb), .92));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid var(--cc-border);
+  transform: translateX(-105%);
+  transition: transform var(--cc-t-med) var(--cc-ease);
+  z-index: 1045;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--cc-shadow-2);
+}
+
+.cc-flyout::before{
+  content:"";
+  position:absolute;
+  inset: 0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(var(--cc-text-rgb), .08), transparent 40%),
+    linear-gradient(180deg, rgba(var(--cc-text-rgb), .06), transparent 30%);
+  opacity:.6;
+}
+
+.cc-flyout > *{ position: relative; z-index: 1; }
+
+.cc-flyout-head{
+  height: var(--cc-topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cc-border);
+  background: rgba(var(--cc-surface-rgb), .55);
+}
+
+.cc-wordmark{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: rgba(var(--cc-text-rgb), .94);
+  min-width: 0;
+}
+.cc-mark-sm img{ display:block; border-radius: 12px; }
+.cc-name{
+  font-weight: 780;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-x{
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid var(--cc-border);
+  background: rgba(var(--cc-surface-2-rgb), .46);
+  color: rgba(var(--cc-text-rgb), .92);
+  transition: transform var(--cc-t-fast) var(--cc-ease),
+              background var(--cc-t-fast) var(--cc-ease),
+              border-color var(--cc-t-fast) var(--cc-ease);
+}
+.cc-x:hover{
+  background: rgba(var(--cc-surface-2-rgb), .66);
+  border-color: var(--cc-mod-border);
+  transform: translateY(-1px);
+}
+.cc-x:active{ transform: translateY(0); }
+.cc-x:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .22);
+}
+
+.cc-flyout-body{
+  padding: 12px;
+  overflow: auto;
+}
+
+/* Open state */
+#layout.cc-flyout-open .cc-flyout{ transform: translateX(0); }
+#layout.cc-flyout-open .cc-flyout-backdrop{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* -----------------------------
+   Accordion (menú)
+------------------------------ */
+.cc-acc.accordion{
+  --bs-accordion-bg: transparent;
+  --bs-accordion-border-color: transparent;
+  --bs-accordion-btn-focus-border-color: transparent;
+  --bs-accordion-btn-focus-box-shadow: none;
+  --bs-accordion-active-color: rgba(var(--cc-text-rgb), .96);
+  --bs-accordion-active-bg: transparent;
+}
+
+/* Mapeo colores por sección */
+.cc-acc .accordion-item{ --cc-section: var(--cc-mod); --cc-section-2: var(--cc-mod-2); }
+.cc-acc .accordion-item[data-cc-mod="inicio"]{ --cc-section: var(--mod-inicio); --cc-section-2: var(--mod-inicio-2); }
+.cc-acc .accordion-item[data-cc-mod="ventas"]{ --cc-section: var(--mod-ventas); --cc-section-2: var(--mod-ventas-2); }
+.cc-acc .accordion-item[data-cc-mod="productos"]{ --cc-section: var(--mod-productos); --cc-section-2: var(--mod-productos-2); }
+.cc-acc .accordion-item[data-cc-mod="caja"]{ --cc-section: var(--mod-caja); --cc-section-2: var(--mod-caja-2); }
+.cc-acc .accordion-item[data-cc-mod="precios"]{ --cc-section: var(--mod-precios); --cc-section-2: var(--mod-precios-2); }
+.cc-acc .accordion-item[data-cc-mod="clientes"]{ --cc-section: var(--mod-clientes); --cc-section-2: var(--mod-clientes-2); }
+.cc-acc .accordion-item[data-cc-mod="compras"]{ --cc-section: var(--mod-compras); --cc-section-2: var(--mod-compras-2); }
+.cc-acc .accordion-item[data-cc-mod="analisis"]{ --cc-section: var(--mod-analisis); --cc-section-2: var(--mod-analisis-2); }
+.cc-acc .accordion-item[data-cc-mod="contabilidad"]{ --cc-section: var(--mod-contabilidad); --cc-section-2: var(--mod-contabilidad-2); }
+.cc-acc .accordion-item[data-cc-mod="sistema"]{ --cc-section: var(--mod-sistema); --cc-section-2: var(--mod-sistema-2); }
+
+.cc-acc .accordion-item{
+  border: 1px solid var(--cc-border);
+  border-radius: 18px;
+  margin-bottom: 10px;
+  background: rgba(var(--cc-surface-2-rgb), .26);
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+  overflow: hidden;
+}
+
+.cc-acc .accordion-button{
+  border-radius: 0; /* el item ya redondea */
+  padding: 12px 12px;
+  background:
+    linear-gradient(180deg,
+      rgba(var(--cc-surface-2-rgb), .60),
+      rgba(var(--cc-surface-2-rgb), .34));
+  color: rgba(var(--cc-text-rgb), .94);
+  font-weight: 780;
+  letter-spacing: .2px;
+  border: 0;
+  position: relative;
+}
+
+.cc-acc .accordion-button::before{
+  content:"";
+  position:absolute;
+  inset: 0;
+  background:
+    radial-gradient(800px 160px at 10% 0%, color-mix(in srgb, var(--cc-section) 16%, transparent), transparent 55%);
+  opacity: .85;
+  pointer-events:none;
+}
+
+.cc-acc .accordion-button > *{ position: relative; z-index: 1; }
+
+.cc-acc .accordion-button:not(.collapsed){
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cc-section) 14%, rgba(var(--cc-surface-2-rgb), .60)),
+      rgba(var(--cc-surface-2-rgb), .28));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc-section) 30%, transparent);
+}
+
+.cc-acc .accordion-body{
+  padding: 10px;
+  background: rgba(var(--cc-surface-rgb), .20);
+  border-top: 1px solid color-mix(in srgb, var(--cc-section) 18%, var(--cc-border));
+}
+
+/* -----------------------------
+   Links internos
+------------------------------ */
+.cc-link{
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 10px;
+  border-radius: 14px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  color: rgba(var(--cc-text-rgb), .92);
+  transition: transform var(--cc-t-fast) var(--cc-ease),
+              background var(--cc-t-fast) var(--cc-ease),
+              border-color var(--cc-t-fast) var(--cc-ease),
+              box-shadow var(--cc-t-fast) var(--cc-ease);
+}
+
+.cc-link::before{
+  content:"";
+  position:absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 999px;
+  background: transparent;
+  opacity: 0;
+  transition: opacity var(--cc-t-fast) var(--cc-ease), background var(--cc-t-fast) var(--cc-ease);
+}
+
+.cc-link-ico{
+  width: 32px;
+  height: 32px;
+  border-radius: 14px;
+  display: inline-grid;
+  place-items: center;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cc-section) 14%, rgba(var(--cc-surface-2-rgb), .52)),
+      rgba(var(--cc-surface-2-rgb), .30));
+  border: 1px solid color-mix(in srgb, var(--cc-section) 30%, var(--cc-border));
+  color: color-mix(in srgb, var(--cc-section) 88%, rgba(var(--cc-text-rgb), .92));
+  box-shadow: 0 10px 18px rgba(0,0,0,.12);
+  flex: 0 0 auto;
+}
+
+.cc-link-text{ min-width: 0; display: grid; gap: 2px; }
+.cc-link-title{ font-weight: 720; font-size: 13px; line-height: 1.1; }
+.cc-link-desc{ font-size: 12px; color: rgba(var(--cc-text-rgb), .68); line-height: 1.1; }
+
+.cc-link:hover{
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--cc-section) 14%, rgba(var(--cc-surface-2-rgb), .22));
+  border-color: color-mix(in srgb, var(--cc-section) 34%, var(--cc-border));
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+}
+.cc-link:hover::before{
+  opacity: .8;
+  background: color-mix(in srgb, var(--cc-section) 86%, transparent);
+}
+
+.cc-link:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .22);
+}
+
+/* Activo (módulo actual) */
+.cc-link.is-active{
+  background: color-mix(in srgb, var(--cc-mod) 16%, rgba(var(--cc-surface-2-rgb), .20));
+  border-color: var(--cc-mod-border);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cc-mod) 26%, transparent), 0 14px 30px rgba(0,0,0,.14);
+}
+.cc-link.is-active::before{
+  opacity: 1;
+  background: rgb(var(--cc-mod-rgb));
+}
+.cc-link.is-active .cc-link-ico{
+  border-color: color-mix(in srgb, var(--cc-mod) 38%, var(--cc-border));
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cc-mod) 18%, rgba(var(--cc-surface-2-rgb), .52)),
+      rgba(var(--cc-surface-2-rgb), .28));
+  color: color-mix(in srgb, var(--cc-mod) 92%, rgba(var(--cc-text-rgb), .92));
+}
+
+/* -----------------------------
+   Bottomnav (mobile)
+------------------------------ */
+.cc-bottomnav{
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 0;
+  z-index: 1035;
+  padding-bottom: env(safe-area-inset-bottom);
+  background:
+    linear-gradient(180deg,
+      rgba(var(--cc-bg-rgb), .74),
+      rgba(var(--cc-bg-rgb), .92));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--cc-border);
+  box-shadow: 0 -18px 46px rgba(0,0,0,.28);
+}
+
+.cc-bottomnav-inner{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 8px;
+  gap: 6px;
+}
+
+.cc-bn-item{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(var(--cc-text-rgb), .72);
+  text-decoration: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  min-width: 62px;
+  position: relative;
+}
+.cc-bn-item i{ font-size: 18px; }
+
+.cc-bn-item:hover{
+  background: rgba(var(--cc-surface-2-rgb), .34);
+}
+
+.cc-bn-item.is-active{
+  color: rgb(var(--cc-mod-rgb));
+  background: color-mix(in srgb, var(--cc-mod) 12%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cc-mod) 34%, transparent);
+}
+.cc-bn-item.is-active::after{
+  content:"";
+  position:absolute;
+  bottom: 6px;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(var(--cc-mod-rgb));
+  opacity: .9;
+}
+
+/* -----------------------------
+   More offcanvas
+------------------------------ */
+.cc-more.offcanvas{
+  background: rgba(var(--cc-bg-rgb), .94);
+  color: rgba(var(--cc-text-rgb), .92);
+  border-top: 1px solid var(--cc-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.cc-more-head{
+  border-bottom: 1px solid var(--cc-border);
+  padding: 12px 12px;
+  background: rgba(var(--cc-surface-rgb), .62);
+}
+.cc-more-body{ padding: 12px; }
+.cc-more-group{
+  border: 1px solid var(--cc-border);
+  border-radius: 18px;
+  background: rgba(var(--cc-surface-rgb), .58);
+  padding: 12px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .cc-flyout-backdrop,
+  .cc-flyout,
+  .cc-link,
+  .cc-x{
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   Team tint (sutil) para Flyout + Accordion
+   Activo SOLO cuando: html[data-cc-clock="team"] o "argentina"
+   En basic NO cambia nada.
+========================================================= */
+
+/* Paleta “actual” para nav según modo */
+html[data-cc-clock="team"]{
+  --cc-navteam-1: var(--cc-team-on);
+  --cc-navteam-2: var(--cc-team-accent);
+}
+html[data-cc-clock="argentina"]{
+  --cc-navteam-1: rgb(var(--cc-brand-rgb));
+  --cc-navteam-2: rgb(var(--cc-premium-rgb));
+}
+
+/* ---------- Flyout panel: wash suave ---------- */
+html[data-cc-clock="team"] .cc-flyout,
+html[data-cc-clock="argentina"] .cc-flyout{
+  border-right-color: color-mix(in srgb, var(--cc-navteam-1) 18%, var(--cc-border));
+  box-shadow: var(--cc-shadow-2),
+              inset -1px 0 0 color-mix(in srgb, var(--cc-navteam-2) 18%, transparent);
+}
+
+/* Overlay de color (muy sutil) sin tocar el contenido */
+html[data-cc-clock="team"] .cc-flyout::after,
+html[data-cc-clock="argentina"] .cc-flyout::after{
+  content:"";
+  position:absolute;
+  inset: 0;
+  pointer-events:none;
+  z-index: 0; /* queda debajo del contenido (los hijos ya tienen z-index:1) */
+
+  background:
+    radial-gradient(900px 420px at 10% 0%,
+      color-mix(in srgb, var(--cc-navteam-1) 12%, transparent),
+      transparent 62%),
+    radial-gradient(900px 420px at 92% 100%,
+      color-mix(in srgb, var(--cc-navteam-2) 10%, transparent),
+      transparent 64%);
+  opacity: .85;
+}
+
+/* Head del flyout: toque mínimo */
+html[data-cc-clock="team"] .cc-flyout-head,
+html[data-cc-clock="argentina"] .cc-flyout-head{
+  border-bottom-color: color-mix(in srgb, var(--cc-navteam-1) 16%, var(--cc-border));
+  background:
+    radial-gradient(700px 160px at 12% 50%,
+      color-mix(in srgb, var(--cc-navteam-1) 10%, transparent),
+      transparent 60%),
+    rgba(var(--cc-surface-rgb), .55);
+}
+
+/* ---------- Accordion: borde/fondo apenas teñidos (sin tocar colores de sección) ---------- */
+html[data-cc-clock="team"] .cc-acc .accordion-item,
+html[data-cc-clock="argentina"] .cc-acc .accordion-item{
+  border-color: color-mix(in srgb, var(--cc-navteam-1) 12%, var(--cc-border));
+  background:
+    radial-gradient(700px 160px at 12% 0%,
+      color-mix(in srgb, var(--cc-navteam-1) 7%, transparent),
+      transparent 58%),
+    rgba(var(--cc-surface-2-rgb), .26);
+}

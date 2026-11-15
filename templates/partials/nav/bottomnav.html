@@ -1,0 +1,32 @@
+{# Celular: barra inferior con los accesos principales + "Más". #}
+<nav class="cc-bottomnav d-md-none" aria-label="Accesos rápidos">
+  <div class="cc-bottomnav-inner">
+    <a class="cc-bn-item" href="{{ menu.inicio }}" aria-label="Inicio">
+      <i class="bi bi-house" aria-hidden="true"></i><span>Inicio</span>
+    </a>
+    {% for item in menu.rapidos %}
+      <a class="cc-bn-item" href="{{ item.url }}" aria-label="{{ item.titulo }}">
+        <i class="bi {{ item.icono }}" aria-hidden="true"></i><span>{{ item.corto|default:item.titulo }}</span>
+      </a>
+    {% endfor %}
+    <button class="cc-bn-item" type="button" data-bs-toggle="offcanvas" data-bs-target="#ccMore"
+            aria-controls="ccMore" aria-label="Más">
+      <i class="bi bi-three-dots" aria-hidden="true"></i><span>Más</span>
+    </button>
+  </div>
+</nav>
+
+<div class="offcanvas offcanvas-end cc-more" tabindex="-1" id="ccMore" aria-labelledby="ccMoreLabel">
+  <div class="offcanvas-header cc-more-head">
+    <div class="d-flex align-items-center gap-2">
+      {% include "partials/_marca.html" with alto=22 ancho=120 %}
+      <h5 class="offcanvas-title mb-0" id="ccMoreLabel">Más</h5>
+    </div>
+    <button type="button" class="cc-x" data-bs-dismiss="offcanvas" aria-label="Cerrar">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="offcanvas-body cc-more-body">
+    {% include "partials/nav/menu_acordeon.html" with acc_id="ccNavMore" %}
+  </div>
+</div>

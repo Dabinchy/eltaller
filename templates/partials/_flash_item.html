@@ -1,0 +1,12 @@
+<div class="cc-flash-item cc-flash-{{ bs_tag }}" role="alert" aria-atomic="true">
+  <div class="cc-flash-icon" aria-hidden="true">
+    {% if bs_tag == "success" %}<i class="bi bi-check-circle"></i>
+    {% elif bs_tag == "danger" %}<i class="bi bi-exclamation-triangle"></i>
+    {% elif bs_tag == "warning" %}<i class="bi bi-exclamation-circle"></i>
+    {% else %}<i class="bi bi-info-circle"></i>{% endif %}
+  </div>
+  <div class="cc-flash-body">{{ message }}</div>
+  <button type="button" class="cc-flash-close" aria-label="Cerrar" data-cc-flash-close>
+    <i class="bi bi-x"></i>
+  </button>
+</div>

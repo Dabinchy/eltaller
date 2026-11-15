@@ -1,0 +1,368 @@
+/* static/css/app/tokens.css
+   CajaClara POS v2 — Design Tokens (RESET v3)
+   Identidad AR: celeste + blanco + dorado (“sol”)
+   Objetivo: módulos MUY diferenciados, UI moderna tipo “Apple business”
+   Nota: NO toca CSS de tarjetas. Mantiene variables que usan venta_card.css y product-card.css.
+*/
+
+:root,
+html[data-bs-theme="dark"]{
+  /* -----------------------------
+     Tipografía
+  ------------------------------ */
+  --cc-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --cc-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --cc-text-size: 14px;
+  --cc-line: 1.35;
+
+  /* -----------------------------
+     Espaciado (mínimo necesario)
+  ------------------------------ */
+  --cc-s-1: 6px;
+  --cc-s-2: 8px;
+
+  /* -----------------------------
+     Radius / Shadow
+  ------------------------------ */
+  --cc-r-1: 10px;
+  --cc-r-2: 14px;
+  --cc-r-3: 18px;
+  --cc-radius: var(--cc-r-2);
+
+  --cc-shadow-1: 0 10px 28px rgba(0,0,0,.30);
+  --cc-shadow-2: 0 18px 60px rgba(0,0,0,.42);
+
+  --cc-shadow-soft: var(--cc-shadow-1);
+  --cc-shadow-soft-2: var(--cc-shadow-2);
+  /* -----------------------------
+     Motion
+  ------------------------------ */
+  --cc-t-fast: 120ms;
+  --cc-t-med: 180ms;
+  --cc-ease: cubic-bezier(.2,.8,.2,1);
+
+  /* -----------------------------
+     Brand (Argentina)
+     - celeste (marca / inicio)
+     - dorado (premium / “sol”)
+  ------------------------------ */
+  --cc-brand: #74ACDF;
+  --cc-brand-2: #2C83D3;
+
+
+  /* Logo reference (NO reemplaza Brand AR; es para fondos sutiles) */
+  --cc-logo-brand: #0297D7;
+  --cc-logo-brand-2: #027CB1;
+  --cc-logo-premium: #FBC437;
+  --cc-logo-premium-2: #D9A62E;
+  --cc-logo-brand-rgb: 2, 151, 215;
+  --cc-logo-brand-2-rgb: 2, 124, 177;
+  --cc-logo-premium-rgb: 251, 196, 55;
+  --cc-logo-premium-2-rgb: 217, 166, 46;
+  --cc-premium: #D4A017;
+  --cc-premium-2: #B88913;
+
+
+  /* Aliases legacy/compat */
+  --cc-gold: var(--cc-premium);
+  --cc-gold-2: var(--cc-premium-2);
+  --cc-gold-rgb: var(--cc-premium-rgb);
+  --cc-gold-2-rgb: var(--cc-premium-2-rgb);
+  /* Aliases legacy (por compatibilidad si algún CSS viejo los usa) */
+  --cc-sun: var(--cc-premium);
+  --cc-sun-2: var(--cc-premium-2);
+
+  /* RGB helpers */
+  --cc-brand-rgb: 116, 172, 223;
+  --cc-brand-2-rgb: 44, 131, 211;
+
+  --cc-premium-rgb: 212, 160, 23;
+  --cc-premium-2-rgb: 184, 137, 19;
+
+  --cc-sun-rgb: var(--cc-premium-rgb);
+  --cc-sun-2-rgb: var(--cc-premium-2-rgb);
+
+  /* -----------------------------
+     Superficies (Dark — limpio, premium)
+     Neutro azulado (para que los módulos destaquen)
+  ------------------------------ */
+  --cc-bg: #070B14;
+  --cc-surface: #0B1220;
+  --cc-surface-2: #0F1A2B;
+  --cc-surface-3: #16233A;
+  --cc-elev: #111A2D;
+
+  --cc-bg-rgb: 7, 11, 20;
+  --cc-surface-rgb: 11, 18, 32;
+  --cc-surface-2-rgb: 15, 26, 43;
+  --cc-surface-3-rgb: 22, 35, 58;
+
+  --cc-text: #EAF2FF;
+  --cc-text-muted: #B9C7DC;
+  --cc-text-dim: #94A3B8;
+
+  --cc-text-rgb: 234, 242, 255;
+
+  --cc-border: #22304A;
+  --cc-border-2: #2C3D5C;
+  --cc-border-w: 1px;
+
+  --cc-text-soft: rgba(var(--cc-text-rgb), .78);
+
+  /* -----------------------------
+     Estados semánticos (NO son módulos)
+  ------------------------------ */
+  --cc-success: #22C55E;
+  --cc-warn: #F59E0B;
+  --cc-danger: #EF4444;
+  --cc-info: #38BDF8;
+
+  /* aliases (compat) */
+  --cc-warning: var(--cc-warn);
+
+  --cc-success-rgb: 34, 197, 94;
+  --cc-warning-rgb: 245, 158, 11;
+  --cc-danger-rgb: 239, 68, 68;
+  --cc-info-rgb: 56, 189, 248;
+
+  /* para charts/JS (si se usan) */
+  --state-success: var(--cc-success);
+  --state-warning: var(--cc-warn);
+  --state-error: var(--cc-danger);
+  --state-info: var(--cc-info);
+
+  --state-success-rgb: var(--cc-success-rgb);
+  --state-warning-rgb: var(--cc-warning-rgb);
+  --state-error-rgb: var(--cc-danger-rgb);
+  --state-info-rgb: var(--cc-info-rgb);
+
+  /* -----------------------------
+     Módulos (más separados en rueda de color)
+     Nota: Ventas = verde fuerte (prioridad UX)
+  ------------------------------ */
+  --mod-inicio: var(--cc-brand);
+  --mod-inicio-2: var(--cc-brand-2);
+  --mod-inicio-rgb: var(--cc-brand-rgb);
+  --mod-inicio-2-rgb: var(--cc-brand-2-rgb);
+
+  --mod-ventas: #12B76A;
+  --mod-ventas-2: #0E9F60;
+  --mod-ventas-rgb: 18, 183, 106;
+  --mod-ventas-2-rgb: 14, 159, 96;
+
+  --mod-productos: #2563EB;
+  --mod-productos-2: #1D4ED8;
+  --mod-productos-rgb: 37, 99, 235;
+  --mod-productos-2-rgb: 29, 78, 216;
+
+  --mod-caja: #F59E0B;
+  --mod-caja-2: #D97706;
+  --mod-caja-rgb: 245, 158, 11;
+  --mod-caja-2-rgb: 217, 119, 6;
+
+  --mod-precios: #C026D3;
+  --mod-precios-2: #A21CAF;
+  --mod-precios-rgb: 192, 38, 211;
+  --mod-precios-2-rgb: 162, 28, 175;
+
+  --mod-clientes: #14B8A6;
+  --mod-clientes-2: #0F766E;
+  --mod-clientes-rgb: 20, 184, 166;
+  --mod-clientes-2-rgb: 15, 118, 110;
+
+  --mod-compras: #F97316;
+  --mod-compras-2: #EA580C;
+  --mod-compras-rgb: 249, 115, 22;
+  --mod-compras-2-rgb: 234, 88, 12;
+
+  --mod-analisis: #4F46E5;
+  --mod-analisis-2: #4338CA;
+  --mod-analisis-rgb: 79, 70, 229;
+  --mod-analisis-2-rgb: 67, 56, 202;
+
+  /* Contabilidad: cyan profundo (serio pero visible en dark) */
+  --mod-contabilidad: #06B6D4;
+  --mod-contabilidad-2: #0891B2;
+  --mod-contabilidad-rgb: 6, 182, 212;
+  --mod-contabilidad-2-rgb: 8, 145, 178;
+
+  --mod-sistema: #64748B;
+  --mod-sistema-2: #475569;
+  --mod-sistema-rgb: 100, 116, 139;
+  --mod-sistema-2-rgb: 71, 85, 105;
+
+  /* Soft por módulo (útil para fondos y pills) */
+  --mod-ventas-soft: color-mix(in srgb, var(--mod-ventas) 16%, transparent);
+  --mod-productos-soft: color-mix(in srgb, var(--mod-productos) 16%, transparent);
+  --mod-caja-soft: color-mix(in srgb, var(--mod-caja) 16%, transparent);
+  --mod-precios-soft: color-mix(in srgb, var(--mod-precios) 16%, transparent);
+  --mod-clientes-soft: color-mix(in srgb, var(--mod-clientes) 16%, transparent);
+  --mod-compras-soft: color-mix(in srgb, var(--mod-compras) 16%, transparent);
+  --mod-analisis-soft: color-mix(in srgb, var(--mod-analisis) 16%, transparent);
+  --mod-contabilidad-soft: color-mix(in srgb, var(--mod-contabilidad) 16%, transparent);
+  --mod-sistema-soft: color-mix(in srgb, var(--mod-sistema) 16%, transparent);
+
+  /* -----------------------------
+     Módulo actual (por defecto: inicio)
+  ------------------------------ */
+  --cc-mod: var(--mod-inicio);
+  --cc-mod-2: var(--mod-inicio-2);
+  --cc-mod-rgb: var(--mod-inicio-rgb);
+
+  /* Derivados del módulo actual (fuerza mayor para que el menú NO se lave) */
+  --cc-mod-soft: color-mix(in srgb, var(--cc-mod) 22%, transparent);
+  --cc-mod-border: color-mix(in srgb, var(--cc-mod) 44%, var(--cc-border));
+  --cc-mod-ink: color-mix(in srgb, var(--cc-mod) 88%, white);
+
+  /* Glow (usado por cards y focus visibles) */
+  --cc-glow-mod: 0 0 0 4px rgba(var(--cc-mod-rgb), .22), 0 18px 48px rgba(0,0,0,.26);
+
+  /* -----------------------------
+     Layout sizes
+  ------------------------------ */
+  --cc-flyout-w: 332px;
+  --cc-topbar-h: 52px;
+  --cc-collabbar-h: 40px;
+  --cc-bottomnav-h: 64px;
+
+  /* -----------------------------
+     Bootstrap bridge (mínimo)
+  ------------------------------ */
+  --bs-body-font-family: var(--cc-font-sans);
+  --bs-body-font-size: var(--cc-text-size);
+  --bs-body-line-height: var(--cc-line);
+
+  --bs-body-bg: var(--cc-bg);
+  --bs-body-color: var(--cc-text);
+  --bs-border-color: var(--cc-border);
+  --bs-border-radius: var(--cc-r-2);
+
+  --bs-primary: var(--cc-mod);
+  --bs-primary-rgb: var(--cc-mod-rgb);
+
+  --bs-link-color: var(--cc-mod);
+  --bs-link-hover-color: color-mix(in srgb, var(--cc-mod) 86%, white);
+
+  --bs-success: var(--cc-success);
+  --bs-warning: var(--cc-warn);
+  --bs-danger: var(--cc-danger);
+  --bs-info: var(--cc-info);
+
+  --bs-focus-ring-color: rgba(var(--cc-mod-rgb), .28);
+}
+
+html[data-bs-theme="light"]{
+  /* Superficies (Light) */
+  --cc-bg: #F7FAFF;
+  --cc-surface: #FFFFFF;
+  --cc-surface-2: #F1F6FF;
+  --cc-surface-3: #E7F0FF;
+  --cc-elev: #FFFFFF;
+
+  --cc-bg-rgb: 247, 250, 255;
+  --cc-surface-rgb: 255, 255, 255;
+  --cc-surface-2-rgb: 241, 246, 255;
+  --cc-surface-3-rgb: 231, 240, 255;
+
+  --cc-text: #0B1220;
+  --cc-text-muted: #334155;
+  --cc-text-dim: #475569;
+  --cc-text-rgb: 11, 18, 32;
+
+  --cc-border: #D6E2F2;
+  --cc-border-2: #C7D7EE;
+
+  --cc-shadow-1: 0 10px 26px rgba(11,18,32,.10);
+  --cc-shadow-2: 0 18px 52px rgba(11,18,32,.14);
+
+  --cc-shadow-soft: var(--cc-shadow-1);
+  --cc-shadow-soft-2: var(--cc-shadow-2);
+  /* En light, soft un poco más bajo para que no “ensucie” */
+  --cc-mod-soft: color-mix(in srgb, var(--cc-mod) 14%, transparent);
+
+  --cc-glow-mod: 0 0 0 4px rgba(var(--cc-mod-rgb), .20), 0 14px 36px rgba(11,18,32,.14);
+
+  --bs-body-bg: var(--cc-bg);
+  --bs-body-color: var(--cc-text);
+  --bs-border-color: var(--cc-border);
+
+  --bs-focus-ring-color: rgba(var(--cc-mod-rgb), .22);
+}
+
+/* -----------------------------
+   Aplicación de módulo actual
+   (soporta body[data-module="x"] y body.mod-x)
+------------------------------ */
+:where(body[data-module="inicio"], body.mod-inicio){
+  --cc-mod: var(--mod-inicio);
+  --cc-mod-2: var(--mod-inicio-2);
+  --cc-mod-rgb: var(--mod-inicio-rgb);
+}
+
+:where(body[data-module="ventas"], body.mod-ventas){
+  --cc-mod: var(--mod-ventas);
+  --cc-mod-2: var(--mod-ventas-2);
+  --cc-mod-rgb: var(--mod-ventas-rgb);
+}
+
+:where(body[data-module="productos"], body.mod-productos){
+  --cc-mod: var(--mod-productos);
+  --cc-mod-2: var(--mod-productos-2);
+  --cc-mod-rgb: var(--mod-productos-rgb);
+}
+
+:where(body[data-module="caja"], body.mod-caja){
+  --cc-mod: var(--mod-caja);
+  --cc-mod-2: var(--mod-caja-2);
+  --cc-mod-rgb: var(--mod-caja-rgb);
+}
+
+:where(body[data-module="precios"], body.mod-precios){
+  --cc-mod: var(--mod-precios);
+  --cc-mod-2: var(--mod-precios-2);
+  --cc-mod-rgb: var(--mod-precios-rgb);
+}
+
+:where(body[data-module="clientes"], body.mod-clientes){
+  --cc-mod: var(--mod-clientes);
+  --cc-mod-2: var(--mod-clientes-2);
+  --cc-mod-rgb: var(--mod-clientes-rgb);
+}
+
+:where(body[data-module="compras"], body.mod-compras){
+  --cc-mod: var(--mod-compras);
+  --cc-mod-2: var(--mod-compras-2);
+  --cc-mod-rgb: var(--mod-compras-rgb);
+}
+
+:where(body[data-module="analisis"], body.mod-analisis){
+  --cc-mod: var(--mod-analisis);
+  --cc-mod-2: var(--mod-analisis-2);
+  --cc-mod-rgb: var(--mod-analisis-rgb);
+}
+
+:where(body[data-module="contabilidad"], body.mod-contabilidad){
+  --cc-mod: var(--mod-contabilidad);
+  --cc-mod-2: var(--mod-contabilidad-2);
+  --cc-mod-rgb: var(--mod-contabilidad-rgb);
+}
+
+:where(body[data-module="sistema"], body.mod-sistema){
+  --cc-mod: var(--mod-sistema);
+  --cc-mod-2: var(--mod-sistema-2);
+  --cc-mod-rgb: var(--mod-sistema-rgb);
+}
+
+/* Recalcular derivados con módulo ya aplicado */
+body{
+  --cc-mod-soft: color-mix(in srgb, var(--cc-mod) 22%, transparent);
+  --cc-mod-border: color-mix(in srgb, var(--cc-mod) 44%, var(--cc-border));
+  --cc-mod-ink: color-mix(in srgb, var(--cc-mod) 88%, white);
+  --cc-glow-mod: 0 0 0 4px rgba(var(--cc-mod-rgb), .22), 0 18px 48px rgba(0,0,0,.26);
+}
+
+html[data-bs-theme="light"] body{
+  --cc-mod-soft: color-mix(in srgb, var(--cc-mod) 12%, transparent);
+  --cc-glow-mod: 0 0 0 4px rgba(var(--cc-mod-rgb), .20), 0 14px 36px rgba(11,18,32,.14);
+}

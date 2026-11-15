@@ -1,0 +1,162 @@
+/* static/css/components/flash.css
+   Flash messages (reset CSS, 2025-12)
+   Hook JS: [data-cc-flash-close]
+
+   Objetivo v2:
+   - Mucho más legible en dark (se ve "estado" al instante)
+   - Respeta tokens (semánticos: success/warn/danger/info)
+   - No depende de Bootstrap alerts
+*/
+
+.cc-flash{
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.cc-flash-item{
+  display: grid;
+  grid-template-columns: 38px 1fr 36px;
+  align-items: start;
+  gap: 10px;
+
+  padding: 10px 10px;
+  border-radius: var(--cc-r-2);
+
+  /* Base surface */
+  border: 1px solid var(--cc-border);
+  border-left-width: 4px;
+  border-left-color: rgba(var(--cc-text-rgb), .14);
+
+  background: linear-gradient(
+    180deg,
+    rgba(var(--cc-surface-rgb), .84),
+    rgba(var(--cc-surface-2-rgb), .58)
+  );
+
+  box-shadow: var(--cc-shadow-1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Si el usuario navega con teclado: anillo visible */
+.cc-flash-item:focus-within{
+  outline: none;
+  box-shadow:
+    0 0 0 4px rgba(var(--cc-mod-rgb), .16),
+    var(--cc-shadow-1);
+}
+
+.cc-flash-icon{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--cc-surface-2-rgb), .75);
+  border: 1px solid rgba(var(--cc-text-rgb), .10);
+  color: var(--cc-text);
+}
+
+.cc-flash-body{
+  padding-top: 2px;
+  color: rgba(var(--cc-text-rgb), .94);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cc-flash-close{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--cc-text-rgb), .12);
+  background: transparent;
+  color: rgba(var(--cc-text-rgb), .70);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cc-flash-close:hover{
+  background: color-mix(in srgb, rgba(var(--cc-surface-2-rgb), .82) 70%, transparent);
+  color: rgba(var(--cc-text-rgb), .96);
+}
+.cc-flash-close:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .18);
+}
+
+/* =================================
+   Variants (semantic, not module)
+   - Más contraste: borde izquierdo + fondo levemente teñido
+   ================================= */
+
+.cc-flash-success{
+  border-color: rgba(var(--cc-success-rgb), .26);
+  border-left-color: rgba(var(--cc-success-rgb), .78);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, rgb(var(--cc-success-rgb)) 10%, rgba(var(--cc-surface-rgb), .86)),
+      rgba(var(--cc-surface-2-rgb), .56)
+    );
+}
+.cc-flash-success .cc-flash-icon{
+  background: rgba(var(--cc-success-rgb), .14);
+  border-color: rgba(var(--cc-success-rgb), .22);
+  color: var(--cc-success);
+}
+
+.cc-flash-danger{
+  border-color: rgba(var(--cc-danger-rgb), .28);
+  border-left-color: rgba(var(--cc-danger-rgb), .82);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, rgb(var(--cc-danger-rgb)) 12%, rgba(var(--cc-surface-rgb), .86)),
+      rgba(var(--cc-surface-2-rgb), .56)
+    );
+}
+.cc-flash-danger .cc-flash-icon{
+  background: rgba(var(--cc-danger-rgb), .14);
+  border-color: rgba(var(--cc-danger-rgb), .22);
+  color: var(--cc-danger);
+}
+
+.cc-flash-warning{
+  border-color: rgba(var(--cc-warning-rgb), .30);
+  border-left-color: rgba(var(--cc-warning-rgb), .86);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, rgb(var(--cc-warning-rgb)) 12%, rgba(var(--cc-surface-rgb), .86)),
+      rgba(var(--cc-surface-2-rgb), .56)
+    );
+}
+.cc-flash-warning .cc-flash-icon{
+  background: rgba(var(--cc-warning-rgb), .16);
+  border-color: rgba(var(--cc-warning-rgb), .24);
+  color: var(--cc-warning);
+}
+
+.cc-flash-info{
+  border-color: rgba(var(--cc-info-rgb), .26);
+  border-left-color: rgba(var(--cc-info-rgb), .80);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, rgb(var(--cc-info-rgb)) 10%, rgba(var(--cc-surface-rgb), .86)),
+      rgba(var(--cc-surface-2-rgb), .56)
+    );
+}
+.cc-flash-info .cc-flash-icon{
+  background: rgba(var(--cc-info-rgb), .14);
+  border-color: rgba(var(--cc-info-rgb), .22);
+  color: var(--cc-info);
+}
+
+@media (max-width: 480px){
+  .cc-flash-item{ grid-template-columns: 34px 1fr 34px; }
+  .cc-flash-icon{ width: 34px; height: 34px; border-radius: 12px; }
+  .cc-flash-close{ width: 34px; height: 34px; border-radius: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .cc-flash-item{ transition: none !important; }
+}

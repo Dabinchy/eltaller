@@ -1,0 +1,30 @@
+{# Menú por secciones. Lo arma core/menu.py según los permisos de cada usuario. #}
+<div class="accordion cc-acc" id="{{ acc_id }}">
+  {% for seccion in menu.secciones %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="{{ acc_id }}H{{ forloop.counter }}">
+        <button class="accordion-button{% if not forloop.first %} collapsed{% endif %}" type="button"
+                data-bs-toggle="collapse" data-bs-target="#{{ acc_id }}C{{ forloop.counter }}"
+                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-controls="{{ acc_id }}C{{ forloop.counter }}">
+          <i class="bi {{ seccion.icono }} me-2" aria-hidden="true"></i>
+          <span>{{ seccion.titulo }}</span>
+        </button>
+      </h2>
+      <div id="{{ acc_id }}C{{ forloop.counter }}" class="accordion-collapse collapse{% if forloop.first %} show{% endif %}"
+           aria-labelledby="{{ acc_id }}H{{ forloop.counter }}" data-bs-parent="#{{ acc_id }}">
+        <div class="accordion-body">
+          {% for item in seccion.items %}
+            <a class="cc-link" href="{{ item.url }}">
+              <span class="cc-link-ico"><i class="bi {{ item.icono }}" aria-hidden="true"></i></span>
+              <span class="cc-link-text">
+                <span class="cc-link-title">{{ item.titulo }}</span>
+                {% if item.desc %}<span class="cc-link-desc">{{ item.desc }}</span>{% endif %}
+              </span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>

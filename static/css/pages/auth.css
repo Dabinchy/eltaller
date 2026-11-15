@@ -1,0 +1,88 @@
+/* static/css/pages/auth.css
+   Auth pages (reset CSS, 2025-12)
+*/
+
+.cc-auth-wrap{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 22px 14px;
+  background:
+    radial-gradient(900px 400px at 15% 10%, rgba(var(--cc-brand-rgb), .18), transparent 60%),
+    radial-gradient(900px 400px at 85% 30%, rgba(var(--cc-premium-rgb), .10), transparent 55%),
+    var(--cc-bg);
+}
+
+.cc-auth-card{
+  width: min(460px, 100%);
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  border-radius: calc(var(--cc-r-2) + 2px);
+  box-shadow: var(--cc-shadow-2);
+  padding: 18px 16px 16px;
+}
+
+.cc-auth-head{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.cc-auth-mark{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--cc-brand) 35%, var(--cc-border));
+  background: color-mix(in srgb, var(--cc-brand) 10%, var(--cc-surface-2));
+  padding: 8px;
+}
+
+.cc-auth-title{
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.cc-auth-sub{
+  margin: 0;
+  color: var(--cc-text-muted);
+  font-size: 13px;
+}
+
+.cc-auth-help{
+  color: var(--cc-text-muted);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+/* Inputs */
+.cc-auth-card .form-label{ font-weight: 800; }
+.cc-auth-card .input-group-text{
+  background: var(--cc-surface-2);
+  border-color: var(--cc-border);
+  color: var(--cc-text-muted);
+}
+.cc-auth-card .form-control{
+  border-color: var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+}
+.cc-auth-card .form-control:focus{
+  border-color: rgba(var(--cc-mod-rgb), .55);
+  box-shadow: 0 0 0 .2rem rgba(var(--cc-mod-rgb), .18);
+}
+
+/* Button */
+.cc-auth-btn{
+  background: var(--cc-brand);
+  border-color: color-mix(in srgb, var(--cc-brand) 70%, black);
+  color: #fff;
+  font-weight: 900;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+.cc-auth-btn:hover{ background: var(--cc-brand-2); border-color: color-mix(in srgb, var(--cc-brand-2) 70%, black); }

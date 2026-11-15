@@ -1,0 +1,12 @@
+{% extends "layouts/base_auth.html" %}
+{% block title %}Algo salió mal{% endblock %}
+{% block content %}
+<div class="cc-auth-wrap">
+  <div class="cc-auth-card text-center" role="region" aria-label="Error 500">
+    <p class="display-4 fw-bold mb-1">500</p>
+    <h1 class="cc-auth-title">Algo salió mal</h1>
+    <p class="cc-auth-sub">Tuvimos un problema al procesar tu pedido. Probá de nuevo en unos minutos.</p>
+    <a class="btn cc-auth-btn mt-2" href="/">Volver al inicio</a>
+  </div>
+</div>
+{% endblock %}

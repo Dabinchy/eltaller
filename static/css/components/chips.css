@@ -1,0 +1,114 @@
+/* static/css/components/chips.css
+   CajaClara POS v2 — Chips / Badges / Pills (UI system)
+   - Fuente de verdad para etiquetas pequeñas en T ODO el POS.
+   - Usa tokens: superficies + borde + semánticos (success/warning/danger/info).
+   - Respeta branding por módulo solo como ACENTO (cc-chip usa --cc-mod).
+*/
+
+/* -----------------------------
+   Chips (acento por módulo)
+------------------------------ */
+.cc-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--cc-border);
+  background: color-mix(in srgb, var(--cc-mod) 10%, var(--cc-surface));
+  color: var(--cc-text);
+  font-weight: 850;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.cc-chip .bi{ opacity: .92; }
+
+.cc-chip--ok{
+  border-color: rgba(var(--cc-success-rgb), .28);
+  background: rgba(var(--cc-success-rgb), .14);
+}
+.cc-chip--warn{
+  border-color: rgba(var(--cc-warning-rgb), .30);
+  background: rgba(var(--cc-warning-rgb), .14);
+}
+.cc-chip--danger{
+  border-color: rgba(var(--cc-danger-rgb), .30);
+  background: rgba(var(--cc-danger-rgb), .12);
+}
+.cc-chip--info{
+  border-color: rgba(var(--cc-info-rgb), .28);
+  background: rgba(var(--cc-info-rgb), .12);
+}
+.cc-chip--off{
+  border-color: var(--cc-border);
+  background: color-mix(in srgb, var(--cc-surface-2) 70%, transparent);
+  color: var(--cc-text-muted);
+}
+
+/* -----------------------------
+   Badges (estado/etiqueta neutra)
+   Nota: NO usa color de módulo como “estado”.
+------------------------------ */
+.cc-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1;
+  border: 1px solid var(--cc-border);
+  background: rgba(var(--cc-surface-2-rgb), .46);
+  color: rgba(var(--cc-text-rgb), .92);
+  white-space: nowrap;
+}
+.cc-badge .bi{ opacity: .90; }
+
+/* Semánticos (consistentes con alerts globales) */
+.cc-badge--ok{
+  border-color: rgba(var(--cc-success-rgb), .35);
+  background: rgba(var(--cc-success-rgb), .12);
+  color: rgba(var(--cc-success-rgb), .95);
+}
+.cc-badge--danger{
+  border-color: rgba(var(--cc-danger-rgb), .35);
+  background: rgba(var(--cc-danger-rgb), .12);
+  color: rgba(var(--cc-danger-rgb), .95);
+}
+.cc-badge--warn{
+  border-color: rgba(var(--cc-warning-rgb), .34);
+  background: rgba(var(--cc-warning-rgb), .12);
+  color: rgba(var(--cc-warning-rgb), .98);
+}
+.cc-badge--info{
+  border-color: rgba(var(--cc-info-rgb), .32);
+  background: rgba(var(--cc-info-rgb), .12);
+  color: rgba(var(--cc-info-rgb), .96);
+}
+
+/* Compat: usados en algunas pantallas (cajas) */
+.cc-badge--open{  border-color: rgba(var(--cc-success-rgb), .28); background: rgba(var(--cc-success-rgb), .14); }
+.cc-badge--closed{
+  border-color: var(--cc-border);
+  background: color-mix(in srgb, var(--cc-surface-2) 70%, transparent);
+  color: var(--cc-text-muted);
+}
+
+/* -----------------------------
+   Pills (más suaves)
+------------------------------ */
+.cc-pill{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--cc-border);
+  background: rgba(var(--cc-surface-2-rgb), .42);
+  color: rgba(var(--cc-text-rgb), .86);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+}

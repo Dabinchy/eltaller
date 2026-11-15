@@ -1,0 +1,15 @@
+{% if messages %}
+  <div class="cc-flash" role="region" aria-label="Notificaciones" aria-live="polite">
+    {% for message in messages %}
+      {% if "error" in message.tags %}
+        {% include "partials/_flash_item.html" with bs_tag="danger" %}
+      {% elif "success" in message.tags %}
+        {% include "partials/_flash_item.html" with bs_tag="success" %}
+      {% elif "warning" in message.tags %}
+        {% include "partials/_flash_item.html" with bs_tag="warning" %}
+      {% else %}
+        {% include "partials/_flash_item.html" with bs_tag="info" %}
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
