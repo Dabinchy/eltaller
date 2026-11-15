@@ -1,0 +1,17 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:480px">
+  <h1 class="h4">Mi PIN</h1>
+  <p class="text-body-secondary">
+    El PIN (4 a 6 números) se pide para abrir y cerrar la caja y para movimientos de efectivo.
+    Es personal: no lo compartas.
+  </p>
+  <form method="post" novalidate autocomplete="off">
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    {% if not tiene_pin %}<p class="small text-body-secondary">Es la primera vez: dejá vacío el PIN actual.</p>{% endif %}
+    <button class="btn btn-primary" type="submit">Guardar PIN</button>
+  </form>
+</div>
+{% endblock %}

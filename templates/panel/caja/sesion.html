@@ -1,0 +1,79 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Caja {{ sesion.caja.numero }} · sesión #{{ sesion.pk }}</h1>
+      <span class="small text-body-secondary">{{ sesion.caja.sucursal }}</span>
+    </div>
+    <div class="d-flex gap-2">
+      {% if sesion.estado == "ABIERTA" %}
+        {% if puede_mover %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'core:movimiento' sesion.caja.pk %}">Movimiento</a>{% endif %}
+        {% if puede_cerrar %}<a class="btn btn-danger btn-sm" href="{% url 'core:cerrar' sesion.pk %}">Cerrar caja</a>{% endif %}
+      {% endif %}
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'core:caja' %}">Volver</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h6">Estado</h2>
+        <p class="mb-1">{% if sesion.estado == "ABIERTA" %}<span class="badge text-bg-success">Abierta</span>{% else %}<span class="badge text-bg-secondary">Cerrada</span>{% endif %}</p>
+        <div class="small">Abrió: {{ sesion.abierta_por.get_full_name|default:sesion.abierta_por.username }} · {{ sesion.abierta_el|date:"d/m/Y H:i" }}</div>
+        {% if sesion.cerrada_el %}<div class="small">Cerró: {{ sesion.cerrada_por.get_full_name|default:sesion.cerrada_por.username }} · {{ sesion.cerrada_el|date:"d/m/Y H:i" }}</div>{% endif %}
+      </div></div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h6">Efectivo</h2>
+        <div class="d-flex justify-content-between"><span>Inicial</span><span>{{ sesion.saldo_inicial|money_ar }}</span></div>
+        <div class="d-flex justify-content-between"><span>Estimado</span><strong>{{ sesion.saldo_estimado|money_ar }}</strong></div>
+        {% if sesion.estado == "CERRADA" %}
+          <div class="d-flex justify-content-between"><span>Contado</span><span>{{ sesion.total_efectivo_contado|money_ar }}</span></div>
+          <div class="d-flex justify-content-between"><span>Diferencia</span>
+            <strong class="{% if sesion.diferencia < 0 %}text-danger{% elif sesion.diferencia > 0 %}text-warning{% else %}text-success{% endif %}">{{ sesion.diferencia|money_ar }}</strong>
+          </div>
+          {% if sesion.observacion_cierre %}<div class="small text-body-secondary mt-1">{{ sesion.observacion_cierre }}</div>{% endif %}
+        {% endif %}
+      </div></div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card h-100"><div class="card-body">
+        <h2 class="h6">Ventas cobradas</h2>
+        <div class="d-flex justify-content-between"><span>Total</span><strong>{{ ventas.total|default:0|money_ar }}</strong></div>
+        <div class="d-flex justify-content-between small"><span>Efectivo</span><span>{{ ventas.efectivo|default:0|money_ar }}</span></div>
+        <div class="d-flex justify-content-between small"><span>Tarjeta</span><span>{{ ventas.tarjeta|default:0|money_ar }}</span></div>
+        <div class="d-flex justify-content-between small"><span>Transferencia</span><span>{{ ventas.transferencia|default:0|money_ar }}</span></div>
+        <div class="d-flex justify-content-between small"><span>Cuenta corriente</span><span>{{ ventas.ctacte|default:0|money_ar }}</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h2 class="h6">Movimientos</h2>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Motivo</th><th>Usuario</th><th class="text-end">Monto</th></tr></thead>
+          <tbody>
+            {% for m in movimientos %}
+              <tr>
+                <td class="text-nowrap">{{ m.creado_el|date:"d/m H:i" }}</td>
+                <td>{{ m.get_tipo_display }}</td>
+                <td>{{ m.motivo }}</td>
+                <td>{{ m.creado_por.username }}</td>
+                <td class="text-end {% if m.tipo == 'egreso' %}text-danger{% endif %}">{% if m.tipo == 'egreso' %}-{% endif %}{{ m.monto|money_ar }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="text-body-secondary">Sin movimientos.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

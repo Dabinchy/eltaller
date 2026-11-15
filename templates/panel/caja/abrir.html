@@ -1,0 +1,21 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:520px">
+  <h1 class="h4">Abrir caja {{ caja.numero }}</h1>
+  <p class="text-body-secondary">{{ caja.sucursal }}</p>
+  {% if not user.action_pin_hash %}
+    <div class="alert alert-warning">
+      Para abrir la caja necesitás tu PIN. <a href="{% url 'core:pin' %}">Configuralo acá</a>.
+    </div>
+  {% endif %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-unlock me-1" aria-hidden="true"></i>Abrir</button>
+      <a class="btn btn-outline-secondary" href="{% url 'core:caja' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <h1 class="h4 mb-3">Caja</h1>
+
+  {% if not filas %}
+    <div class="alert alert-info">No hay cajas en tu sucursal. La gerencia las crea desde el administrador.</div>
+  {% endif %}
+
+  <div class="row g-3">
+    {% for f in filas %}
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h2 class="h5 mb-0">Caja {{ f.caja.numero }}{% if f.caja.nombre %} · {{ f.caja.nombre }}{% endif %}</h2>
+                <span class="small text-body-secondary">{{ f.caja.sucursal }}</span>
+              </div>
+              {% if f.sesion %}
+                <span class="badge text-bg-success">Abierta</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Cerrada</span>
+              {% endif %}
+            </div>
+
+            {% if f.sesion %}
+              <p class="mt-3 mb-1 small text-body-secondary">Efectivo estimado</p>
+              <p class="h3 mb-1">{{ f.sesion.saldo_estimado|money_ar }}</p>
+              <p class="small text-body-secondary mb-3">
+                Abierta por {{ f.sesion.abierta_por.get_full_name|default:f.sesion.abierta_por.username }}
+                el {{ f.sesion.abierta_el|date:"d/m H:i" }}
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'core:sesion' f.sesion.pk %}">
+                  <i class="bi bi-list-ul me-1" aria-hidden="true"></i>Ver sesión
+                </a>
+                {% if perms.core.movimientos_caja %}
+                  <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:movimiento' f.caja.pk %}">
+                    <i class="bi bi-arrow-left-right me-1" aria-hidden="true"></i>Movimiento
+                  </a>
+                {% endif %}
+                {% if perms.core.cerrar_caja %}
+                  <a class="btn btn-outline-danger btn-sm" href="{% url 'core:cerrar' f.sesion.pk %}">
+                    <i class="bi bi-lock me-1" aria-hidden="true"></i>Cerrar
+                  </a>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                {% if perms.core.abrir_caja %}
+                  <a class="btn btn-primary btn-sm" href="{% url 'core:abrir' f.caja.pk %}">
+                    <i class="bi bi-unlock me-1" aria-hidden="true"></i>Abrir caja
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+            <a class="d-inline-block small mt-3" href="{% url 'core:caja_detalle' f.caja.pk %}">Historial de sesiones</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

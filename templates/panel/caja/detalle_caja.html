@@ -1,0 +1,32 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Caja {{ caja.numero }} · historial</h1>
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'core:caja' %}">Volver</a>
+  </div>
+  <div class="card"><div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>#</th><th>Apertura</th><th>Cierre</th><th>Estado</th><th class="text-end">Estimado</th><th class="text-end">Diferencia</th></tr></thead>
+        <tbody>
+          {% for s in sesiones %}
+            <tr>
+              <td><a href="{% url 'core:sesion' s.pk %}">{{ s.pk }}</a></td>
+              <td class="text-nowrap">{{ s.abierta_el|date:"d/m/Y H:i" }} · {{ s.abierta_por.username }}</td>
+              <td class="text-nowrap">{% if s.cerrada_el %}{{ s.cerrada_el|date:"d/m/Y H:i" }} · {{ s.cerrada_por.username }}{% else %}—{% endif %}</td>
+              <td>{{ s.get_estado_display }}</td>
+              <td class="text-end">{{ s.saldo_estimado|money_ar }}</td>
+              <td class="text-end">{% if s.diferencia is not None %}{{ s.diferencia|money_ar }}{% else %}—{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="text-body-secondary">Todavía no se abrió esta caja.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

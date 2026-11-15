@@ -1,0 +1,25 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container py-3" style="max-width:520px">
+  <h1 class="h4">Cerrar caja {{ sesion.caja.numero }}</h1>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between"><span>Efectivo inicial</span><strong>{{ sesion.saldo_inicial|money_ar }}</strong></div>
+      <div class="d-flex justify-content-between"><span>Efectivo estimado ahora</span><strong>{{ sesion.saldo_estimado|money_ar }}</strong></div>
+      <p class="small text-body-secondary mt-2 mb-0">
+        Contá el efectivo de la caja. Si no coincide con el estimado, queda registrada la diferencia.
+      </p>
+    </div>
+  </div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="d-flex gap-2">
+      <button class="btn btn-danger" type="submit"><i class="bi bi-lock me-1" aria-hidden="true"></i>Cerrar caja</button>
+      <a class="btn btn-outline-secondary" href="{% url 'core:sesion' sesion.pk %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

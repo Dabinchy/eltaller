@@ -1,0 +1,22 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container py-3" style="max-width:520px">
+  <h1 class="h4">Movimiento de efectivo</h1>
+  <p class="text-body-secondary">Caja {{ caja.numero }} · {{ caja.sucursal }}</p>
+  {% if sesion %}
+    <p>Efectivo estimado: <strong>{{ sesion.saldo_estimado|money_ar }}</strong></p>
+  {% else %}
+    <div class="alert alert-warning">La caja está cerrada: abrila antes de registrar movimientos.</div>
+  {% endif %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit"{% if not sesion %} disabled{% endif %}>Registrar</button>
+      <a class="btn btn-outline-secondary" href="{% url 'core:caja' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
