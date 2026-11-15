@@ -87,6 +87,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Archivos privados (facturas, archivos internos): fuera de MEDIA_ROOT y sin URL pública.
+PRIVATE_MEDIA_ROOT = BASE_DIR / "privado"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "core.Usuario"
