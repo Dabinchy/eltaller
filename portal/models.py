@@ -310,6 +310,12 @@ class RegistroModeracion(models.Model):
         REVOCAR = "REVOCAR", "Revocar acceso"
         VINCULAR = "VINCULAR", "Vincular con el taller"
         DESVINCULAR = "DESVINCULAR", "Desvincular del taller"
+        # Campeonatos
+        VALIDAR = "VALIDAR", "Validar resultado"
+        CORREGIR = "CORREGIR", "Corregir resultado"
+        OBSERVAR = "OBSERVAR", "Observar resultado"
+        ANULAR = "ANULAR", "Anular resultado"
+        BAJA = "BAJA", "Dar de baja inscripción"
 
     fecha = models.DateTimeField(default=timezone.now)
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")

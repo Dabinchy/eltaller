@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "compras",
     "taller",
     "portal",
+    "campeonatos",
 
 ]
 
