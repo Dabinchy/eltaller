@@ -1,0 +1,64 @@
+{% extends "layouts/base_sitio.html" %}
+{# Portada de El Prepa (provisoria): competición, personalización y clásicos. #}
+
+{% block description %}Preparación de autos de competición, personalización y restauración de clásicos.{% endblock %}
+
+{% block content %}
+<section class="sitio-hero">
+  <div class="container">
+    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+    <p class="lead">Preparación de autos de competición, personalización y restauración de clásicos, con el respaldo de {{ empresa.nombre|default:"El Taller" }}.</p>
+    <div class="sitio-hero-acciones">
+      {% if parte.accion %}
+        <a class="btn btn-lg sitio-btn-accion" href="{{ parte.accion.url }}">
+          <i class="bi {{ parte.accion.icono }}" aria-hidden="true"></i> {{ parte.accion.texto }}
+        </a>
+      {% endif %}
+      <a class="btn btn-lg btn-outline-light" href="{% url 'sitio:prepa_proyectos' %}">
+        <i class="bi bi-images me-1" aria-hidden="true"></i> Ver proyectos
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    <h2 class="sitio-seccion-titulo">Qué hacemos</h2>
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{% url 'sitio:prepa_competicion' %}">
+          <span class="sitio-card-ico"><i class="bi bi-flag" aria-hidden="true"></i></span>
+          <h3>Competición</h3>
+          <p>Preparación de motor, suspensión y seguridad para pista, rally y picadas.</p>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{% url 'sitio:prepa_personalizacion' %}">
+          <span class="sitio-card-ico"><i class="bi bi-brush" aria-hidden="true"></i></span>
+          <h3>Personalización</h3>
+          <p>Potencia, estética y puesta a punto para que tu auto sea único.</p>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{% url 'sitio:prepa_clasicos' %}">
+          <span class="sitio-card-ico"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+          <h3>Clásicos</h3>
+          <p>Restauración respetando el original, con el proceso documentado paso a paso.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-2">
+  <div class="container">
+    <a class="sitio-banda" data-parte="campeonatos" href="{% url 'sitio:campeonatos' %}">
+      <div>
+        <strong>Nuestros autos en pista</strong>
+        <span>Seguí los campeonatos donde corren los autos que preparamos.</span>
+      </div>
+      <i class="bi bi-arrow-right" aria-hidden="true"></i>
+    </a>
+  </div>
+</section>
+{% endblock %}

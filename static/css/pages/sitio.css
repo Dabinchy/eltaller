@@ -1,0 +1,246 @@
+/* static/css/pages/sitio.css
+   Sitio público en tres partes. Cada parte define su color de acento en body[data-parte]
+   (y en cada pestaña / enlace con data-parte, para que se vean con su propio color).
+*/
+
+[data-parte="taller"]      { --sitio-acento: #2F6BFF; --sitio-acento-rgb: 47, 107, 255;  --sitio-acento-texto: #fff; }
+[data-parte="prepa"]       { --sitio-acento: #E3171B; --sitio-acento-rgb: 227, 23, 27;   --sitio-acento-texto: #fff; }
+[data-parte="campeonatos"] { --sitio-acento: #F5B700; --sitio-acento-rgb: 245, 183, 0;   --sitio-acento-texto: #111; }
+
+.sitio { background: var(--cc-bg); }
+
+/* ---------- Pestañas de las partes ---------- */
+.sitio-partes {
+  background: #05080F;
+  border-bottom: 1px solid var(--cc-border);
+  font-size: 13px;
+}
+.sitio-partes-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sitio-partes-lista {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1 1 auto;
+}
+@media (min-width: 992px) {
+  .sitio-partes-lista { flex: 0 0 auto; }
+}
+.sitio-partes-lista > li { flex: 1 1 0; }
+@media (min-width: 576px) {
+  .sitio-partes-lista > li { flex: 0 0 auto; }
+}
+.sitio-pestana {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  color: var(--cc-text-dim);
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color var(--cc-t-fast) var(--cc-ease), border-color var(--cc-t-fast) var(--cc-ease);
+}
+.sitio-pestana i { color: var(--sitio-acento); opacity: .75; }
+.sitio-pestana:hover { color: var(--cc-text); }
+.sitio-pestana.activa {
+  color: var(--cc-text);
+  border-bottom-color: var(--sitio-acento);
+  background: rgba(var(--sitio-acento-rgb), .08);
+}
+.sitio-pestana.activa i { opacity: 1; }
+@media (max-width: 400px) {
+  .sitio-pestana { padding: 9px 6px; gap: 4px; font-size: 12.5px; }
+}
+
+.sitio-link-ingreso {
+  color: var(--cc-text-muted);
+  text-decoration: none;
+  font-weight: 700;
+}
+.sitio-link-ingreso:hover { color: var(--cc-text); }
+
+/* ---------- Menú de la parte ---------- */
+.sitio-nav {
+  background: var(--cc-surface);
+  border-bottom: 1px solid var(--cc-border);
+  box-shadow: inset 0 -2px 0 rgba(var(--sitio-acento-rgb), .55);
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.sitio-brand { padding: 0; margin-right: 0; }
+.sitio-logo {
+  display: block;
+  height: 46px;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.sitio-logo-prepa { height: 30px; }
+.sitio-logo-grande { height: 140px; max-width: 100%; border-radius: 12px; margin: 0 auto; }
+.sitio-logo-prepa.sitio-logo-grande { height: auto; width: 520px; }
+@media (max-width: 400px) {
+  .sitio-logo:not(.sitio-logo-grande) { height: 40px; max-width: 140px; }
+  .sitio-logo-prepa:not(.sitio-logo-grande) { height: auto; width: 140px; }
+}
+
+.sitio-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  color: var(--cc-text);
+}
+.sitio-wordmark i { color: var(--sitio-acento); }
+.sitio-wordmark-grande { font-size: clamp(32px, 7vw, 54px); gap: 14px; }
+
+.sitio-nav .nav-link {
+  font-weight: 700;
+  color: var(--cc-text-muted);
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  border-radius: 10px;
+}
+.sitio-nav .nav-link:hover { color: var(--cc-text); background: rgba(var(--cc-text-rgb), .05); }
+.sitio-nav .nav-link.active { color: var(--cc-text); background: rgba(var(--sitio-acento-rgb), .14); }
+
+.sitio-toggler {
+  border: 1px solid var(--cc-border-2);
+  color: var(--cc-text);
+  font-size: 22px;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+.sitio-toggler:focus { box-shadow: 0 0 0 .2rem rgba(var(--sitio-acento-rgb), .3); }
+
+.sitio-nav-ingreso { padding: 10px 0 4px; }
+@media (max-width: 991.98px) {
+  .sitio-nav .navbar-collapse { margin-top: 10px; border-top: 1px solid var(--cc-border); padding-top: 6px; }
+}
+
+/* Botón principal de cada parte */
+.sitio-btn-accion {
+  background: var(--sitio-acento);
+  border: 1px solid var(--sitio-acento);
+  color: var(--sitio-acento-texto);
+  font-weight: 800;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.sitio-btn-accion:hover,
+.sitio-btn-accion:focus-visible {
+  background: color-mix(in srgb, var(--sitio-acento) 85%, white);
+  border-color: color-mix(in srgb, var(--sitio-acento) 85%, white);
+  color: var(--sitio-acento-texto);
+}
+.sitio-btn-accion i { margin-right: 4px; }
+
+/* ---------- Portadas provisorias ---------- */
+.sitio-hero {
+  padding: 56px 0 48px;
+  text-align: center;
+  background:
+    radial-gradient(800px 360px at 50% 0%, rgba(var(--sitio-acento-rgb), .16), transparent 70%),
+    var(--cc-bg);
+  border-bottom: 1px solid var(--cc-border);
+}
+.sitio-hero .lead { max-width: 680px; margin: 22px auto 0; color: var(--cc-text-muted); }
+.sitio-hero-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 24px; }
+
+.sitio-seccion { padding: 44px 0; }
+.sitio-seccion-titulo { font-size: 20px; font-weight: 900; margin-bottom: 18px; }
+
+.sitio-card {
+  display: block;
+  height: 100%;
+  padding: 20px;
+  border-radius: var(--cc-r-3);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  text-decoration: none;
+  transition: border-color var(--cc-t-med) var(--cc-ease), transform var(--cc-t-med) var(--cc-ease);
+}
+a.sitio-card:hover { border-color: rgba(var(--sitio-acento-rgb), .6); transform: translateY(-2px); color: var(--cc-text); }
+.sitio-card-ico {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 20px;
+  color: var(--sitio-acento);
+  background: rgba(var(--sitio-acento-rgb), .12);
+  margin-bottom: 12px;
+}
+.sitio-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+.sitio-card p { margin: 0; color: var(--cc-text-muted); font-size: 13.5px; }
+
+/* Banda que invita a otra parte (ej.: desde El Taller hacia El Prepa) */
+.sitio-banda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px;
+  border-radius: var(--cc-r-3);
+  border: 1px solid rgba(var(--sitio-acento-rgb), .45);
+  background: linear-gradient(90deg, rgba(var(--sitio-acento-rgb), .14), transparent 80%), var(--cc-surface);
+  color: var(--cc-text);
+  text-decoration: none;
+}
+.sitio-banda:hover { color: var(--cc-text); border-color: var(--sitio-acento); }
+.sitio-banda strong { display: block; font-size: 17px; }
+.sitio-banda span { color: var(--cc-text-muted); }
+.sitio-banda .bi-arrow-right { color: var(--sitio-acento); font-size: 22px; }
+
+.sitio-aviso { color: var(--cc-text-dim); font-size: 13px; }
+
+/* ---------- Pie ---------- */
+.sitio-footer {
+  margin-top: 56px;
+  padding: 36px 0 20px;
+  background: #05080F;
+  border-top: 1px solid var(--cc-border);
+  font-size: 13.5px;
+}
+.sitio-footer-parte {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  color: var(--cc-text);
+  text-decoration: none;
+}
+.sitio-footer-parte i { color: var(--sitio-acento, var(--cc-text-dim)); }
+a.sitio-footer-parte:hover { color: var(--sitio-acento); }
+.sitio-footer-lema { color: var(--cc-text-dim); margin: 4px 0 8px; font-size: 12.5px; }
+.sitio-footer-links { list-style: none; margin: 0; padding: 0; color: var(--cc-text-muted); }
+.sitio-footer-links li { margin-bottom: 5px; }
+.sitio-footer-links a { color: var(--cc-text-muted); text-decoration: none; }
+.sitio-footer-links a:hover { color: var(--cc-text); text-decoration: underline; }
+.sitio-footer-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cc-border);
+  color: var(--cc-text-dim);
+  font-size: 12.5px;
+}
+.sitio-footer-base a { color: var(--cc-text-dim); text-decoration: none; }
+.sitio-footer-base a:hover { color: var(--cc-text); }

@@ -1,0 +1,8 @@
+{# Logo de una parte del sitio (p = una parte de partes.contexto). Sin logo: ícono + nombre. #}
+{% if p.logo %}
+  <img src="{{ p.logo }}" alt="{{ p.nombre }}" class="sitio-logo sitio-logo-{{ p.clave }}{% if grande %} sitio-logo-grande{% endif %}">
+{% else %}
+  <span class="sitio-wordmark{% if grande %} sitio-wordmark-grande{% endif %}">
+    <i class="bi {{ p.icono }}" aria-hidden="true"></i><span>{{ p.nombre }}</span>
+  </span>
+{% endif %}

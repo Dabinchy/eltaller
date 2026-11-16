@@ -2,20 +2,29 @@
 
 {% block title %}Ingresar{% endblock %}
 
+{% block extra_css %}{% load static %}<link rel="stylesheet" href="{% static 'css/pages/sitio.css' %}">{% endblock %}
+
 {% block content %}
-<div class="cc-auth-wrap">
+{# La marca depende de desde qué parte del sitio se llegó (?parte=taller|prepa|campeonatos). #}
+<div class="cc-auth-wrap" data-parte="{{ parte.clave }}">
   <div class="cc-auth-card" role="region" aria-label="Ingreso">
-    {% load static %}
     <div class="cc-auth-head">
-      <img src="{{ marca.logo }}" alt="{{ marca.nombre }}"
-           style="height:110px;width:auto;max-width:100%;object-fit:contain;border-radius:8px">
-      <h1 class="cc-auth-title mt-2">Ingresar</h1>
-      <p class="cc-auth-sub">Personal del taller, pilotos y clientes: ingresá con tu usuario.</p>
-      <div class="d-flex align-items-center justify-content-center gap-2 small text-body-secondary">
-        <span>Portal de pilotos</span>
-        <img src="{% static 'img/brand/el-prepa.jpg' %}" alt="El Prepa"
-             style="height:20px;width:auto;object-fit:contain;border-radius:3px">
-      </div>
+      <a href="{{ parte.inicio }}" aria-label="Volver a {{ parte.nombre }}">
+        {% if parte.logo %}
+          <img src="{{ parte.logo }}" alt="{{ parte.nombre }}"
+               style="height:{% if parte.clave == 'prepa' %}auto;width:300px{% else %}110px;width:auto{% endif %};max-width:100%;object-fit:contain;border-radius:8px">
+        {% else %}
+          {% include "sitio/_logo_parte.html" with p=parte %}
+        {% endif %}
+      </a>
+      {% firstof request.GET.parte request.POST.parte as pedida %}
+      {% if pedida %}
+        <h1 class="cc-auth-title mt-2">{{ parte.ingreso.texto }}</h1>
+        <p class="cc-auth-sub">{{ parte.ingreso_ayuda }}</p>
+      {% else %}
+        <h1 class="cc-auth-title mt-2">Ingresar</h1>
+        <p class="cc-auth-sub">Personal del taller, pilotos y clientes: ingresá con tu usuario.</p>
+      {% endif %}
     </div>
 
     {% if form.non_field_errors %}
@@ -54,6 +63,7 @@
       </div>
 
       {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% if pedida %}<input type="hidden" name="parte" value="{{ parte.clave }}">{% endif %}
 
       <div class="d-grid mt-3">
         <button type="submit" class="btn cc-auth-btn">
@@ -68,6 +78,9 @@
         ¿Sos piloto o cliente y no tenés cuenta? <a href="{{ url_registro }}">Registrate</a>
       </p>
     {% endif %}
+    <p class="cc-auth-help text-center mb-0">
+      <a href="{{ parte.inicio }}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver a {{ parte.nombre }}</a>
+    </p>
   </div>
 </div>
 {% endblock %}

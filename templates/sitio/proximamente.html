@@ -1,9 +1,15 @@
 {% extends "layouts/base_sitio.html" %}
 
 {% block content %}
-<section class="container py-5 text-center">
-  <h1 class="h3">{{ seccion }}</h1>
-  <p class="text-body-secondary">Estamos preparando esta sección. Volvé pronto.</p>
-  <a class="btn btn-outline-light" href="{% url 'sitio:inicio' %}">Volver al inicio</a>
+<section class="sitio-hero">
+  <div class="container">
+    <h1 class="h3 fw-bold">{{ seccion }}</h1>
+    <p class="lead">Estamos preparando esta sección. Volvé pronto.</p>
+    <div class="sitio-hero-acciones">
+      <a class="btn btn-outline-light" href="{{ parte.inicio }}">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a {{ parte.nombre }}
+      </a>
+    </div>
+  </div>
 </section>
 {% endblock %}

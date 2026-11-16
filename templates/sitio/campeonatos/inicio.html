@@ -1,0 +1,28 @@
+{% extends "layouts/base_sitio.html" %}
+{# Portada de Campeonatos (provisoria). En el paso siguiente: campeonatos en curso, tablas y pilotos. #}
+
+{% block description %}Campeonatos: fechas, resultados, tablas de posiciones y pilotos.{% endblock %}
+
+{% block content %}
+<section class="sitio-hero">
+  <div class="container">
+    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+    <p class="lead">Fechas, resultados y tablas de posiciones de cada campeonato, y el perfil de sus pilotos.</p>
+    <div class="sitio-hero-acciones">
+      <a class="btn btn-lg btn-outline-light" href="{% url 'sitio:pilotos' %}">
+        <i class="bi bi-people me-1" aria-hidden="true"></i> Pilotos
+      </a>
+      <a class="btn btn-lg btn-outline-light" href="{{ parte.ingreso.url }}">
+        <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    <h2 class="sitio-seccion-titulo">Campeonatos en curso</h2>
+    <p class="sitio-aviso"><i class="bi bi-cone-striped me-1" aria-hidden="true"></i> Estamos preparando esta sección: pronto vas a ver acá los campeonatos, las tablas y los últimos resultados.</p>
+  </div>
+</section>
+{% endblock %}

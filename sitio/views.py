@@ -1,11 +1,18 @@
-"""Vistas del sitio público (provisorias hasta el paso 6)."""
+"""Vistas del sitio público. Las portadas son provisorias hasta que se cargue el contenido."""
 from __future__ import annotations
 
 from django.shortcuts import render
 
+PORTADAS = {
+    "taller": ("sitio/taller/inicio.html", "Mecánica de confianza"),
+    "prepa": ("sitio/prepa/inicio.html", "Competición, personalización y clásicos"),
+    "campeonatos": ("sitio/campeonatos/inicio.html", "Resultados, tablas y pilotos"),
+}
 
-def inicio(request):
-    return render(request, "sitio/inicio.html", {"titulo": "Inicio"})
+
+def portada(request, parte: str):
+    plantilla, titulo = PORTADAS[parte]
+    return render(request, plantilla, {"titulo": titulo})
 
 
 def proximamente(request, seccion: str, slug: str | None = None):

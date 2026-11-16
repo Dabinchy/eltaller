@@ -1,0 +1,71 @@
+{% extends "layouts/base_sitio.html" %}
+{# Portada de El Taller (provisoria): autos de calle, generar confianza. #}
+
+{% block content %}
+<section class="sitio-hero">
+  <div class="container">
+    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+    <p class="lead">
+      {% if empresa.descripcion_web %}{{ empresa.descripcion_web|linebreaksbr }}{% else %}Mecánica general, diagnóstico y mantenimiento para tu auto de todos los días.{% endif %}
+    </p>
+    <div class="sitio-hero-acciones">
+      {% if parte.accion %}
+        <a class="btn btn-lg sitio-btn-accion" href="{{ parte.accion.url }}">
+          <i class="bi {{ parte.accion.icono }}" aria-hidden="true"></i> {{ parte.accion.texto }}
+        </a>
+      {% endif %}
+      <a class="btn btn-lg btn-outline-light" href="{{ parte.ingreso.url }}">
+        <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    <h2 class="sitio-seccion-titulo">Lo que hacemos</h2>
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{% url 'sitio:servicios' %}">
+          <span class="sitio-card-ico"><i class="bi bi-tools" aria-hidden="true"></i></span>
+          <h3>Mecánica y mantenimiento</h3>
+          <p>Service, frenos, tren delantero, distribución y todo lo que tu auto necesita.</p>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{% url 'sitio:servicios' %}">
+          <span class="sitio-card-ico"><i class="bi bi-activity" aria-hidden="true"></i></span>
+          <h3>Diagnóstico</h3>
+          <p>Encontramos la falla antes de cambiar piezas, y te explicamos qué hay que hacer.</p>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="sitio-card" href="{{ parte.ingreso.url }}">
+          <span class="sitio-card-ico"><i class="bi bi-phone" aria-hidden="true"></i></span>
+          <h3>Seguí tu vehículo</h3>
+          <p>Mirá el avance, aprobá el presupuesto y enterate de cada cambio desde el celular.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-2">
+  <div class="container d-grid gap-3">
+    <a class="sitio-banda" data-parte="prepa" href="{% url 'sitio:prepa' %}">
+      <div>
+        <strong>¿Competís, querés personalizar tu auto o tenés un clásico?</strong>
+        <span>Conocé El Prepa: preparación de competición, personalización y restauración.</span>
+      </div>
+      <i class="bi bi-arrow-right" aria-hidden="true"></i>
+    </a>
+    <a class="sitio-banda" data-parte="campeonatos" href="{% url 'sitio:campeonatos' %}">
+      <div>
+        <strong>Campeonatos</strong>
+        <span>Resultados, tablas de posiciones y pilotos.</span>
+      </div>
+      <i class="bi bi-arrow-right" aria-hidden="true"></i>
+    </a>
+  </div>
+</section>
+{% endblock %}

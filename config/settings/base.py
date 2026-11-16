@@ -71,6 +71,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.empresa",
                 "core.context_processors.menu",
+                "sitio.context_processors.sitio",
             ],
         },
     },
