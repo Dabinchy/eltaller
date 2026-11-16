@@ -78,6 +78,7 @@ PARTES: dict[str, Parte] = {
         menu=(
             ("Campeonatos", "sitio:campeonatos"),
             ("Pilotos", "sitio:pilotos"),
+            ("Asociaciones", "sitio:asociaciones"),
         ),
         ingreso=("Acceso pilotos", "bi-person-badge"),
         ingreso_ayuda="Pilotos y moderadores: ingresá con tu usuario.",

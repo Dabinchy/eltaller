@@ -244,3 +244,195 @@ a.sitio-footer-parte:hover { color: var(--sitio-acento); }
 }
 .sitio-footer-base a { color: var(--cc-text-dim); text-decoration: none; }
 .sitio-footer-base a:hover { color: var(--cc-text); }
+
+/* =========================================================
+   Campeonatos: cabeceras, tablas, fechas, pilotos y autos
+   ========================================================= */
+.sitio-hero-chico { padding: 40px 0 32px; }
+
+.sitio-cabecera {
+  padding: 26px 0 24px;
+  border-bottom: 1px solid var(--cc-border);
+  background:
+    radial-gradient(700px 260px at 0% 0%, rgba(var(--sitio-acento-rgb), .12), transparent 70%),
+    var(--cc-bg);
+}
+.sitio-h1 { font-size: clamp(24px, 4.5vw, 34px); font-weight: 900; letter-spacing: .2px; }
+.sitio-cabecera-texto { max-width: 760px; margin: 16px 0 0; color: var(--cc-text-muted); }
+.sitio-migas { font-size: 13px; color: var(--cc-text-dim); margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sitio-migas a { color: var(--cc-text-muted); text-decoration: none; }
+.sitio-migas a:hover { color: var(--cc-text); text-decoration: underline; }
+.sitio-migas .bi { font-size: 10px; }
+
+.sitio-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--cc-border-2);
+  background: var(--cc-surface);
+  color: var(--cc-text-muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+a.sitio-chip:hover { color: var(--cc-text); border-color: rgba(var(--sitio-acento-rgb), .6); }
+
+.sitio-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.sitio-pill {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cc-border-2);
+  color: var(--cc-text-muted);
+  font-weight: 800;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sitio-pill:hover { color: var(--cc-text); }
+.sitio-pill.activa { background: var(--sitio-acento); border-color: var(--sitio-acento); color: var(--sitio-acento-texto); }
+
+.badge.sitio-badge-vivo { background: rgba(var(--cc-success-rgb), .16); color: #4ADE80; border: 1px solid rgba(var(--cc-success-rgb), .4); }
+.badge.sitio-badge-prog { background: transparent; color: var(--cc-text-dim); border: 1px solid var(--cc-border-2); font-weight: 600; }
+.badge.sitio-badge-x { background: rgba(var(--sitio-acento-rgb), .18); color: var(--sitio-acento); border: 1px solid rgba(var(--sitio-acento-rgb), .45); }
+
+.sitio-numero {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #F4F4F5;
+  color: #111;
+  font-weight: 900;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.sitio-numero-grande { min-width: 42px; height: 32px; font-size: 16px; border-radius: 8px; }
+.sitio-prov { color: var(--cc-warn); font-weight: 900; margin-left: 2px; cursor: help; }
+.sitio-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 900;
+  color: var(--sitio-acento);
+  border: 1px solid rgba(var(--sitio-acento-rgb), .5);
+  vertical-align: 1px;
+}
+
+/* Tabla de posiciones */
+.sitio-tabla-wrap { border: 1px solid var(--cc-border); border-radius: var(--cc-r-2); background: var(--cc-surface); overflow-y: hidden; }
+.sitio-tabla { --bs-table-bg: transparent; --bs-table-color: var(--cc-text); font-variant-numeric: tabular-nums; }
+.sitio-tabla thead th {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--cc-text-dim);
+  border-bottom-color: var(--cc-border-2);
+  white-space: nowrap;
+}
+.sitio-tabla td { vertical-align: middle; border-color: var(--cc-border); }
+.sitio-tabla tbody tr:last-child td { border-bottom: 0; }
+.sitio-tabla a { color: var(--cc-text); font-weight: 700; text-decoration: none; }
+.sitio-tabla a:hover { color: var(--sitio-acento); text-decoration: underline; }
+.sitio-podio-1 td:first-child { box-shadow: inset 3px 0 0 #F5B700; }
+.sitio-podio-2 td:first-child { box-shadow: inset 3px 0 0 #C0C7D1; }
+.sitio-podio-3 td:first-child { box-shadow: inset 3px 0 0 #CD7F32; }
+.sitio-tabla-chica { font-size: 13px; margin-bottom: 14px; }
+/* Columnas fijas (Pos, N°) para que todas las tablas queden alineadas */
+.sitio-tabla th:nth-child(1) { width: 52px; }
+.sitio-tabla th:nth-child(2) { width: 60px; }
+.sitio-tabla-chica th:last-child { width: 60px; }
+
+/* Podio en las tarjetas de la portada */
+.sitio-camp-card h3 a { color: var(--cc-text); text-decoration: none; }
+.sitio-camp-card h3 a:hover { color: var(--sitio-acento); }
+.sitio-podio-mini { padding: 10px 0; border-top: 1px solid var(--cc-border); }
+.sitio-podio-mini-cat { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--cc-text-dim); margin-bottom: 6px; }
+.sitio-podio-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sitio-podio-lista li { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.sitio-podio-lista a { color: var(--cc-text); text-decoration: none; font-weight: 700; }
+.sitio-podio-lista a:hover { color: var(--sitio-acento); }
+.sitio-medalla {
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 12px; font-weight: 900; color: #111;
+}
+.sitio-medalla-1 { background: #F5B700; }
+.sitio-medalla-2 { background: #C0C7D1; }
+.sitio-medalla-3 { background: #CD7F32; }
+
+/* Listas con filas enlazadas (fechas, campeonatos, palmarés) */
+.sitio-lista { list-style: none; margin: 0; padding: 0; border: 1px solid var(--cc-border); border-radius: var(--cc-r-2); background: var(--cc-surface); overflow: hidden; }
+.sitio-lista > li + li { border-top: 1px solid var(--cc-border); }
+.sitio-lista-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: var(--cc-text); text-decoration: none; }
+a.sitio-lista-item:hover { background: rgba(var(--sitio-acento-rgb), .07); color: var(--cc-text); }
+.sitio-dia {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 44px; padding: 4px 6px; border-radius: 10px;
+  background: rgba(var(--sitio-acento-rgb), .12); color: var(--cc-text); line-height: 1.1;
+}
+.sitio-dia strong { font-size: 17px; }
+.sitio-dia small { font-size: 10.5px; text-transform: uppercase; color: var(--cc-text-muted); }
+.sitio-anio { min-width: 44px; font-weight: 900; color: var(--sitio-acento); }
+
+/* Fechas (acordeón) */
+.sitio-fechas {
+  --bs-accordion-bg: var(--cc-surface);
+  --bs-accordion-border-color: var(--cc-border);
+  --bs-accordion-active-bg: rgba(var(--sitio-acento-rgb), .08);
+  --bs-accordion-active-color: var(--cc-text);
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 .2rem rgba(var(--sitio-acento-rgb), .3);
+}
+.sitio-fechas .accordion-button { gap: 4px; padding: 10px 14px; color: var(--cc-text); }
+.sitio-fechas .accordion-button:disabled { opacity: 1; cursor: default; }
+.sitio-fechas .accordion-button:disabled::after { display: none; }
+.sitio-carrera { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--cc-text-dim); margin: 4px 0 6px; }
+
+/* Avatares */
+.sitio-avatar {
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: var(--tam); height: var(--tam); border-radius: 50%; overflow: hidden;
+  background: rgba(var(--sitio-acento-rgb), .16); color: var(--sitio-acento);
+  font-weight: 900; font-size: calc(var(--tam) * .42);
+  border: 2px solid rgba(var(--sitio-acento-rgb), .35);
+}
+.sitio-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.sitio-avatar-cuadrado { border-radius: 14px; background: #fff; color: #111; }
+.sitio-avatar-cuadrado img { object-fit: contain; }
+
+/* Perfil de piloto / asociación */
+.sitio-perfil { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.sitio-perfil-foto { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(var(--sitio-acento-rgb), .5); }
+.sitio-piloto-card { text-align: center; }
+.sitio-piloto-card h2, .sitio-piloto-card h3 { font-weight: 800; }
+
+/* Buscador */
+.sitio-buscar { position: relative; max-width: 420px; }
+.sitio-buscar .bi { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--cc-text-dim); }
+.sitio-buscar .form-control { padding-left: 36px; border-radius: 12px; background: var(--cc-surface); border-color: var(--cc-border-2); color: var(--cc-text); }
+.sitio-buscar .form-control:focus { border-color: rgba(var(--sitio-acento-rgb), .6); box-shadow: 0 0 0 .2rem rgba(var(--sitio-acento-rgb), .2); }
+
+/* Autos */
+.sitio-auto-card { overflow: hidden; }
+.sitio-auto-foto {
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: 16 / 10; background: var(--cc-surface-2); color: var(--cc-text-dim); font-size: 42px;
+}
+.sitio-auto-foto img { width: 100%; height: 100%; object-fit: cover; }
+.sitio-auto-foto .sitio-numero { position: absolute; left: 10px; top: 10px; }
+.sitio-auto-foto-grande { border-radius: var(--cc-r-3); overflow: hidden; border: 1px solid var(--cc-border); font-size: 72px; }
+.sitio-datos { display: flex; flex-wrap: wrap; gap: 18px; margin: 0; }
+.sitio-datos dt { font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--cc-text-dim); font-weight: 700; }
+.sitio-datos dd { margin: 0; font-weight: 800; }
+
+/* Galería */
+.sitio-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.sitio-galeria a { display: block; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--cc-border); }
+.sitio-galeria img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--cc-t-med) var(--cc-ease); }
+.sitio-galeria a:hover img { transform: scale(1.04); }
+.sitio-video { border-radius: 12px; overflow: hidden; border: 1px solid var(--cc-border); }

@@ -1,0 +1,31 @@
+{% extends "layouts/base_sitio.html" %}
+
+{% block description %}Asociaciones que organizan los campeonatos.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container"><h1 class="sitio-h1">Asociaciones</h1></div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    {% if asociaciones %}
+      <div class="row g-3">
+        {% for a in asociaciones %}
+          <div class="col-12 col-md-6 col-lg-4">
+            <a class="sitio-card d-flex align-items-center gap-3" href="{% url 'sitio:asociacion' a.slug %}">
+              {% include "sitio/campeonatos/_logo_asociacion.html" with a=a %}
+              <span>
+                <h2 class="h6 mb-1">{{ a.nombre }}</h2>
+                {% if a.descripcion %}<p>{{ a.descripcion|truncatechars:90 }}</p>{% endif %}
+              </span>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="sitio-aviso">Todavía no hay asociaciones publicadas.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

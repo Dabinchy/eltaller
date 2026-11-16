@@ -1,0 +1,38 @@
+{% extends "layouts/base_sitio.html" %}
+
+{% block description %}Pilotos: perfiles, autos, campeonatos y palmarés.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container">
+    <h1 class="sitio-h1">Pilotos</h1>
+    <form method="get" class="sitio-buscar mt-3" role="search">
+      <label class="visually-hidden" for="buscarPiloto">Buscar piloto</label>
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input id="buscarPiloto" type="search" name="q" value="{{ busqueda }}" class="form-control" placeholder="Buscar por nombre" maxlength="60">
+    </form>
+  </div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    {% if pilotos %}
+      <div class="row g-3">
+        {% for p in pilotos %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <a class="sitio-card sitio-piloto-card" href="{% url 'sitio:piloto' p.slug %}">
+              {% include "sitio/campeonatos/_avatar.html" with p=p tam=72 %}
+              <h2 class="h6 mb-0 mt-2">{{ p.nombre_publico }}</h2>
+              {% if p.instagram %}<small class="text-body-secondary">@{{ p.instagram }}</small>{% endif %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif busqueda %}
+      <p class="sitio-aviso">No encontramos pilotos con “{{ busqueda }}”. <a href="{% url 'sitio:pilotos' %}">Ver todos</a></p>
+    {% else %}
+      <p class="sitio-aviso">Todavía no hay perfiles de pilotos publicados.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

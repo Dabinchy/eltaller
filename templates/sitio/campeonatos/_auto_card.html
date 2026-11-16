@@ -1,0 +1,15 @@
+{# Tarjeta de un auto público. auto = Auto visible en la web. #}
+<a class="sitio-card sitio-auto-card p-0" href="{% url 'sitio:auto' auto.slug %}">
+  <div class="sitio-auto-foto">
+    {% if auto.portada_id %}
+      <img src="{% url 'archivo' auto.portada_id %}?mini=1" alt="" loading="lazy">
+    {% else %}
+      <i class="bi bi-car-front" aria-hidden="true"></i>
+    {% endif %}
+    {% if auto.numero_competicion %}<span class="sitio-numero sitio-numero-grande">{{ auto.numero_competicion }}</span>{% endif %}
+  </div>
+  <div class="p-3">
+    <h3 class="mb-1">{{ auto.marca }} {{ auto.modelo }}</h3>
+    <p>{% if auto.anio %}{{ auto.anio }}{% endif %}{% if auto.anio and auto.categoria %} · {% endif %}{{ auto.categoria }}</p>
+  </div>
+</a>

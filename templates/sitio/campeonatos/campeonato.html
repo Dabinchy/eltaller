@@ -1,0 +1,109 @@
+{% extends "layouts/base_sitio.html" %}
+{# Un campeonato: categorías, tabla de posiciones, calendario y resultados de la categoría elegida. #}
+
+{% block description %}{{ camp.nombre }} {{ camp.temporada }} ({{ camp.asociacion.nombre }}): tabla de posiciones, fechas y resultados.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container">
+    <nav aria-label="Ubicación" class="sitio-migas">
+      <a href="{% url 'sitio:campeonatos' %}">Campeonatos</a> <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <span>{{ camp.asociacion.nombre }}</span>
+    </nav>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <h1 class="sitio-h1 mb-0">{{ camp.nombre }} {{ camp.temporada }}</h1>
+      {% if camp.estado == "EN_CURSO" %}<span class="badge sitio-badge-vivo">En curso</span>{% else %}<span class="badge text-bg-secondary">Finalizado</span>{% endif %}
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      <a class="sitio-chip" href="{% url 'sitio:asociacion' camp.asociacion.slug %}"><i class="bi bi-people me-1" aria-hidden="true"></i>{{ camp.asociacion.nombre }}</a>
+      {% if camp.reglamento_url %}
+        <a class="sitio-chip" href="{{ camp.reglamento_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>Reglamento</a>
+      {% endif %}
+    </div>
+    {% if camp.descripcion %}<p class="sitio-cabecera-texto">{{ camp.descripcion|linebreaksbr }}</p>{% endif %}
+
+    {% if categorias|length > 1 %}
+      <nav class="sitio-pills mt-3" aria-label="Categorías">
+        {% for c in categorias %}
+          <a href="?categoria={{ c.pk }}" class="sitio-pill{% if c == elegida %} activa{% endif %}"{% if c == elegida %} aria-current="true"{% endif %}>{{ c.nombre }}</a>
+        {% endfor %}
+      </nav>
+    {% endif %}
+  </div>
+</section>
+
+<section class="sitio-seccion">
+  <div class="container">
+    {% if elegida %}
+      <div class="row g-4">
+        <div class="col-12 col-xl-7">
+          <h2 class="sitio-seccion-titulo">Tabla de posiciones{% if categorias|length > 1 %} · {{ elegida.nombre }}{% endif %}</h2>
+          {% include "sitio/campeonatos/_tabla.html" with filas=tabla %}
+        </div>
+
+        <div class="col-12 col-xl-5">
+          <h2 class="sitio-seccion-titulo">Fechas y resultados</h2>
+          {% if fechas %}
+            <div class="accordion sitio-fechas" id="fechas">
+              {% for item in fechas %}
+                {% with f=item.fecha %}
+                  <div class="accordion-item" id="fecha-{{ f.numero }}">
+                    <h3 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                              data-bs-target="#fechaC{{ f.pk }}" aria-expanded="false" aria-controls="fechaC{{ f.pk }}"
+                              {% if not item.tiene_resultados %}disabled{% endif %}>
+                        <span class="sitio-dia"><strong>{{ f.dia|date:"d" }}</strong><small>{{ f.dia|date:"M" }}</small></span>
+                        <span class="flex-grow-1 ms-2">
+                          <strong>Fecha {{ f.numero }}</strong>{% if f.nombre %} · {{ f.nombre }}{% endif %}
+                          <small class="d-block text-body-secondary">{{ f.circuito }}</small>
+                        </span>
+                        {% if f.multiplicador != 1 %}<span class="badge sitio-badge-x me-2">x{{ f.multiplicador|floatformat:"-2" }}</span>{% endif %}
+                        {% if f.estado == "SUSPENDIDA" %}<span class="badge text-bg-secondary me-2">Suspendida</span>
+                        {% elif not item.tiene_resultados %}<span class="badge sitio-badge-prog me-2">{% if f.estado == "DISPUTADA" %}Sin resultados{% else %}Programada{% endif %}</span>{% endif %}
+                      </button>
+                    </h3>
+                    {% if item.tiene_resultados %}
+                      <div id="fechaC{{ f.pk }}" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          {% for c in item.carreras %}
+                            {% if c.resultados %}
+                              <h4 class="sitio-carrera">{{ c.carrera.nombre }}</h4>
+                              <table class="table table-sm sitio-tabla sitio-tabla-chica">
+                                <caption class="visually-hidden">Resultados de {{ c.carrera.nombre }}</caption>
+                                <thead><tr><th scope="col" class="text-center">Pos</th><th scope="col" class="text-center">N°</th><th scope="col">Piloto</th><th scope="col" class="text-end">Pts</th></tr></thead>
+                                <tbody>
+                                  {% for r in c.resultados %}
+                                    <tr>
+                                      <td class="text-center">{% if r.condicion == "FINALIZO" %}{{ r.posicion }}{% else %}<abbr title="{{ r.get_condicion_display }}{% if r.posicion %} ({{ r.posicion }}°){% endif %}">{% if r.condicion == "ABANDONO" %}AB{% elif r.condicion == "NO_LARGO" %}NL{% else %}DSQ{% endif %}</abbr>{% endif %}</td>
+                                      <td class="text-center"><span class="sitio-numero">{{ r.inscripcion.numero }}</span></td>
+                                      <td>
+                                        {{ r.inscripcion.nombre_mostrado }}
+                                        {% if r.pole %}<span class="sitio-tag" title="Pole position">P</span>{% endif %}
+                                        {% if r.vuelta_rapida %}<span class="sitio-tag" title="Vuelta rápida">VR</span>{% endif %}
+                                        {% if r.estado == "PROVISORIO" %}<span class="sitio-prov" title="Provisorio: falta validar">*</span>{% endif %}
+                                      </td>
+                                      <td class="text-end">{{ r.puntos|floatformat:"-2" }}</td>
+                                    </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="sitio-aviso">El calendario se publica pronto.</p>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <p class="sitio-aviso">Las categorías de este campeonato se publican pronto.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "layouts/base_sitio.html" %}
+{# Ficha pública de un auto (publicado por su piloto principal y aprobado). #}
+
+{% block description %}{{ auto }}{% if auto.categoria %} · {{ auto.categoria }}{% endif %}: ficha, pilotos y galería.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container">
+    <nav aria-label="Ubicación" class="sitio-migas">
+      <a href="{% url 'sitio:pilotos' %}">Pilotos</a> <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <span>{{ auto.marca }} {{ auto.modelo }}</span>
+    </nav>
+    <div class="row g-4 align-items-center">
+      <div class="col-12 col-md-6">
+        <div class="sitio-auto-foto sitio-auto-foto-grande">
+          {% if auto.portada_id %}
+            <img src="{% url 'archivo' auto.portada_id %}" alt="{{ auto.marca }} {{ auto.modelo }}">
+          {% else %}
+            <i class="bi bi-car-front" aria-hidden="true"></i>
+          {% endif %}
+          {% if auto.numero_competicion %}<span class="sitio-numero sitio-numero-grande">{{ auto.numero_competicion }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <h1 class="sitio-h1 mb-2">{{ auto.marca }} {{ auto.modelo }}</h1>
+        <dl class="sitio-datos">
+          {% if auto.anio %}<div><dt>Año</dt><dd>{{ auto.anio }}</dd></div>{% endif %}
+          {% if auto.categoria %}<div><dt>Categoría</dt><dd>{{ auto.categoria }}</dd></div>{% endif %}
+          {% if auto.numero_competicion %}<div><dt>Número</dt><dd>{{ auto.numero_competicion }}</dd></div>{% endif %}
+        </dl>
+        {% if pilotos %}
+          <h2 class="h6 mt-3">Pilotos</h2>
+          <div class="d-flex flex-wrap gap-2">
+            {% for pa in pilotos %}
+              {% if pa.piloto.visible_en_web %}
+                <a class="sitio-chip" href="{% url 'sitio:piloto' pa.piloto.slug %}">{{ pa.piloto.nombre_publico }}{% if pa.principal %}<small class="text-body-secondary ms-1">(principal)</small>{% endif %}</a>
+              {% else %}
+                <span class="sitio-chip">{{ pa.piloto.nombre_publico }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if auto.descripcion %}<p class="sitio-cabecera-texto">{{ auto.descripcion|linebreaksbr }}</p>{% endif %}
+  </div>
+</section>
+
+<div class="container">
+  {% if inscripciones %}
+    <section class="sitio-seccion pb-0">
+      <h2 class="sitio-seccion-titulo">Campeonatos</h2>
+      <ul class="sitio-lista">
+        {% for i in inscripciones %}
+          <li>
+            <a class="sitio-lista-item" href="{% url 'sitio:campeonato' i.categoria.campeonato.slug %}?categoria={{ i.categoria_id }}">
+              <span class="sitio-numero sitio-numero-grande">{{ i.numero }}</span>
+              <span class="flex-grow-1">
+                <strong>{{ i.categoria.campeonato }}</strong>
+                <small class="d-block text-body-secondary">{{ i.categoria.nombre }} · {{ i.nombre_mostrado }}</small>
+              </span>
+              <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% include "sitio/campeonatos/_galeria.html" %}
+</div>
+{% endblock %}

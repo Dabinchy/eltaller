@@ -1,28 +1,113 @@
 {% extends "layouts/base_sitio.html" %}
-{# Portada de Campeonatos (provisoria). En el paso siguiente: campeonatos en curso, tablas y pilotos. #}
+{# Portada de Campeonatos: los que están en curso con su podio, próximas fechas y finalizados. #}
 
 {% block description %}Campeonatos: fechas, resultados, tablas de posiciones y pilotos.{% endblock %}
 
 {% block content %}
-<section class="sitio-hero">
+<section class="sitio-hero sitio-hero-chico">
   <div class="container">
     {% include "sitio/_logo_parte.html" with p=parte grande=True %}
     <p class="lead">Fechas, resultados y tablas de posiciones de cada campeonato, y el perfil de sus pilotos.</p>
-    <div class="sitio-hero-acciones">
-      <a class="btn btn-lg btn-outline-light" href="{% url 'sitio:pilotos' %}">
-        <i class="bi bi-people me-1" aria-hidden="true"></i> Pilotos
-      </a>
-      <a class="btn btn-lg btn-outline-light" href="{{ parte.ingreso.url }}">
-        <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
-      </a>
-    </div>
   </div>
 </section>
 
-<section class="sitio-seccion">
-  <div class="container">
-    <h2 class="sitio-seccion-titulo">Campeonatos en curso</h2>
-    <p class="sitio-aviso"><i class="bi bi-cone-striped me-1" aria-hidden="true"></i> Estamos preparando esta sección: pronto vas a ver acá los campeonatos, las tablas y los últimos resultados.</p>
-  </div>
-</section>
+{% if not en_curso and not finalizados %}
+  <section class="sitio-seccion">
+    <div class="container text-center">
+      <p class="sitio-aviso"><i class="bi bi-flag me-1" aria-hidden="true"></i> Todavía no hay campeonatos publicados. Volvé pronto.</p>
+      <a class="btn btn-outline-light" href="{% url 'sitio:pilotos' %}">Ver pilotos</a>
+    </div>
+  </section>
+{% endif %}
+
+{% if en_curso %}
+  <section class="sitio-seccion">
+    <div class="container">
+      <h2 class="sitio-seccion-titulo">En curso</h2>
+      <div class="row g-3">
+        {% for camp, resumen in en_curso %}
+          <div class="col-12 col-lg-6">
+            <article class="sitio-card sitio-camp-card">
+              <header class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                <div>
+                  <h3 class="mb-1"><a href="{% url 'sitio:campeonato' camp.slug %}">{{ camp.nombre }} {{ camp.temporada }}</a></h3>
+                  <a class="sitio-chip" href="{% url 'sitio:asociacion' camp.asociacion.slug %}">{{ camp.asociacion.nombre }}</a>
+                </div>
+                <span class="badge sitio-badge-vivo">En curso</span>
+              </header>
+              {% for r in resumen %}
+                <div class="sitio-podio-mini">
+                  <div class="sitio-podio-mini-cat">{{ r.categoria.nombre }}{% if r.provisoria %} <span class="sitio-prov" title="Incluye resultados sin validar">*</span>{% endif %}</div>
+                  {% if r.podio %}
+                    <ol class="sitio-podio-lista">
+                      {% for f in r.podio %}
+                        <li>
+                          <span class="sitio-medalla sitio-medalla-{{ f.posicion }}">{{ f.posicion }}</span>
+                          <span class="sitio-numero">{{ f.numero }}</span>
+                          {% with slug=f.perfil_publico_slug %}
+                            {% if slug %}<a href="{% url 'sitio:piloto' slug %}">{{ f.nombre }}</a>{% else %}<span>{{ f.nombre }}</span>{% endif %}
+                          {% endwith %}
+                          <strong class="ms-auto">{{ f.puntos|floatformat:"-2" }} pts</strong>
+                        </li>
+                      {% endfor %}
+                    </ol>
+                  {% else %}
+                    <p class="sitio-aviso mb-0">Sin resultados todavía.</p>
+                  {% endif %}
+                </div>
+              {% empty %}
+                <p class="sitio-aviso">Las categorías se publican pronto.</p>
+              {% endfor %}
+              <a class="btn btn-sm sitio-btn-accion mt-2" href="{% url 'sitio:campeonato' camp.slug %}">
+                <i class="bi bi-table" aria-hidden="true"></i> Tabla y resultados
+              </a>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{% if proximas %}
+  <section class="sitio-seccion pt-0">
+    <div class="container">
+      <h2 class="sitio-seccion-titulo">Próximas fechas</h2>
+      <ul class="sitio-lista">
+        {% for f in proximas %}
+          <li>
+            <a href="{% url 'sitio:campeonato' f.campeonato.slug %}#fecha-{{ f.numero }}" class="sitio-lista-item">
+              <span class="sitio-dia"><strong>{{ f.dia|date:"d" }}</strong><small>{{ f.dia|date:"M" }}</small></span>
+              <span class="flex-grow-1">
+                <strong>{{ f.campeonato.nombre }}</strong> · Fecha {{ f.numero }}{% if f.nombre %} · {{ f.nombre }}{% endif %}
+                <small class="d-block text-body-secondary"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ f.circuito }}</small>
+              </span>
+              {% if f.multiplicador != 1 %}<span class="badge sitio-badge-x">x{{ f.multiplicador|floatformat:"-2" }}</span>{% endif %}
+              <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% endif %}
+
+{% if finalizados %}
+  <section class="sitio-seccion pt-0">
+    <div class="container">
+      <h2 class="sitio-seccion-titulo">Temporadas anteriores</h2>
+      <ul class="sitio-lista">
+        {% for c in finalizados %}
+          <li>
+            <a href="{% url 'sitio:campeonato' c.slug %}" class="sitio-lista-item">
+              <i class="bi bi-trophy text-body-secondary" aria-hidden="true"></i>
+              <span class="flex-grow-1"><strong>{{ c.nombre }} {{ c.temporada }}</strong> <small class="text-body-secondary">· {{ c.asociacion.nombre }}</small></span>
+              <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% endif %}
 {% endblock %}

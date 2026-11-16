@@ -34,12 +34,13 @@ urlpatterns = [
     path("prepa/consulta/", P, {"seccion": "Contanos tu proyecto"}, name="prepa_consulta"),
 
     # Campeonatos
-    path("campeonatos/", views.portada, {"parte": "campeonatos"}, name="campeonatos"),
-    path("campeonatos/<slug:slug>/", P, {"seccion": "Campeonatos"}, name="campeonato"),
-    path("pilotos/", P, {"seccion": "Pilotos"}, name="pilotos"),
-    path("pilotos/<slug:slug>/", P, {"seccion": "Pilotos"}, name="piloto"),
-    path("autos/<slug:slug>/", P, {"seccion": "Autos"}, name="auto"),
-    path("asociaciones/<slug:slug>/", P, {"seccion": "Asociaciones"}, name="asociacion"),
+    path("campeonatos/", views.campeonatos, name="campeonatos"),
+    path("campeonatos/<slug:slug>/", views.campeonato, name="campeonato"),
+    path("pilotos/", views.pilotos, name="pilotos"),
+    path("pilotos/<slug:slug>/", views.piloto, name="piloto"),
+    path("autos/<slug:slug>/", views.auto, name="auto"),
+    path("asociaciones/", views.asociaciones, name="asociaciones"),
+    path("asociaciones/<slug:slug>/", views.asociacion, name="asociacion"),
 
     # Compartido: cada publicación indicará a qué parte pertenece
     path("publicaciones/", P, {"seccion": "Novedades"}, name="publicaciones"),

@@ -1,0 +1,4 @@
+{# Logo de la asociación o su inicial. a = Asociacion. #}
+<span class="sitio-avatar sitio-avatar-cuadrado" style="--tam:{{ tam|default:56 }}px" aria-hidden="true">
+  {% if a.logo %}<img src="{{ a.logo.url }}" alt="" loading="lazy">{% else %}{{ a.nombre|first|upper }}{% endif %}
+</span>

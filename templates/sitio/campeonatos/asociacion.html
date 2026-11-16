@@ -1,0 +1,67 @@
+{% extends "layouts/base_sitio.html" %}
+
+{% block description %}{{ asoc.nombre }}: campeonatos y pilotos.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container">
+    <nav aria-label="Ubicación" class="sitio-migas">
+      <a href="{% url 'sitio:asociaciones' %}">Asociaciones</a> <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <span>{{ asoc.nombre }}</span>
+    </nav>
+    <div class="sitio-perfil">
+      {% include "sitio/campeonatos/_logo_asociacion.html" with a=asoc tam=96 %}
+      <div>
+        <h1 class="sitio-h1 mb-2">{{ asoc.nombre }}</h1>
+        <div class="d-flex flex-wrap gap-2">
+          {% if asoc.instagram %}
+            <a class="sitio-chip" href="https://www.instagram.com/{{ asoc.instagram|urlencode }}/" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram me-1" aria-hidden="true"></i>@{{ asoc.instagram }}</a>
+          {% endif %}
+          {% if asoc.sitio_web %}
+            <a class="sitio-chip" href="{{ asoc.sitio_web }}" target="_blank" rel="noopener noreferrer nofollow"><i class="bi bi-globe me-1" aria-hidden="true"></i>Sitio web</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if asoc.descripcion %}<p class="sitio-cabecera-texto">{{ asoc.descripcion|linebreaksbr }}</p>{% endif %}
+  </div>
+</section>
+
+<div class="container">
+  <section class="sitio-seccion pb-0">
+    <h2 class="sitio-seccion-titulo">Campeonatos</h2>
+    {% if campeonatos %}
+      <ul class="sitio-lista">
+        {% for c in campeonatos %}
+          <li>
+            <a class="sitio-lista-item" href="{% url 'sitio:campeonato' c.slug %}">
+              <i class="bi bi-trophy text-body-secondary" aria-hidden="true"></i>
+              <span class="flex-grow-1"><strong>{{ c.nombre }} {{ c.temporada }}</strong></span>
+              {% if c.estado == "EN_CURSO" %}<span class="badge sitio-badge-vivo">En curso</span>{% else %}<span class="badge text-bg-secondary">Finalizado</span>{% endif %}
+              <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="sitio-aviso">Todavía no publicó campeonatos.</p>
+    {% endif %}
+  </section>
+
+  {% if pilotos %}
+    <section class="sitio-seccion">
+      <h2 class="sitio-seccion-titulo">Pilotos</h2>
+      <div class="row g-3">
+        {% for p in pilotos %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <a class="sitio-card sitio-piloto-card" href="{% url 'sitio:piloto' p.slug %}">
+              {% include "sitio/campeonatos/_avatar.html" with p=p tam=64 %}
+              <h3 class="h6 mb-0 mt-2">{{ p.nombre_publico }}</h3>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

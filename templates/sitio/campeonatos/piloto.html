@@ -1,0 +1,99 @@
+{% extends "layouts/base_sitio.html" %}
+{# Perfil público de un piloto (sólo si está aprobado y es público). #}
+
+{% block description %}{{ perfil.nombre_publico }}: perfil de piloto, campeonatos, autos y palmarés.{% endblock %}
+
+{% block content %}
+<section class="sitio-cabecera">
+  <div class="container">
+    <nav aria-label="Ubicación" class="sitio-migas">
+      <a href="{% url 'sitio:pilotos' %}">Pilotos</a> <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      <span>{{ perfil.nombre_publico }}</span>
+    </nav>
+    <div class="sitio-perfil">
+      {% if perfil.foto %}
+        <img class="sitio-perfil-foto" src="{% url 'foto_perfil' perfil.slug %}" alt="Foto de {{ perfil.nombre_publico }}">
+      {% else %}
+        {% include "sitio/campeonatos/_avatar.html" with p=perfil tam=120 %}
+      {% endif %}
+      <div>
+        <h1 class="sitio-h1 mb-2">{{ perfil.nombre_publico }}</h1>
+        <div class="d-flex flex-wrap gap-2">
+          {% for a in asociaciones %}
+            <a class="sitio-chip" href="{% url 'sitio:asociacion' a.slug %}"><i class="bi bi-people me-1" aria-hidden="true"></i>{{ a.nombre }}</a>
+          {% endfor %}
+          {% if perfil.instagram %}
+            <a class="sitio-chip" href="https://www.instagram.com/{{ perfil.instagram|urlencode }}/" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram me-1" aria-hidden="true"></i>@{{ perfil.instagram }}</a>
+          {% endif %}
+          {% if perfil.sitio_web %}
+            <a class="sitio-chip" href="{{ perfil.sitio_web }}" target="_blank" rel="noopener noreferrer nofollow"><i class="bi bi-globe me-1" aria-hidden="true"></i>Sitio web</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if perfil.bio %}<p class="sitio-cabecera-texto">{{ perfil.bio|linebreaksbr }}</p>{% endif %}
+  </div>
+</section>
+
+<div class="container">
+  {% if participaciones %}
+    <section class="sitio-seccion pb-0">
+      <h2 class="sitio-seccion-titulo">Campeonatos</h2>
+      <ul class="sitio-lista">
+        {% for p in participaciones %}
+          {% with camp=p.inscripcion.categoria.campeonato %}
+            <li>
+              <a class="sitio-lista-item" href="{% url 'sitio:campeonato' camp.slug %}?categoria={{ p.inscripcion.categoria_id }}">
+                <span class="sitio-numero sitio-numero-grande">{{ p.inscripcion.numero }}</span>
+                <span class="flex-grow-1">
+                  <strong>{{ camp.nombre }} {{ camp.temporada }}</strong>
+                  <small class="d-block text-body-secondary">{{ p.inscripcion.categoria.nombre }} · {{ camp.asociacion.nombre }}</small>
+                </span>
+                {% if p.fila and p.fila.puntos %}
+                  <span class="text-end">
+                    <strong class="d-block">{{ p.fila.posicion }}° de {{ p.total }}</strong>
+                    <small class="text-body-secondary">{{ p.fila.puntos|floatformat:"-2" }} pts</small>
+                  </span>
+                {% endif %}
+                <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+              </a>
+            </li>
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if autos %}
+    <section class="sitio-seccion pb-0">
+      <h2 class="sitio-seccion-titulo">Autos</h2>
+      <div class="row g-3">
+        {% for a in autos %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            {% include "sitio/campeonatos/_auto_card.html" with auto=a %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if palmares %}
+    <section class="sitio-seccion pb-0">
+      <h2 class="sitio-seccion-titulo">Palmarés</h2>
+      <ul class="sitio-lista">
+        {% for p in palmares %}
+          <li class="sitio-lista-item">
+            <span class="sitio-anio">{{ p.anio }}</span>
+            <span class="flex-grow-1">
+              <strong>{{ p.resultado }}</strong> · {{ p.campeonato }}{% if p.categoria %} ({{ p.categoria }}){% endif %}
+              {% if p.detalle %}<small class="d-block text-body-secondary">{{ p.detalle }}</small>{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% include "sitio/campeonatos/_galeria.html" %}
+</div>
+{% endblock %}

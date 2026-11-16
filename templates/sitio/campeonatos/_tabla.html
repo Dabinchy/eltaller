@@ -1,0 +1,42 @@
+{# Tabla de posiciones de una categoría. filas = lista de FilaTabla; provisoria = bool. #}
+{% if filas %}
+  <div class="table-responsive sitio-tabla-wrap">
+    <table class="table sitio-tabla mb-0">
+      <caption class="visually-hidden">Tabla de posiciones</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="text-center">Pos</th>
+          <th scope="col" class="text-center">N°</th>
+          <th scope="col">Piloto</th>
+          <th scope="col" class="text-end">Pts</th>
+          <th scope="col" class="text-center d-none d-sm-table-cell" title="Victorias en finales">Vic</th>
+          <th scope="col" class="text-center d-none d-sm-table-cell" title="Podios en finales">Pod</th>
+          <th scope="col" class="text-center d-none d-md-table-cell" title="Carreras">Car</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in filas %}
+          <tr{% if f.posicion <= 3 and f.puntos %} class="sitio-podio-{{ f.posicion }}"{% endif %}>
+            <td class="text-center fw-bold">{{ f.posicion }}</td>
+            <td class="text-center"><span class="sitio-numero">{{ f.numero }}</span></td>
+            <td>
+              {% with slug=f.perfil_publico_slug %}
+                {% if slug %}<a href="{% url 'sitio:piloto' slug %}">{{ f.nombre }}</a>{% else %}{{ f.nombre }}{% endif %}
+              {% endwith %}
+              {% if f.provisorios %}<span class="sitio-prov" title="Incluye resultados todavía sin validar">*</span>{% endif %}
+            </td>
+            <td class="text-end fw-bold">{{ f.puntos|floatformat:"-2" }}</td>
+            <td class="text-center d-none d-sm-table-cell">{{ f.victorias }}</td>
+            <td class="text-center d-none d-sm-table-cell">{{ f.podios }}</td>
+            <td class="text-center d-none d-md-table-cell">{{ f.carreras }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if provisoria %}
+    <p class="sitio-aviso mt-2 mb-0"><span class="sitio-prov">*</span> Incluye resultados provisorios: los cargan los pilotos y todavía los tienen que validar los moderadores.</p>
+  {% endif %}
+{% else %}
+  <p class="sitio-aviso mb-0">Todavía no hay pilotos inscriptos en esta categoría.</p>
+{% endif %}

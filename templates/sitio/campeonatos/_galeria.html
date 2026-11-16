@@ -1,0 +1,29 @@
+{# Fotos y videos públicos. fotos / videos = listas de Archivo ya filtradas. #}
+{% if fotos or videos %}
+  <section class="sitio-seccion pb-0">
+    <h2 class="sitio-seccion-titulo">Galería</h2>
+    {% if fotos %}
+      <div class="sitio-galeria">
+        {% for a in fotos %}
+          <a href="{% url 'archivo' a.pk %}" target="_blank" rel="noopener" title="{{ a.titulo }}">
+            <img src="{% url 'archivo' a.pk %}?mini=1" alt="{{ a.titulo }}" loading="lazy">
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if videos %}
+      <div class="row g-3 mt-1">
+        {% for a in videos %}
+          <div class="col-12 col-md-6">
+            <div class="ratio ratio-16x9 sitio-video">
+              <iframe src="{{ a.video_embed_url }}" title="{{ a.titulo }}" loading="lazy"
+                      allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <p class="small text-body-secondary mt-1 mb-0">{{ a.titulo }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+{% endif %}

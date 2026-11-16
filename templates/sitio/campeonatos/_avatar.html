@@ -1,0 +1,4 @@
+{# Foto chica del piloto o su inicial. p = PerfilPiloto (visible en la web). tam = px (por defecto 40). #}
+<span class="sitio-avatar" style="--tam:{{ tam|default:40 }}px" aria-hidden="true">
+  {% if p.foto %}<img src="{% url 'foto_perfil' p.slug %}?mini=1" alt="" loading="lazy">{% else %}{{ p.nombre_publico|first|upper }}{% endif %}
+</span>
