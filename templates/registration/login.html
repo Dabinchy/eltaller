@@ -11,8 +11,8 @@
     <div class="cc-auth-head">
       <a href="{{ parte.inicio }}" aria-label="Volver a {{ parte.nombre }}">
         {% if parte.logo %}
-          <img src="{{ parte.logo }}" alt="{{ parte.nombre }}"
-               style="height:{% if parte.clave == 'prepa' %}auto;width:300px{% else %}110px;width:auto{% endif %};max-width:100%;object-fit:contain;border-radius:8px">
+          <img src="{{ parte.logo }}" alt="{{ parte.nombre }}" class="cc-logo-placa"
+               style="height:{% if parte.clave == 'prepa' %}auto;width:300px{% else %}110px;width:auto{% endif %};max-width:100%;object-fit:contain">
         {% else %}
           {% include "sitio/_logo_parte.html" with p=parte %}
         {% endif %}

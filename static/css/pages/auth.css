@@ -1,5 +1,6 @@
 /* static/css/pages/auth.css
-   Auth pages (reset CSS, 2025-12)
+   Pantallas sin menú: ingreso, registro y errores (layouts/base_auth.html).
+   El color sale de data-parte (El Taller, El Prepa o Campeonatos): ver app/tokens.css.
 */
 
 .cc-auth-wrap{
@@ -8,8 +9,7 @@
   place-items: center;
   padding: 22px 14px;
   background:
-    radial-gradient(900px 400px at 15% 10%, rgba(var(--cc-brand-rgb), .18), transparent 60%),
-    radial-gradient(900px 400px at 85% 30%, rgba(var(--cc-premium-rgb), .10), transparent 55%),
+    radial-gradient(900px 420px at 50% 0%, rgba(var(--cc-mod-rgb), .16), transparent 65%),
     var(--cc-bg);
 }
 
@@ -29,15 +29,6 @@
   gap: 10px;
   margin-bottom: 12px;
   text-align: center;
-}
-
-.cc-auth-mark{
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--cc-brand) 35%, var(--cc-border));
-  background: color-mix(in srgb, var(--cc-brand) 10%, var(--cc-surface-2));
-  padding: 8px;
 }
 
 .cc-auth-title{
@@ -76,13 +67,18 @@
   box-shadow: 0 0 0 .2rem rgba(var(--cc-mod-rgb), .18);
 }
 
-/* Button */
+/* Botón principal, con el color de la marca */
 .cc-auth-btn{
-  background: var(--cc-brand);
-  border-color: color-mix(in srgb, var(--cc-brand) 70%, black);
-  color: #fff;
+  background: var(--cc-mod);
+  border: 1px solid var(--cc-mod);
+  color: var(--sitio-acento-texto, #fff);
   font-weight: 900;
   padding: 10px 12px;
   border-radius: 14px;
 }
-.cc-auth-btn:hover{ background: var(--cc-brand-2); border-color: color-mix(in srgb, var(--cc-brand-2) 70%, black); }
+.cc-auth-btn:hover,
+.cc-auth-btn:focus-visible{
+  background: color-mix(in srgb, var(--cc-mod) 86%, var(--cc-text));
+  border-color: color-mix(in srgb, var(--cc-mod) 86%, var(--cc-text));
+  color: var(--sitio-acento-texto, #fff);
+}

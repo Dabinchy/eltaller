@@ -28,6 +28,7 @@ class Parte:
     icono: str
     lema: str                         # texto corto debajo del nombre (pie, pestañas en pantallas grandes)
     logo: str = ""                    # archivo estático; vacío = se muestra el nombre con el ícono
+    favicon: str = ""                 # ícono de la pestaña del navegador (archivo estático)
     menu: tuple = field(default_factory=tuple)   # (título, nombre de URL)
     accion: tuple | None = None       # botón principal: (texto, nombre de URL, ícono, texto corto)
     ingreso: tuple = ("Ingresar", "bi-box-arrow-in-right")   # botón de ingreso: (texto, ícono)
@@ -42,6 +43,7 @@ PARTES: dict[str, Parte] = {
         icono="bi-wrench-adjustable",
         lema="Mecánica de confianza",
         logo=settings.TALLER_MARCA_LOGO,
+        favicon=settings.TALLER_MARCA_FAVICON,
         menu=(
             ("Servicios", "sitio:servicios"),
             ("Trabajos", "sitio:trabajos"),
@@ -59,6 +61,7 @@ PARTES: dict[str, Parte] = {
         icono="bi-speedometer2",
         lema="Competición, personalización y clásicos",
         logo=settings.PORTAL_MARCA_LOGO,
+        favicon=settings.PORTAL_MARCA_FAVICON,
         menu=(
             ("Competición", "sitio:prepa_competicion"),
             ("Personalización", "sitio:prepa_personalizacion"),
@@ -75,6 +78,7 @@ PARTES: dict[str, Parte] = {
         inicio="sitio:campeonatos",
         icono="bi-trophy",
         lema="Resultados, tablas y pilotos",
+        favicon=settings.CAMPEONATOS_FAVICON,
         menu=(
             ("Campeonatos", "sitio:campeonatos"),
             ("Pilotos", "sitio:pilotos"),
@@ -112,10 +116,11 @@ def parte_de_request(request) -> str:
 
 
 def marca_de(clave: str) -> dict:
-    """Nombre y logo para el título de la pestaña, el ícono y la pantalla de ingreso."""
+    """Clave, nombre, logo e ícono de pestaña para el título, el color y la pantalla de ingreso."""
     parte = PARTES[clave]
     logo = parte.logo or settings.TALLER_MARCA_LOGO
-    return {"nombre": parte.nombre, "logo": static(logo)}
+    favicon = parte.favicon or settings.TALLER_MARCA_FAVICON
+    return {"clave": clave, "nombre": parte.nombre, "logo": static(logo), "favicon": static(favicon)}
 
 
 def _url(nombre: str) -> str | None:

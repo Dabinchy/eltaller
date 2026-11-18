@@ -110,8 +110,11 @@ LOGOUT_REDIRECT_URL = "sitio:inicio"
 # Marcas (se pueden cambiar sin tocar templates). Siempre se usan éstas, aunque Empresa tenga logo.
 TALLER_MARCA_NOMBRE = "El Taller"
 TALLER_MARCA_LOGO = "img/brand/el-taller.jpg"
+TALLER_MARCA_FAVICON = "img/brand/icono-taller.svg"
 PORTAL_MARCA_NOMBRE = "El Prepa"
 PORTAL_MARCA_LOGO = "img/brand/el-prepa.jpg"
+PORTAL_MARCA_FAVICON = "img/brand/icono-prepa.svg"
+CAMPEONATOS_FAVICON = "img/brand/icono-campeonatos.svg"
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 

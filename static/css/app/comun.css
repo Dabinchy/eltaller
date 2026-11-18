@@ -15,3 +15,36 @@
   transition: transform .2s ease;
 }
 .cc-skip:focus { transform: translateY(0); }
+
+/* Placa detrás de los logos. Los logos actuales son JPG con fondo gris claro: la placa tiene ese
+   mismo gris para que el logo se vea prolijo sobre fondo oscuro. Cuando se reemplacen por PNG o SVG
+   transparentes, poner --marca-logo-fondo: transparent en app/tokens.css. */
+.cc-logo-placa {
+  background: var(--marca-logo-fondo);
+  border-radius: 10px;
+  padding: 4px 8px;
+}
+.cc-logo-placa.sitio-logo-grande { border-radius: 18px; padding: 14px 22px; }
+
+/* Botón de tema en las pantallas sin menú (ingreso, registro, errores) */
+.cc-tema-flotante {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 1040;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  font-size: 18px;
+  box-shadow: var(--cc-shadow-1);
+}
+.cc-tema-flotante:hover { border-color: var(--cc-mod-border); }
+.cc-tema-flotante:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .25); }
+
+/* Foco visible y del color de la marca en todo el sistema */
+:focus-visible { outline-color: var(--cc-mod); }

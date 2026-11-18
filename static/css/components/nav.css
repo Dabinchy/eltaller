@@ -1,8 +1,6 @@
 /* static/css/components/nav.css
-   CajaClara POS v2 — Navigation (v2 "Apple business")
-   Flyout + Accordion + Bottomnav + More offcanvas
-   Mantener comportamiento: #layout.cc-flyout-open + [data-cc-flyout-close]
-   NO tocar JS / IDs / data-attributes
+   Menú lateral (flyout) con acordeón, barra inferior del celular y panel "Más".
+   Comportamiento en app.js: #layout.cc-flyout-open + [data-cc-flyout-close].
 */
 
 /* Scroll lock cuando el menú está abierto */
@@ -78,14 +76,6 @@
   color: rgba(var(--cc-text-rgb), .94);
   min-width: 0;
 }
-.cc-mark-sm img{ display:block; border-radius: 12px; }
-.cc-name{
-  font-weight: 780;
-  letter-spacing: .2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .cc-x{
   width: 40px;
@@ -135,18 +125,8 @@
   --bs-accordion-active-bg: transparent;
 }
 
-/* Mapeo colores por sección */
-.cc-acc .accordion-item{ --cc-section: var(--cc-mod); --cc-section-2: var(--cc-mod-2); }
-.cc-acc .accordion-item[data-cc-mod="inicio"]{ --cc-section: var(--mod-inicio); --cc-section-2: var(--mod-inicio-2); }
-.cc-acc .accordion-item[data-cc-mod="ventas"]{ --cc-section: var(--mod-ventas); --cc-section-2: var(--mod-ventas-2); }
-.cc-acc .accordion-item[data-cc-mod="productos"]{ --cc-section: var(--mod-productos); --cc-section-2: var(--mod-productos-2); }
-.cc-acc .accordion-item[data-cc-mod="caja"]{ --cc-section: var(--mod-caja); --cc-section-2: var(--mod-caja-2); }
-.cc-acc .accordion-item[data-cc-mod="precios"]{ --cc-section: var(--mod-precios); --cc-section-2: var(--mod-precios-2); }
-.cc-acc .accordion-item[data-cc-mod="clientes"]{ --cc-section: var(--mod-clientes); --cc-section-2: var(--mod-clientes-2); }
-.cc-acc .accordion-item[data-cc-mod="compras"]{ --cc-section: var(--mod-compras); --cc-section-2: var(--mod-compras-2); }
-.cc-acc .accordion-item[data-cc-mod="analisis"]{ --cc-section: var(--mod-analisis); --cc-section-2: var(--mod-analisis-2); }
-.cc-acc .accordion-item[data-cc-mod="contabilidad"]{ --cc-section: var(--mod-contabilidad); --cc-section-2: var(--mod-contabilidad-2); }
-.cc-acc .accordion-item[data-cc-mod="sistema"]{ --cc-section: var(--mod-sistema); --cc-section-2: var(--mod-sistema-2); }
+/* Color de cada sección: el acento del área (El Taller en el panel, El Prepa en el portal). */
+.cc-acc .accordion-item{ --cc-section: var(--cc-mod); }
 
 .cc-acc .accordion-item{
   border: 1px solid var(--cc-border);
@@ -240,14 +220,14 @@
       color-mix(in srgb, var(--cc-section) 14%, rgba(var(--cc-surface-2-rgb), .52)),
       rgba(var(--cc-surface-2-rgb), .30));
   border: 1px solid color-mix(in srgb, var(--cc-section) 30%, var(--cc-border));
-  color: color-mix(in srgb, var(--cc-section) 88%, rgba(var(--cc-text-rgb), .92));
+  color: var(--cc-mod-tinta);
   box-shadow: 0 10px 18px rgba(0,0,0,.12);
   flex: 0 0 auto;
 }
 
 .cc-link-text{ min-width: 0; display: grid; gap: 2px; }
-.cc-link-title{ font-weight: 720; font-size: 13px; line-height: 1.1; }
-.cc-link-desc{ font-size: 12px; color: rgba(var(--cc-text-rgb), .68); line-height: 1.1; }
+.cc-link-title{ font-weight: 720; font-size: 14px; line-height: 1.2; }
+.cc-link-desc{ font-size: 12.5px; color: var(--cc-text-muted); line-height: 1.2; }
 
 .cc-link:hover{
   transform: translateY(-1px);
@@ -281,7 +261,7 @@
     linear-gradient(180deg,
       color-mix(in srgb, var(--cc-mod) 18%, rgba(var(--cc-surface-2-rgb), .52)),
       rgba(var(--cc-surface-2-rgb), .28));
-  color: color-mix(in srgb, var(--cc-mod) 92%, rgba(var(--cc-text-rgb), .92));
+  color: var(--cc-mod-tinta);
 }
 
 /* -----------------------------
@@ -334,7 +314,7 @@
 }
 
 .cc-bn-item.is-active{
-  color: rgb(var(--cc-mod-rgb));
+  color: var(--cc-mod-tinta);
   background: color-mix(in srgb, var(--cc-mod) 12%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--cc-mod) 34%, transparent);
 }
@@ -365,14 +345,6 @@
   background: rgba(var(--cc-surface-rgb), .62);
 }
 .cc-more-body{ padding: 12px; }
-.cc-more-group{
-  border: 1px solid var(--cc-border);
-  border-radius: 18px;
-  background: rgba(var(--cc-surface-rgb), .58);
-  padding: 12px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.12);
-}
-
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce){
   .cc-flyout-backdrop,
@@ -381,69 +353,4 @@
   .cc-x{
     transition: none !important;
   }
-}
-
-/* =========================================================
-   Team tint (sutil) para Flyout + Accordion
-   Activo SOLO cuando: html[data-cc-clock="team"] o "argentina"
-   En basic NO cambia nada.
-========================================================= */
-
-/* Paleta “actual” para nav según modo */
-html[data-cc-clock="team"]{
-  --cc-navteam-1: var(--cc-team-on);
-  --cc-navteam-2: var(--cc-team-accent);
-}
-html[data-cc-clock="argentina"]{
-  --cc-navteam-1: rgb(var(--cc-brand-rgb));
-  --cc-navteam-2: rgb(var(--cc-premium-rgb));
-}
-
-/* ---------- Flyout panel: wash suave ---------- */
-html[data-cc-clock="team"] .cc-flyout,
-html[data-cc-clock="argentina"] .cc-flyout{
-  border-right-color: color-mix(in srgb, var(--cc-navteam-1) 18%, var(--cc-border));
-  box-shadow: var(--cc-shadow-2),
-              inset -1px 0 0 color-mix(in srgb, var(--cc-navteam-2) 18%, transparent);
-}
-
-/* Overlay de color (muy sutil) sin tocar el contenido */
-html[data-cc-clock="team"] .cc-flyout::after,
-html[data-cc-clock="argentina"] .cc-flyout::after{
-  content:"";
-  position:absolute;
-  inset: 0;
-  pointer-events:none;
-  z-index: 0; /* queda debajo del contenido (los hijos ya tienen z-index:1) */
-
-  background:
-    radial-gradient(900px 420px at 10% 0%,
-      color-mix(in srgb, var(--cc-navteam-1) 12%, transparent),
-      transparent 62%),
-    radial-gradient(900px 420px at 92% 100%,
-      color-mix(in srgb, var(--cc-navteam-2) 10%, transparent),
-      transparent 64%);
-  opacity: .85;
-}
-
-/* Head del flyout: toque mínimo */
-html[data-cc-clock="team"] .cc-flyout-head,
-html[data-cc-clock="argentina"] .cc-flyout-head{
-  border-bottom-color: color-mix(in srgb, var(--cc-navteam-1) 16%, var(--cc-border));
-  background:
-    radial-gradient(700px 160px at 12% 50%,
-      color-mix(in srgb, var(--cc-navteam-1) 10%, transparent),
-      transparent 60%),
-    rgba(var(--cc-surface-rgb), .55);
-}
-
-/* ---------- Accordion: borde/fondo apenas teñidos (sin tocar colores de sección) ---------- */
-html[data-cc-clock="team"] .cc-acc .accordion-item,
-html[data-cc-clock="argentina"] .cc-acc .accordion-item{
-  border-color: color-mix(in srgb, var(--cc-navteam-1) 12%, var(--cc-border));
-  background:
-    radial-gradient(700px 160px at 12% 0%,
-      color-mix(in srgb, var(--cc-navteam-1) 7%, transparent),
-      transparent 58%),
-    rgba(var(--cc-surface-2-rgb), .26);
 }

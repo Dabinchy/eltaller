@@ -2,7 +2,7 @@
 Datos disponibles en todos los templates.
 
 - empresa: datos del taller (una sola fila).
-- marca: nombre y logo según el área: "El Prepa" en el portal de pilotos, "El Taller" en el panel,
+- marca: clave (taller/prepa/campeonatos: define el color), nombre, logo e ícono de pestaña según el área: "El Prepa" en el portal de pilotos, "El Taller" en el panel,
   y en el sitio público la de la parte que se está viendo (ver sitio/partes.py).
 - menu: el menú del área actual (panel o portal), armado según los permisos. Se calcula sólo
   si el template lo usa.
@@ -38,14 +38,24 @@ def empresa(request):
     def _marca():
         area = _area(request)
         if area == "portal":
-            return {"nombre": settings.PORTAL_MARCA_NOMBRE, "logo": static(settings.PORTAL_MARCA_LOGO)}
+            return {
+                "clave": "prepa",
+                "nombre": settings.PORTAL_MARCA_NOMBRE,
+                "logo": static(settings.PORTAL_MARCA_LOGO),
+                "favicon": static(settings.PORTAL_MARCA_FAVICON),
+            }
         if area == "publico":
             # Sitio público e ingreso: la marca de la parte (El Taller, El Prepa o Campeonatos).
             from sitio import partes
 
             return partes.marca_de(partes.parte_de_request(request))
         # Panel: siempre la marca El Taller (el logo de Empresa no la reemplaza).
-        return {"nombre": settings.TALLER_MARCA_NOMBRE, "logo": static(settings.TALLER_MARCA_LOGO)}
+        return {
+            "clave": "taller",
+            "nombre": settings.TALLER_MARCA_NOMBRE,
+            "logo": static(settings.TALLER_MARCA_LOGO),
+            "favicon": static(settings.TALLER_MARCA_FAVICON),
+        }
 
     return {"empresa": emp, "marca": SimpleLazyObject(_marca)}
 

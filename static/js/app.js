@@ -1,5 +1,6 @@
 /* static/js/app.js
- * Comportamiento común del panel y del portal (JS vanilla, sin dependencias salvo Bootstrap):
+ * Comportamiento común del panel, del portal, del sitio público y del ingreso
+ * (JS vanilla, sin dependencias salvo Bootstrap):
  * - menú lateral (abrir/cerrar, Esc, foco accesible)
  * - tema claro/oscuro guardado en el navegador
  * - link activo del menú según la URL
@@ -10,22 +11,30 @@
 
   /* ---------- Tema ---------- */
   const CLAVE_TEMA = "taller-tema";
-  const aplicarTema = (tema) => {
+  /* Botones con [data-cc-tema] (partials/_tema_boton.html); el ícono muestra el modo al que se pasa. */
+  const aplicarTema = (tema, guardar) => {
     document.documentElement.setAttribute("data-bs-theme", tema);
-    try { localStorage.setItem(CLAVE_TEMA, tema); } catch (e) { /* modo privado */ }
-    const icono = document.getElementById("themeToggleIcon");
-    if (icono) icono.className = tema === "dark" ? "bi bi-sun" : "bi bi-moon-stars";
+    if (guardar) {
+      try { localStorage.setItem(CLAVE_TEMA, tema); } catch (e) { /* modo privado */ }
+    }
+    const texto = tema === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+    document.querySelectorAll("[data-cc-tema]").forEach((b) => {
+      b.setAttribute("aria-label", texto);
+      b.setAttribute("title", texto);
+    });
+    document.querySelectorAll("[data-cc-tema-icono]").forEach((i) => {
+      i.className = tema === "dark" ? "bi bi-sun" : "bi bi-moon-stars";
+    });
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    aplicarTema(document.documentElement.getAttribute("data-bs-theme") || "dark");
-    const botonTema = document.getElementById("themeToggle");
-    if (botonTema) {
-      botonTema.addEventListener("click", () => {
+    aplicarTema(document.documentElement.getAttribute("data-bs-theme") || "dark", false);
+    document.querySelectorAll("[data-cc-tema]").forEach((b) => {
+      b.addEventListener("click", () => {
         const actual = document.documentElement.getAttribute("data-bs-theme") || "dark";
-        aplicarTema(actual === "dark" ? "light" : "dark");
+        aplicarTema(actual === "dark" ? "light" : "dark", true);
       });
-    }
+    });
 
     /* ---------- Menú lateral ---------- */
     const layout = document.getElementById("layout");

@@ -1,9 +1,9 @@
 /* static/css/layout.css
-   CajaClara POS v2 — Layout System (v2 "Apple business")
-   - Eleva t odo el sistema sin tocar lógica/seguridad.
-   - No depende de CSS de tarjetas (venta_card.css / product-card.css).
-   - Respeta módulos vía tokens (--cc-mod / --cc-mod-rgb).
+   Estructura del panel y del portal (layouts/base_app.html): barra fija arriba, contenido,
+   barra inferior en el celular, y estilos de Bootstrap ajustados al tema (tarjetas, formularios,
+   botones, alertas).
 */
+
 
 /* -----------------------------
    Base
@@ -35,22 +35,7 @@ a:hover{ color: var(--bs-link-hover-color); }
   }
   *::-webkit-scrollbar-thumb:hover{ background: rgba(var(--cc-text-rgb), .26); }
 }
-
-/* Skip link */
-.cc-skip{
-  position: absolute;
-  left: 12px;
-  top: 10px;
-  z-index: 1100;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-rgb), .92);
-  color: rgba(var(--cc-text-rgb), .92);
-  transform: translateY(-140%);
-  transition: transform var(--cc-t-med) var(--cc-ease);
-}
-.cc-skip:focus{ transform: translateY(0); outline: none; box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .22); }
+/* El link "Saltar al contenido" (.cc-skip) está en app/comun.css. */
 
 /* -----------------------------
    Layout shell
@@ -63,24 +48,10 @@ a:hover{ color: var(--bs-link-hover-color); }
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-
 }
 
-:root{
-  /* Altura del “chrome” fijo (collabbar + topbar). */
-  --cc-chrome-h: calc(var(--cc-topbar-h) + var(--cc-collabbar-h));
-}
-
-/* Chrome (topbar + collabbar) ya se estiliza en components/topbar.css,
-   acá solo aseguramos stacking */
-.cc-chrome{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1030;
-}
+/* Altura de la barra fija de arriba (topbar). */
+:root{ --cc-chrome-h: var(--cc-topbar-h); }
 
 /* Main content area */
 .cc-content{
@@ -101,65 +72,8 @@ a:hover{ color: var(--bs-link-hover-color); }
 }
 
 /* -----------------------------
-   Typography helpers
+   Tarjetas
 ------------------------------ */
-.cc-h1{
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  margin: 0;
-}
-@media (min-width: 768px){
-  .cc-h1{ font-size: 26px; }
-}
-.cc-h1-muted{ color: rgba(var(--cc-text-rgb), .62); font-weight: 750; }
-.cc-sub{
-  margin: 6px 0 0;
-  color: rgba(var(--cc-text-rgb), .72);
-  max-width: 72ch;
-}
-
-.cc-muted{ color: rgba(var(--cc-text-rgb), .66) !important; }
-.cc-mono{ font-family: var(--cc-font-mono); }
-
-/* Accent text for module */
-.text-mod{ color: rgb(var(--cc-mod-rgb)); }
-
-/* -----------------------------
-   Page header
------------------------------- */
-.cc-pagehead{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 2px 2px 14px;
-}
-
-.cc-pagehead-left{ min-width: 0; }
-.cc-pagehead-actions{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-/* Gold line (AR sol) */
-.cc-goldline{
-  height: 10px;
-  width: 72px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(var(--cc-premium-rgb), .35), rgba(var(--cc-premium-rgb), .95));
-  box-shadow: 0 0 0 3px rgba(var(--cc-premium-rgb), .12);
-}
-
-/* -----------------------------
-   Surfaces / Cards
------------------------------- */
-.cc-surface{
-  background: rgba(var(--cc-surface-rgb), .78);
-  border: 1px solid var(--cc-border);
-  border-radius: 18px;
-  box-shadow: 0 16px 50px rgba(0,0,0,.18);
-  overflow: hidden;
-}
-
 .card{
   border-radius: 18px;
   border: 1px solid var(--cc-border);
@@ -167,73 +81,8 @@ a:hover{ color: var(--bs-link-hover-color); }
   box-shadow: 0 16px 50px rgba(0,0,0,.12);
 }
 
-.cc-card{
-  border-radius: 18px;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-rgb), .78);
-  box-shadow: 0 16px 50px rgba(0,0,0,.12);
-}
-.cc-card-head{
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .40);
-}
-.cc-card-title{
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  color: rgba(var(--cc-text-rgb), .94);
-}
-.cc-card-body{ padding: 14px; }
-
-@media (min-width: 992px){
-  .cc-card-head{ padding: 14px 16px; }
-  .cc-card-body{ padding: 16px; }
-}
-
-/* Mobile "cards list" pattern (compras) */
-.cc-cards{ display: grid; gap: 12px; }
-.cc-cards .cc-card{ padding: 14px; }
-.cc-card-top{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.cc-card-title{ font-size: 14px; }
-.cc-card-sub{ color: rgba(var(--cc-text-rgb), .66); font-size: 12px; margin-top: 2px; }
-
-/* Icono circular de módulo */
-.pos-ico{
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .48);
-  color: rgba(var(--cc-text-rgb), .92);
-}
-.pos-ico--mod{
-  border-color: var(--cc-mod-border);
-  background: color-mix(in srgb, var(--cc-mod) 14%, rgba(var(--cc-surface-2-rgb), .52));
-  color: color-mix(in srgb, var(--cc-mod) 90%, rgba(var(--cc-text-rgb), .92));
-}
-
-/* Soft note / hint */
-.cc-softnote{
-  padding: 12px 12px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--cc-mod) 22%, var(--cc-border));
-  background: color-mix(in srgb, var(--cc-mod) 10%, rgba(var(--cc-surface-2-rgb), .40));
-  color: rgba(var(--cc-text-rgb), .82);
-  font-size: 13px;
-}
-
 /* HR */
-.cc-hr, hr{
+hr{
   border: 0;
   height: 1px;
   background: rgba(var(--cc-text-rgb), .10);
@@ -241,10 +90,8 @@ a:hover{ color: var(--bs-link-hover-color); }
 }
 
 /* -----------------------------
-   Forms (Bootstrap-friendly)
+   Formularios
 ------------------------------ */
-.cc-form .form-label{ color: rgba(var(--cc-text-rgb), .86); }
-
 .form-control, .form-select{
   border-radius: 16px;
   border: 1px solid var(--cc-border);
@@ -285,17 +132,8 @@ a:hover{ color: var(--bs-link-hover-color); }
   box-shadow: 0 0 0 3px rgba(var(--cc-danger-rgb), .14);
 }
 
-/* PIN box pattern (clientes) */
-.cc-pinbox{
-  margin-top: 18px;
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--cc-premium) 24%, var(--cc-border));
-  background: color-mix(in srgb, var(--cc-premium) 8%, rgba(var(--cc-surface-2-rgb), .44));
-}
-
 /* -----------------------------
-   Buttons (módulo)
+   Botones
 ------------------------------ */
 .btn{
   border-radius: 16px;
@@ -304,6 +142,9 @@ a:hover{ color: var(--bs-link-hover-color); }
 }
 
 .btn-primary{
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
   background: var(--cc-mod);
   border-color: var(--cc-mod);
 }
@@ -311,152 +152,10 @@ a:hover{ color: var(--bs-link-hover-color); }
   background: color-mix(in srgb, var(--cc-mod) 92%, black);
   border-color: color-mix(in srgb, var(--cc-mod) 92%, black);
 }
-
-.btn-mod{
-  background: var(--cc-mod);
-  border: 1px solid var(--cc-mod);
-  color: white;
-}
-.btn-mod:hover{
-  background: color-mix(in srgb, var(--cc-mod) 92%, black);
-  border-color: color-mix(in srgb, var(--cc-mod) 92%, black);
-  color: white;
-}
-.btn-mod:focus-visible, .btn-primary:focus-visible{
+.btn-primary:focus-visible{
   outline: none;
   box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .22);
 }
-
-.btn-outline-mod{
-  background: transparent;
-  border: 1px solid var(--cc-mod-border);
-  color: rgba(var(--cc-text-rgb), .92);
-}
-.btn-outline-mod:hover{
-  background: color-mix(in srgb, var(--cc-mod) 12%, transparent);
-  border-color: color-mix(in srgb, var(--cc-mod) 44%, var(--cc-border));
-  color: rgba(var(--cc-text-rgb), .96);
-}
-.btn-outline-mod:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .18);
-}
-
-/* Icon buttons (compras list) */
-.cc-actions{ display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
-.cc-iconbtn{
-  width: 38px;
-  height: 38px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 14px;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .46);
-  color: rgba(var(--cc-text-rgb), .92);
-  text-decoration: none;
-  transition: transform var(--cc-t-fast) var(--cc-ease),
-              background var(--cc-t-fast) var(--cc-ease),
-              border-color var(--cc-t-fast) var(--cc-ease);
-}
-.cc-iconbtn:hover{
-  transform: translateY(-1px);
-  background: rgba(var(--cc-surface-2-rgb), .66);
-  border-color: var(--cc-mod-border);
-}
-.cc-iconbtn:active{ transform: translateY(0); }
-.cc-iconbtn:focus-visible{ outline: none; box-shadow: 0 0 0 4px rgba(var(--cc-mod-rgb), .20); }
-
-.cc-iconbtn--soft{
-  background: color-mix(in srgb, var(--cc-mod) 10%, rgba(var(--cc-surface-2-rgb), .46));
-  border-color: color-mix(in srgb, var(--cc-mod) 22%, var(--cc-border));
-}
-
-/* -----------------------------
-   Toolbar (filters)
------------------------------- */
-.cc-toolbar{
-  padding: 12px 12px;
-  border-bottom: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .26);
-}
-@media (min-width: 992px){
-  .cc-toolbar{ padding: 14px 14px; }
-}
-
-/* -----------------------------
-   Tables
------------------------------- */
-.cc-tablewrap{ border-radius: 18px; overflow: hidden; border: 1px solid var(--cc-border); }
-.cc-table{
-  --cc-row: rgba(var(--cc-surface-2-rgb), .10);
-  --cc-row-hover: color-mix(in srgb, var(--cc-mod) 7%, rgba(var(--cc-surface-2-rgb), .18));
-}
-
-.cc-table thead th{
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: rgba(var(--cc-text-rgb), .72);
-  background: rgba(var(--cc-surface-2-rgb), .38);
-  border-bottom: 1px solid var(--cc-border);
-  padding: 12px 12px;
-}
-.cc-table tbody td{
-  border-top: 1px solid rgba(var(--cc-text-rgb), .08);
-  padding: 12px 12px;
-  color: rgba(var(--cc-text-rgb), .92);
-}
-.cc-table tbody tr:nth-child(odd){ background: var(--cc-row); }
-.cc-table.table-hover tbody tr:hover{
-  background: var(--cc-row-hover);
-}
-
-/* money alignment */
-.cc-money{ font-variant-numeric: tabular-nums; }
-
-/* -----------------------------
-   Badges / pills / diffs
------------------------------- */
-.cc-badge{
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .46);
-  font-weight: 750;
-  font-size: 12px;
-}
-.cc-badge--ok{
-  border-color: rgba(var(--cc-success-rgb), .45);
-  background: rgba(var(--cc-success-rgb), .10);
-  color: rgba(var(--cc-success-rgb), .95);
-}
-.cc-badge--danger{
-  border-color: rgba(var(--cc-danger-rgb), .45);
-  background: rgba(var(--cc-danger-rgb), .10);
-  color: rgba(var(--cc-danger-rgb), .95);
-}
-
-.cc-pill{
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--cc-border);
-  background: rgba(var(--cc-surface-2-rgb), .42);
-  color: rgba(var(--cc-text-rgb), .86);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.cc-diff{
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.cc-diff--ok{ color: rgba(var(--cc-success-rgb), .95); }
-.cc-diff--bad{ color: rgba(var(--cc-danger-rgb), .95); }
 
 /* -----------------------------
    Alerts (si aparecen inline)
@@ -471,15 +170,6 @@ a:hover{ color: var(--bs-link-hover-color); }
 .alert-warning{ border-color: rgba(var(--cc-warning-rgb), .35); background: rgba(var(--cc-warning-rgb), .10); }
 .alert-danger{ border-color: rgba(var(--cc-danger-rgb), .35); background: rgba(var(--cc-danger-rgb), .10); }
 .alert-info{ border-color: rgba(var(--cc-info-rgb), .35); background: rgba(var(--cc-info-rgb), .10); }
-
-/* -----------------------------
-   Responsive tweaks
------------------------------- */
-@media (max-width: 576px){
-  .cc-pagehead{ padding-bottom: 10px; }
-  .cc-goldline{ width: 58px; }
-  .cc-card-body{ padding: 12px; }
-}
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce){

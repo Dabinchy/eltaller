@@ -14,7 +14,7 @@
 
   <header class="sitio-header">
     {# Pestañas para pasar de una parte a otra #}
-    <nav class="sitio-partes" aria-label="Partes del sitio">
+    <nav class="sitio-partes" data-bs-theme="dark" data-parte="{{ parte.clave }}" aria-label="Partes del sitio">
       <div class="container sitio-partes-inner">
         <ul class="sitio-partes-lista">
           {% for p in partes %}
@@ -27,7 +27,7 @@
             </li>
           {% endfor %}
         </ul>
-        <div class="sitio-partes-ingreso d-none d-lg-block">
+        <div class="sitio-partes-extra d-none d-lg-flex">
           {% if user.is_authenticated %}
             <a class="sitio-link-ingreso" href="{% url 'redireccion' %}">
               <i class="bi bi-person-circle" aria-hidden="true"></i> Mi espacio
@@ -37,6 +37,7 @@
               <i class="bi {{ parte.ingreso.icono }}" aria-hidden="true"></i> {{ parte.ingreso.texto }}
             </a>
           {% endif %}
+          {% include "partials/_tema_boton.html" with clase="sitio-tema" %}
         </div>
       </div>
     </nav>
@@ -73,14 +74,15 @@
           </ul>
           <div class="d-lg-none sitio-nav-ingreso">
             {% if user.is_authenticated %}
-              <a class="btn btn-outline-light w-100" href="{% url 'redireccion' %}">
+              <a class="btn sitio-btn-sec flex-grow-1" href="{% url 'redireccion' %}">
                 <i class="bi bi-person-circle me-1" aria-hidden="true"></i> Mi espacio
               </a>
             {% else %}
-              <a class="btn btn-outline-light w-100" href="{{ parte.ingreso.url }}">
+              <a class="btn sitio-btn-sec flex-grow-1" href="{{ parte.ingreso.url }}">
                 <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
               </a>
             {% endif %}
+            {% include "partials/_tema_boton.html" with clase="btn sitio-btn-sec sitio-tema-movil" %}
           </div>
         </div>
       </div>
@@ -92,7 +94,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="sitio-footer">
+  <footer class="sitio-footer" data-bs-theme="dark" data-parte="{{ parte.clave }}">
     <div class="container">
       <div class="row g-4">
         {% for p in partes %}

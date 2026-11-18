@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="cc-app">
+<body class="cc-app cc-auth-body" data-parte="{{ marca.clave|default:'taller' }}">
   <a class="cc-skip" href="#mainContent">Saltar al contenido</a>
+  {% include "partials/_tema_boton.html" with clase="cc-tema-flotante" %}
   <main id="mainContent" class="cc-auth" tabindex="-1">
     {% include "partials/_flash.html" %}
     {% block content %}{% endblock %}
