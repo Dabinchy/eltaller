@@ -1,0 +1,31 @@
+{% extends "layouts/base_sitio.html" %}
+{# Trabajos realizados de El Taller (admin → Trabajos y proyectos, tipo "Auto de calle"). #}
+
+{% block description %}Trabajos realizados en {{ parte.nombre }}: fotos de antes, durante y después.{% endblock %}
+
+{% block content %}
+{% include "sitio/_cabecera.html" with texto="Algunos de los autos que pasaron por el taller." %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="row g-3">
+      {% for t in pagina %}
+        <div class="col-12 col-sm-6 col-lg-4">
+          {% url 'sitio:trabajo' t.slug as url %}
+          {% include "sitio/_trabajo_card.html" with url=url %}
+        </div>
+      {% empty %}
+        <div class="col-12"><p class="sitio-aviso"><i class="bi bi-images me-1" aria-hidden="true"></i>Pronto vas a ver acá los trabajos que hicimos.</p></div>
+      {% endfor %}
+    </div>
+
+    {% if pagina.has_other_pages %}
+      <nav class="sitio-paginas" aria-label="Páginas">
+        {% if pagina.has_previous %}<a class="btn sitio-btn-sec" href="?pagina={{ pagina.previous_page_number }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Anteriores</a>{% endif %}
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+        {% if pagina.has_next %}<a class="btn sitio-btn-sec" href="?pagina={{ pagina.next_page_number }}">Siguientes <i class="bi bi-arrow-right" aria-hidden="true"></i></a>{% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

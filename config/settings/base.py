@@ -135,3 +135,4 @@ CACHES = {
 PORTAL_CUOTA_MB_POR_DEFECTO = 500   # si la asociación no define cuota
 PORTAL_EDAD_MAYORIA = 18            # menores necesitan consentimiento del tutor para publicar
 PORTAL_REGISTROS_POR_IP_HORA = 3    # anti-spam en el registro
+SITIO_CONSULTAS_POR_IP_HORA = 5     # anti-spam en los formularios del sitio (presupuesto, contacto)

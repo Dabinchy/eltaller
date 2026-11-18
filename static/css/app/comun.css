@@ -48,3 +48,6 @@
 
 /* Foco visible y del color de la marca en todo el sistema */
 :focus-visible { outline-color: var(--cc-mod); }
+
+/* Campo trampa de los formularios públicos: invisible para las personas (los robots lo completan). */
+.campo-trampa { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }

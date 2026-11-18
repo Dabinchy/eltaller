@@ -175,3 +175,7 @@ hr{
 @media (prefers-reduced-motion: reduce){
   *{ scroll-behavior: auto !important; }
 }
+
+/* Tarjeta que lleva a otra pantalla (stretched-link) */
+.card.cc-card-link{ position: relative; transition: border-color var(--cc-t-fast) var(--cc-ease); }
+.card.cc-card-link:hover{ border-color: var(--cc-mod-border); }

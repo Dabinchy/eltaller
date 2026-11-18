@@ -1,0 +1,8 @@
+{% load sitio_tags %}
+{# Botón flotante de WhatsApp (El Taller y El Prepa), si la Empresa tiene número. #}
+{% if empresa.whatsapp and parte.clave != "campeonatos" %}
+  {% if parte.clave == "prepa" %}{% whatsapp_url empresa.whatsapp "Hola, les escribo desde la web de El Prepa." as wa %}{% else %}{% whatsapp_url empresa.whatsapp "Hola, les escribo desde la web." as wa %}{% endif %}
+  <a class="sitio-wa" href="{{ wa }}" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" title="Escribinos por WhatsApp">
+    <i class="bi bi-whatsapp" aria-hidden="true"></i>
+  </a>
+{% endif %}

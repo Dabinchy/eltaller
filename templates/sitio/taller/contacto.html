@@ -1,0 +1,30 @@
+{% extends "layouts/base_sitio.html" %}
+{# Contacto: datos de la Empresa (admin → Empresa) y formulario que guarda una Consulta. #}
+
+{% block description %}Dirección, horarios, WhatsApp y teléfono de {{ empresa.nombre|default:parte.nombre }}.{% endblock %}
+
+{% block content %}
+{% include "sitio/_cabecera.html" with texto="Escribinos, llamanos o vení al taller." %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-lg-5">
+        <div class="sitio-panel h-100">
+          <h2 class="h5 fw-bold mb-3">Dónde estamos</h2>
+          {% include "sitio/_contacto_datos.html" %}
+          {% if not empresa.whatsapp and not empresa.telefono and not empresa.direccion %}
+            <p class="sitio-aviso mb-0">Pronto vas a ver acá nuestros datos. Mientras tanto, usá el formulario.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-12 col-lg-7">
+        <div class="sitio-panel">
+          <h2 class="h5 fw-bold mb-3">Mandanos un mensaje</h2>
+          {% include "sitio/_form_consulta.html" with boton="Enviar mensaje" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

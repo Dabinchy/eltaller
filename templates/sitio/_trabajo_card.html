@@ -1,0 +1,17 @@
+{# Tarjeta de un trabajo o proyecto (t = Trabajo). url = su página. #}
+<a class="sitio-card sitio-card-foto" href="{{ url }}">
+  <span class="sitio-card-img">
+    {% if t.portada_miniatura %}
+      <img src="{{ t.portada_miniatura.url }}" alt="" loading="lazy">
+    {% elif t.portada %}
+      <img src="{{ t.portada.url }}" alt="" loading="lazy">
+    {% else %}
+      <i class="bi bi-car-front" aria-hidden="true"></i>
+    {% endif %}
+  </span>
+  <span class="sitio-card-cuerpo">
+    {% if t.auto %}<span class="sitio-card-meta">{{ t.auto }}</span>{% endif %}
+    <h3>{{ t.titulo }}</h3>
+    <p>{{ t.resumen }}</p>
+  </span>
+</a>

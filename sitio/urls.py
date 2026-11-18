@@ -18,11 +18,13 @@ P = views.proximamente
 
 urlpatterns = [
     # El Taller
-    path("", views.portada, {"parte": "taller"}, name="inicio"),
-    path("servicios/", P, {"seccion": "Servicios"}, name="servicios"),
-    path("trabajos/", P, {"seccion": "Trabajos realizados"}, name="trabajos"),
-    path("presupuesto/", P, {"seccion": "Pedir presupuesto"}, name="presupuesto"),
-    path("contacto/", P, {"seccion": "Contacto"}, name="contacto"),
+    path("", views.inicio, name="inicio"),
+    path("servicios/", views.servicios, name="servicios"),
+    path("trabajos/", views.trabajos, name="trabajos"),
+    path("trabajos/<slug:slug>/", views.trabajo, name="trabajo"),
+    path("presupuesto/", views.presupuesto, name="presupuesto"),
+    path("contacto/", views.contacto, name="contacto"),
+    path("consulta-enviada/<str:tipo>/", views.consulta_enviada, name="consulta_enviada"),
 
     # El Prepa
     path("prepa/", views.portada, {"parte": "prepa"}, name="prepa"),

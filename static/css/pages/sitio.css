@@ -462,3 +462,204 @@ a.sitio-lista-item:hover { background: rgba(var(--sitio-acento-rgb), .07); color
 .sitio-galeria img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--cc-t-med) var(--cc-ease); }
 .sitio-galeria a:hover img { transform: scale(1.04); }
 .sitio-video { border-radius: 12px; overflow: hidden; border: 1px solid var(--cc-border); }
+
+/* =========================================================
+   El Taller / El Prepa: contenido cargado desde el admin
+   ========================================================= */
+
+/* Portada con foto de fondo (siempre oscura para que el texto se lea) */
+.sitio-hero-foto {
+  position: relative;
+  padding: clamp(72px, 14vw, 140px) 0 clamp(56px, 10vw, 110px);
+  background:
+    linear-gradient(180deg, rgba(5, 8, 15, .55), rgba(5, 8, 15, .78)),
+    var(--hero-img) center / cover no-repeat,
+    #05080F;
+  color: var(--cc-text);
+  border-bottom: 3px solid var(--sitio-acento);
+}
+.sitio-hero-foto .lead { color: rgba(234, 242, 255, .88); }
+.sitio-hero-titulo {
+  font-size: clamp(30px, 6vw, 54px);
+  font-weight: 900;
+  letter-spacing: -.5px;
+  line-height: 1.1;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Encabezado de sección con link "ver todos" */
+.sitio-seccion-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.sitio-seccion-head .sitio-seccion-titulo { margin-bottom: 0; }
+.sitio-seccion-titulo { font-size: clamp(20px, 3vw, 26px); }
+.sitio-link-mas { color: var(--sitio-acento-tinta); font-weight: 800; text-decoration: none; white-space: nowrap; }
+.sitio-link-mas:hover { color: var(--sitio-acento-tinta); text-decoration: underline; }
+.sitio-seccion-alt { background: var(--cc-surface-2); border-top: 1px solid var(--cc-border); border-bottom: 1px solid var(--cc-border); }
+.sitio-seccion-alt + .sitio-seccion-alt { border-top: 0; }
+
+/* Tarjeta con foto (trabajos y proyectos) */
+.sitio-card-foto { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.sitio-card-img {
+  display: grid; place-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--cc-surface-2);
+  color: var(--cc-text-dim);
+  font-size: 44px;
+  overflow: hidden;
+}
+.sitio-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--cc-t-med) var(--cc-ease); }
+a.sitio-card-foto:hover .sitio-card-img img { transform: scale(1.04); }
+.sitio-card-cuerpo { display: block; padding: 16px 18px 18px; }
+.sitio-card-meta { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--sitio-acento-tinta); margin-bottom: 4px; }
+
+/* Bloque destacado (invitación a una acción) */
+.sitio-destacado {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 22px;
+  border-radius: var(--cc-r-3);
+  border: 1px solid rgba(var(--sitio-acento-rgb), .4);
+  background: linear-gradient(120deg, rgba(var(--sitio-acento-rgb), .14), transparent 70%), var(--cc-surface);
+}
+.sitio-destacado p { color: var(--cc-text-muted); }
+.sitio-destacado-ico {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 54px; height: 54px; border-radius: 14px;
+  background: var(--sitio-acento); color: var(--sitio-acento-texto); font-size: 24px;
+}
+.sitio-destacado-chico { padding: 14px 16px; gap: 12px; }
+
+/* Testimonios */
+.sitio-testimonio {
+  height: 100%; margin: 0; padding: 22px;
+  border-radius: var(--cc-r-3); border: 1px solid var(--cc-border); background: var(--cc-surface);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sitio-testimonio > .bi-quote { font-size: 30px; line-height: 1; color: var(--sitio-acento-tinta); }
+.sitio-testimonio blockquote { margin: 0; font-size: 15.5px; color: var(--cc-text); flex: 1 1 auto; }
+.sitio-testimonio figcaption { display: flex; flex-direction: column; font-size: 14px; }
+.sitio-testimonio figcaption span { color: var(--cc-text-dim); font-size: 13px; }
+
+/* Datos de contacto y redes */
+.sitio-contacto { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.sitio-contacto li { display: flex; gap: 12px; align-items: flex-start; }
+.sitio-contacto li > .bi {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(var(--sitio-acento-rgb), .12); color: var(--sitio-acento-tinta); font-size: 18px;
+}
+.sitio-contacto li > div { display: flex; flex-direction: column; min-width: 0; }
+.sitio-contacto strong { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--cc-text-dim); }
+.sitio-contacto a { color: var(--cc-text); font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+.sitio-contacto a:hover { color: var(--sitio-acento-tinta); text-decoration: underline; }
+.sitio-contacto .sitio-contacto-mapa { margin-top: 4px; color: var(--sitio-acento-tinta); font-size: 14px; }
+.sitio-redes { display: flex; gap: 8px; margin-top: 18px; }
+.sitio-redes a {
+  display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px;
+  border: 1px solid var(--cc-border-2); color: var(--cc-text); font-size: 18px; text-decoration: none;
+}
+.sitio-redes a:hover { border-color: var(--sitio-acento); color: var(--sitio-acento-tinta); }
+
+/* Paneles (formularios, datos) */
+.sitio-panel { padding: clamp(18px, 3vw, 28px); border-radius: var(--cc-r-3); border: 1px solid var(--cc-border); background: var(--cc-surface); }
+.sitio-form .form-control { border-radius: 12px; background: var(--cc-bg); border-color: var(--cc-border-2); color: var(--cc-text); min-height: 46px; }
+.sitio-form .form-control:focus { border-color: var(--sitio-acento); box-shadow: 0 0 0 .2rem rgba(var(--sitio-acento-rgb), .2); }
+.sitio-form .form-label { font-weight: 700; }
+
+/* Servicios (página) */
+.sitio-servicio {
+  display: grid; grid-template-columns: 1fr; gap: 18px;
+  padding: 22px 0; border-bottom: 1px solid var(--cc-border);
+  scroll-margin-top: 20px;
+}
+.sitio-servicio:first-child { padding-top: 0; }
+@media (min-width: 768px) { .sitio-servicio { grid-template-columns: 280px 1fr; gap: 28px; } }
+.sitio-servicio-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--cc-r-3); border: 1px solid var(--cc-border); }
+.sitio-servicio-ico { display: grid; place-items: center; background: rgba(var(--sitio-acento-rgb), .1); color: var(--sitio-acento-tinta); font-size: 54px; }
+.sitio-servicio-resumen { font-size: 17px; color: var(--cc-text-muted); }
+.sitio-texto { color: var(--cc-text-muted); max-width: 72ch; }
+.sitio-texto p:last-child { margin-bottom: 0; }
+
+/* Trabajo (página) */
+.sitio-trabajo-portada { display: block; border-radius: var(--cc-r-3); overflow: hidden; border: 1px solid var(--cc-border); }
+.sitio-trabajo-portada img { display: block; width: 100%; height: auto; }
+.sitio-datos-bloque { padding: 16px 18px; border-radius: var(--cc-r-2); border: 1px solid var(--cc-border); background: var(--cc-surface); }
+.sitio-etapa { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--sitio-acento-tinta); margin: 22px 0 10px; }
+.sitio-paginas { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 28px; color: var(--cc-text-muted); }
+
+/* Video liviano */
+.sitio-video-poster {
+  display: grid; place-items: center; width: 100%; height: 100%;
+  border: 0; padding: 0; cursor: pointer; color: #fff;
+  background: linear-gradient(135deg, #0B1220, #16233A) center / cover no-repeat;
+  position: relative;
+}
+.sitio-video-poster::before { content: ""; position: absolute; inset: 0; background: rgba(5, 8, 15, .35); transition: background var(--cc-t-med) var(--cc-ease); }
+.sitio-video-poster:hover::before { background: rgba(5, 8, 15, .15); }
+.sitio-video-play {
+  position: relative; display: grid; place-items: center;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--sitio-acento); color: var(--sitio-acento-texto); font-size: 38px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+.sitio-video-titulo { position: absolute; left: 14px; bottom: 12px; right: 14px; text-align: left; font-weight: 800; text-shadow: 0 1px 6px rgba(0, 0, 0, .7); }
+.sitio-video iframe { border: 0; }
+.sitio-modal-video { background: #000; border: 0; border-radius: var(--cc-r-2); overflow: visible; }
+.sitio-modal-cerrar { position: absolute; top: -40px; right: 0; z-index: 2; opacity: .9; }
+
+/* Visor de fotos (galería) */
+.sitio-visor {
+  position: fixed; inset: 0; z-index: 1080;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  background: rgba(3, 5, 10, .94);
+  padding: 12px;
+}
+.sitio-visor[hidden] { display: none; }
+.sitio-visor-figura { grid-column: 2; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.sitio-visor-figura img { max-width: 100%; max-height: calc(100dvh - 110px); object-fit: contain; border-radius: 8px; }
+.sitio-visor-figura figcaption { color: #E5E7EB; font-size: 14px; text-align: center; }
+.sitio-visor-btn {
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .08); color: #fff; font-size: 22px;
+}
+.sitio-visor-btn:hover { background: rgba(255, 255, 255, .18); }
+.sitio-visor-cerrar { position: absolute; top: 12px; right: 12px; }
+.sitio-visor-ant { grid-column: 1; }
+.sitio-visor-sig { grid-column: 3; }
+.sitio-visor-una .sitio-visor-ant,
+.sitio-visor-una .sitio-visor-sig { visibility: hidden; }
+.sitio-visor-cuenta { position: absolute; top: 22px; left: 18px; color: #CBD5E1; font-size: 14px; font-weight: 700; }
+@media (max-width: 575.98px) {
+  .sitio-visor { grid-template-columns: 1fr; padding: 60px 6px 70px; }
+  .sitio-visor-figura { grid-column: 1; grid-row: 1; }
+  .sitio-visor-ant, .sitio-visor-sig { position: absolute; bottom: 14px; }
+  .sitio-visor-ant { left: calc(50% - 60px); }
+  .sitio-visor-sig { right: calc(50% - 60px); }
+}
+
+/* Botón flotante de WhatsApp */
+.sitio-wa {
+  position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 1030;
+  display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%;
+  background: #25D366; color: #fff; font-size: 30px; text-decoration: none;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+  transition: transform var(--cc-t-fast) var(--cc-ease);
+}
+.sitio-wa:hover { color: #fff; transform: scale(1.06); }
+.sitio-wa:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.sitio-btn-wa { background: #25D366; border: 1px solid #25D366; color: #0B1220; font-weight: 800; border-radius: 12px; }
+.sitio-btn-wa:hover { background: #1EBE5A; border-color: #1EBE5A; color: #0B1220; }
+
+/* Gracias */
+.sitio-ok {
+  display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(var(--cc-success-rgb), .16); color: var(--cc-success); font-size: 40px;
+  border: 2px solid rgba(var(--cc-success-rgb), .45);
+}
+
+/* Que el botón flotante de WhatsApp no tape los links del pie */
+body:has(.sitio-wa) .sitio-footer { padding-bottom: 92px; }
+
+/* En el celular, el servicio sin foto muestra un ícono chico (no un bloque grande vacío) */
+@media (max-width: 767.98px) {
+  .sitio-servicio-ico { width: 64px; height: 64px; aspect-ratio: auto; font-size: 30px; border-radius: 16px; }
+}

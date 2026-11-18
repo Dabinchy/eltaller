@@ -1,0 +1,72 @@
+{% extends "layouts/base_sitio.html" %}
+{# Un trabajo de El Taller con su galería (antes / proceso / después) y su video. #}
+{% load static %}
+
+{% block description %}{{ trabajo.resumen|truncatechars:150 }}{% endblock %}
+
+{% block content %}
+{% url 'sitio:trabajos' as url_trabajos %}
+{% include "sitio/_cabecera.html" with texto=trabajo.resumen miga_url=url_trabajos miga_texto="Trabajos" %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-lg-7">
+        {% if trabajo.portada %}
+          <div data-galeria>
+            <a class="sitio-trabajo-portada" href="{{ trabajo.portada.url }}" data-foto data-epigrafe="{{ trabajo.titulo }}">
+              <img src="{{ trabajo.portada.url }}" alt="{{ trabajo.titulo }}">
+            </a>
+          </div>
+        {% endif %}
+        {% if trabajo.descripcion %}<div class="sitio-texto mt-3">{{ trabajo.descripcion|linebreaks }}</div>{% endif %}
+      </div>
+      <div class="col-12 col-lg-5">
+        <dl class="sitio-datos sitio-datos-bloque">
+          {% if trabajo.auto %}<div><dt>Auto</dt><dd>{{ trabajo.auto }}</dd></div>{% endif %}
+          <div><dt>Terminado</dt><dd>{{ trabajo.fecha|date:"F Y"|capfirst }}</dd></div>
+        </dl>
+        {% if trabajo.video_embed_url %}
+          <div class="mt-3">
+            {% if trabajo.portada_miniatura %}
+              {% include "sitio/_video.html" with url=trabajo.video_embed_url titulo=trabajo.titulo poster=trabajo.portada_miniatura.url %}
+            {% else %}
+              {% include "sitio/_video.html" with url=trabajo.video_embed_url titulo=trabajo.titulo %}
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="sitio-destacado sitio-destacado-chico mt-3">
+          <div class="flex-grow-1"><strong>¿Tu auto necesita algo parecido?</strong></div>
+          <a class="btn sitio-btn-accion" href="{% url 'sitio:presupuesto' %}">Pedir presupuesto</a>
+        </div>
+      </div>
+    </div>
+
+    {% if hay_fotos %}
+      <div data-galeria-grupo>
+      <h2 class="sitio-seccion-titulo mt-5">Fotos</h2>
+      {% for etiqueta, fotos in etapas %}
+        <h3 class="sitio-etapa">{{ etiqueta }}</h3>
+        {% include "sitio/_galeria_fotos.html" %}
+      {% endfor %}
+      {% if sin_etapa %}
+        {% if etapas %}<h3 class="sitio-etapa">Más fotos</h3>{% endif %}
+        {% include "sitio/_galeria_fotos.html" with fotos=sin_etapa %}
+      {% endif %}
+      </div>
+    {% endif %}
+
+    {% if otros %}
+      <h2 class="sitio-seccion-titulo mt-5">Otros trabajos</h2>
+      <div class="row g-3">
+        {% for t in otros %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            {% url 'sitio:trabajo' t.slug as url %}
+            {% include "sitio/_trabajo_card.html" with url=url %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layouts/base_sitio.html" %}
+{# Servicios de El Taller (admin → Sitio público → Servicios, parte El Taller). #}
+
+{% block description %}Servicios de {{ parte.nombre }}: mecánica, mantenimiento y diagnóstico para tu auto.{% endblock %}
+
+{% block content %}
+{% include "sitio/_cabecera.html" with texto="Todo lo que tu auto necesita, con presupuesto claro antes de arrancar." %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    {% for s in servicios %}
+      <article class="sitio-servicio" id="servicio-{{ s.pk }}">
+        {% if s.imagen %}
+          <img class="sitio-servicio-foto" src="{{ s.imagen.url }}" alt="{{ s.titulo }}" loading="lazy">
+        {% else %}
+          <span class="sitio-servicio-foto sitio-servicio-ico"><i class="bi {{ s.icono }}" aria-hidden="true"></i></span>
+        {% endif %}
+        <div>
+          <h2 class="h4 fw-bold">{{ s.titulo }}</h2>
+          <p class="sitio-servicio-resumen">{{ s.resumen }}</p>
+          {% if s.descripcion %}<div class="sitio-texto">{{ s.descripcion|linebreaks }}</div>{% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <p class="sitio-aviso"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>Estamos cargando nuestros servicios. Mientras tanto, pedinos un presupuesto o escribinos.</p>
+    {% endfor %}
+
+    <div class="sitio-destacado mt-4">
+      <div class="sitio-destacado-ico"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
+      <div class="flex-grow-1">
+        <h2 class="h5 fw-bold mb-1">¿No encontrás lo que buscás?</h2>
+        <p class="mb-0">Contanos qué le pasa a tu auto y te pasamos un presupuesto.</p>
+      </div>
+      <a class="btn sitio-btn-accion" href="{% url 'sitio:presupuesto' %}"><i class="bi bi-calendar-check" aria-hidden="true"></i> Pedir presupuesto</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

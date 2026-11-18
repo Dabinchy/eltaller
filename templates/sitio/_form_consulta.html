@@ -1,0 +1,27 @@
+{% load widget_tweaks %}
+{# Formulario de consulta (sitio/forms.py). boton = texto del botón. #}
+<form method="post" class="sitio-form" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2" role="alert">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+  {% endif %}
+  <div class="row g-3">
+    {% for campo in form.visible_fields %}{% if campo.name != "web" %}
+      <div class="{% if campo.name == 'mensaje' %}col-12{% else %}col-12 col-md-6{% endif %}">
+        <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
+        {% if campo.errors %}{% render_field campo class="form-control is-invalid" %}{% else %}{% render_field campo class="form-control" %}{% endif %}
+        {% for e in campo.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+        {% if campo.help_text and not campo.errors %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+      </div>
+    {% endif %}{% endfor %}
+  </div>
+  <div class="campo-trampa" aria-hidden="true">
+    <label for="{{ form.web.id_for_label }}">No completar</label>{{ form.web }}
+  </div>
+  <div class="d-grid d-sm-flex gap-2 mt-4">
+    <button type="submit" class="btn btn-lg sitio-btn-accion">
+      <i class="bi bi-send" aria-hidden="true"></i> {{ boton|default:"Enviar" }}
+    </button>
+  </div>
+  <p class="form-text mt-2 mb-0">Usamos tus datos sólo para responderte.</p>
+</form>

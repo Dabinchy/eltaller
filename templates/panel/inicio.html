@@ -15,13 +15,15 @@
     <div class="row g-3">
       {% for t in tarjetas %}
         <div class="col-12 col-sm-6 col-xl-3">
-          <div class="card h-100">
+          <div class="card h-100{% if t.url %} cc-card-link{% endif %}">
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between">
                 <span class="text-body-secondary">{{ t.titulo }}</span>
                 <i class="bi {{ t.icono }} fs-4 text-body-secondary" aria-hidden="true"></i>
               </div>
-              <p class="display-6 fw-semibold mb-1">{{ t.valor }}</p>
+              <p class="display-6 fw-semibold mb-1">
+                {% if t.url %}<a class="stretched-link text-reset text-decoration-none" href="{{ t.url }}">{{ t.valor }}</a>{% else %}{{ t.valor }}{% endif %}
+              </p>
               {% if t.detalle %}
                 <ul class="list-unstyled small mb-0">
                   {% for nombre, cantidad in t.detalle %}

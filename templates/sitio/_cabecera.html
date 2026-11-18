@@ -1,0 +1,11 @@
+{# Cabecera de una página interna. titulo, texto (opcional), migas = [(texto, url)] opcional vía bloque. #}
+<section class="sitio-cabecera">
+  <div class="container">
+    <nav class="sitio-migas" aria-label="Estás en">
+      <a href="{{ parte.inicio }}">{{ parte.nombre }}</a>
+      {% if miga_url %}<i class="bi bi-chevron-right" aria-hidden="true"></i><a href="{{ miga_url }}">{{ miga_texto }}</a>{% endif %}
+    </nav>
+    <h1 class="sitio-h1">{{ titulo }}</h1>
+    {% if texto %}<p class="sitio-cabecera-texto">{{ texto }}</p>{% endif %}
+  </div>
+</section>

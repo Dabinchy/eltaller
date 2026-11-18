@@ -1,0 +1,34 @@
+{% load sitio_tags %}
+{# Datos de contacto de la Empresa: WhatsApp, teléfono, dirección, horarios, mapa y redes. #}
+<ul class="sitio-contacto">
+  {% if empresa.whatsapp %}
+    {% whatsapp_url empresa.whatsapp "Hola, les escribo desde la web." as wa %}
+    <li><i class="bi bi-whatsapp" aria-hidden="true"></i>
+      <div><strong>WhatsApp</strong><a href="{{ wa }}" target="_blank" rel="noopener">{{ empresa.whatsapp }}</a></div></li>
+  {% endif %}
+  {% if empresa.telefono %}
+    <li><i class="bi bi-telephone" aria-hidden="true"></i>
+      <div><strong>Teléfono</strong><a href="tel:{{ empresa.telefono }}">{{ empresa.telefono }}</a></div></li>
+  {% endif %}
+  {% if empresa.email_contacto %}
+    <li><i class="bi bi-envelope" aria-hidden="true"></i>
+      <div><strong>Email</strong><a href="mailto:{{ empresa.email_contacto }}">{{ empresa.email_contacto }}</a></div></li>
+  {% endif %}
+  {% if empresa.direccion %}
+    <li><i class="bi bi-geo-alt" aria-hidden="true"></i>
+      <div><strong>Dirección</strong><span>{{ empresa.direccion }}{% if empresa.localidad %}, {{ empresa.localidad }}{% endif %}</span>
+        {% if empresa.mapa_url %}<a class="sitio-contacto-mapa" href="{{ empresa.mapa_url }}" target="_blank" rel="noopener"><i class="bi bi-sign-turn-right" aria-hidden="true"></i> Cómo llegar</a>{% endif %}
+      </div></li>
+  {% endif %}
+  {% if empresa.horarios %}
+    <li><i class="bi bi-clock" aria-hidden="true"></i>
+      <div><strong>Horarios</strong><span>{{ empresa.horarios|linebreaksbr }}</span></div></li>
+  {% endif %}
+</ul>
+{% if empresa.instagram or empresa.facebook or empresa.youtube %}
+  <div class="sitio-redes">
+    {% if empresa.instagram %}<a href="{{ empresa.instagram|instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a>{% endif %}
+    {% if empresa.facebook %}<a href="{{ empresa.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>{% endif %}
+    {% if empresa.youtube %}<a href="{{ empresa.youtube }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube" aria-hidden="true"></i></a>{% endif %}
+  </div>
+{% endif %}

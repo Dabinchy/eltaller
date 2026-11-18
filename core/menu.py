@@ -80,6 +80,9 @@ MENU_PANEL = [
              puede=_perm("clientes.ver_clientes")),
         Item("Accesos al portal", "admin:portal_accesocliente_changelist", "bi-person-check",
              "Clientes que piden ver su taller", puede=_perm("portal.gestionar_accesos_cliente")),
+        Item("Consultas del sitio", "admin:sitio_consulta_changelist", "bi-chat-left-text",
+             "Presupuestos y mensajes de la web",
+             puede=lambda u: u.is_staff and u.has_perm("sitio.view_consulta")),
     ]),
     Seccion("Sistema", "bi-gear", [
         Item("Mi PIN", "core:pin", "bi-key", "Para acciones de caja"),

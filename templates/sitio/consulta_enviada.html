@@ -1,0 +1,24 @@
+{% extends "layouts/base_sitio.html" %}
+{# Después de enviar una consulta (presupuesto, contacto o proyecto). #}
+{% load sitio_tags %}
+
+{% block content %}
+<section class="sitio-hero">
+  <div class="container">
+    <span class="sitio-ok"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+    <h1 class="sitio-h1 mt-3">¡Gracias! Recibimos tu consulta</h1>
+    <p class="lead">Te vamos a responder lo antes posible{% if empresa.horarios %}, dentro de nuestro horario de atención{% endif %}.</p>
+    <div class="sitio-hero-acciones">
+      {% if empresa.whatsapp %}
+        {% whatsapp_url empresa.whatsapp texto_whatsapp as wa %}
+        <a class="btn btn-lg sitio-btn-wa" href="{{ wa }}" target="_blank" rel="noopener">
+          <i class="bi bi-whatsapp me-1" aria-hidden="true"></i> Escribinos por WhatsApp
+        </a>
+      {% endif %}
+      <a class="btn btn-lg sitio-btn-sec" href="{{ parte.inicio }}">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a {{ parte.nombre }}
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

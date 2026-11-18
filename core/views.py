@@ -66,4 +66,18 @@ def panel_inicio(request):
         pendientes = AccesoCliente.objects.filter(estado=AccesoCliente.Estado.PENDIENTE).count()
         tarjetas.append({"titulo": "Accesos al portal pendientes", "icono": "bi-person-check", "valor": pendientes})
 
+    if user.has_perm("sitio.view_consulta"):
+        from django.urls import reverse
+
+        from sitio.models import Consulta
+
+        nuevas = Consulta.objects.filter(estado=Consulta.Estado.NUEVA).count()
+        tarjetas.append({
+            "titulo": "Consultas nuevas del sitio",
+            "icono": "bi-chat-left-text",
+            "valor": nuevas,
+            # La lista está en el admin (sólo para quien puede entrar al admin).
+            "url": reverse("admin:sitio_consulta_changelist") + "?estado__exact=nueva" if user.is_staff else "",
+        })
+
     return render(request, "panel/inicio.html", {"titulo": "Inicio", "tarjetas": tarjetas})

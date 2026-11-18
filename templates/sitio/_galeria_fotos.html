@@ -1,0 +1,9 @@
+{# Grilla de fotos (lista de FotoTrabajo) que se abren en grande (static/js/galeria.js). #}
+<div class="sitio-galeria" data-galeria>
+  {% for f in fotos %}
+    <a href="{{ f.imagen.url }}" data-foto data-epigrafe="{{ f.epigrafe }}">
+      <img src="{% if f.miniatura %}{{ f.miniatura.url }}{% else %}{{ f.imagen.url }}{% endif %}"
+           alt="{{ f.epigrafe|default:'Foto del trabajo' }}" loading="lazy">
+    </a>
+  {% endfor %}
+</div>

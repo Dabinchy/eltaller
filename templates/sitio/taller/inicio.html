@@ -1,12 +1,22 @@
 {% extends "layouts/base_sitio.html" %}
-{# Portada de El Taller (provisoria): autos de calle, generar confianza. #}
+{# Portada de El Taller: autos de calle, generar confianza. Contenido del admin (Sitio público); sin contenido, textos por defecto. #}
+{% load sitio_tags %}
+
+{% block description %}{% if portada.subtitulo %}{{ portada.subtitulo|truncatechars:150 }}{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block content %}
-<section class="sitio-hero">
+<section class="sitio-hero{% if portada.imagen %} sitio-hero-foto{% endif %}"
+         {% if portada.imagen %}data-bs-theme="dark" style="--hero-img:url('{{ portada.imagen.url }}')"{% endif %}>
   <div class="container">
-    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+    {% if portada.imagen %}
+      <h1 class="sitio-hero-titulo">{{ portada.titulo }}</h1>
+    {% else %}
+      {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+      <h1 class="visually-hidden">{{ portada.titulo|default:parte.nombre }}</h1>
+      {% if portada.titulo %}<p class="sitio-hero-titulo mt-4">{{ portada.titulo }}</p>{% endif %}
+    {% endif %}
     <p class="lead">
-      {% if empresa.descripcion_web %}{{ empresa.descripcion_web|linebreaksbr }}{% else %}Mecánica general, diagnóstico y mantenimiento para tu auto de todos los días.{% endif %}
+      {% if portada.subtitulo %}{{ portada.subtitulo|linebreaksbr }}{% elif empresa.descripcion_web %}{{ empresa.descripcion_web|linebreaksbr }}{% else %}Mecánica general, diagnóstico y mantenimiento para tu auto de todos los días.{% endif %}
     </p>
     <div class="sitio-hero-acciones">
       {% if parte.accion %}
@@ -14,43 +24,120 @@
           <i class="bi {{ parte.accion.icono }}" aria-hidden="true"></i> {{ parte.accion.texto }}
         </a>
       {% endif %}
-      <a class="btn btn-lg sitio-btn-sec" href="{{ parte.ingreso.url }}">
-        <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
+      {% if portada.video_embed_url %}
+        <button type="button" class="btn btn-lg sitio-btn-sec" data-bs-toggle="modal" data-bs-target="#videoPortada">
+          <i class="bi bi-play-circle me-1" aria-hidden="true"></i> Ver video
+        </button>
+      {% else %}
+        <a class="btn btn-lg sitio-btn-sec" href="{{ parte.ingreso.url }}">
+          <i class="bi {{ parte.ingreso.icono }} me-1" aria-hidden="true"></i> {{ parte.ingreso.texto }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{# Servicios #}
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="sitio-seccion-head">
+      <h2 class="sitio-seccion-titulo">Lo que hacemos</h2>
+      {% if servicios %}<a class="sitio-link-mas" href="{% url 'sitio:servicios' %}">Todos los servicios <i class="bi bi-arrow-right" aria-hidden="true"></i></a>{% endif %}
+    </div>
+    <div class="row g-3">
+      {% for s in servicios %}
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a class="sitio-card" href="{% url 'sitio:servicios' %}#servicio-{{ s.pk }}">
+            <span class="sitio-card-ico"><i class="bi {{ s.icono }}" aria-hidden="true"></i></span>
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.resumen }}</p>
+          </a>
+        </div>
+      {% empty %}
+        <div class="col-12 col-md-4">
+          <div class="sitio-card">
+            <span class="sitio-card-ico"><i class="bi bi-tools" aria-hidden="true"></i></span>
+            <h3>Mecánica y mantenimiento</h3>
+            <p>Service, frenos, tren delantero, distribución y todo lo que tu auto necesita.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="sitio-card">
+            <span class="sitio-card-ico"><i class="bi bi-activity" aria-hidden="true"></i></span>
+            <h3>Diagnóstico</h3>
+            <p>Encontramos la falla antes de cambiar piezas, y te explicamos qué hay que hacer.</p>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="sitio-card">
+            <span class="sitio-card-ico"><i class="bi bi-clipboard-check" aria-hidden="true"></i></span>
+            <h3>Presupuesto claro</h3>
+            <p>Antes de arrancar sabés qué se hace y cuánto cuesta. Sin sorpresas.</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# Trabajos #}
+{% if trabajos %}
+  <section class="sitio-seccion sitio-seccion-alt">
+    <div class="container">
+      <div class="sitio-seccion-head">
+        <h2 class="sitio-seccion-titulo">Trabajos recientes</h2>
+        <a class="sitio-link-mas" href="{% url 'sitio:trabajos' %}">Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="row g-3">
+        {% for t in trabajos %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            {% url 'sitio:trabajo' t.slug as url %}
+            {% include "sitio/_trabajo_card.html" with url=url %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{# Seguí tu vehículo #}
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="sitio-destacado">
+      <div class="sitio-destacado-ico"><i class="bi bi-phone" aria-hidden="true"></i></div>
+      <div class="flex-grow-1">
+        <h2 class="h4 fw-bold mb-1">Seguí tu vehículo desde el celular</h2>
+        <p class="mb-0">Mirá el avance del trabajo, aprobá el presupuesto y enterate de cada cambio sin llamar.</p>
+      </div>
+      <a class="btn sitio-btn-accion" href="{{ parte.ingreso.url }}">
+        <i class="bi {{ parte.ingreso.icono }}" aria-hidden="true"></i> {{ parte.ingreso.texto }}
       </a>
     </div>
   </div>
 </section>
 
-<section class="sitio-seccion">
-  <div class="container">
-    <h2 class="sitio-seccion-titulo">Lo que hacemos</h2>
-    <div class="row g-3">
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{% url 'sitio:servicios' %}">
-          <span class="sitio-card-ico"><i class="bi bi-tools" aria-hidden="true"></i></span>
-          <h3>Mecánica y mantenimiento</h3>
-          <p>Service, frenos, tren delantero, distribución y todo lo que tu auto necesita.</p>
-        </a>
-      </div>
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{% url 'sitio:servicios' %}">
-          <span class="sitio-card-ico"><i class="bi bi-activity" aria-hidden="true"></i></span>
-          <h3>Diagnóstico</h3>
-          <p>Encontramos la falla antes de cambiar piezas, y te explicamos qué hay que hacer.</p>
-        </a>
-      </div>
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{{ parte.ingreso.url }}">
-          <span class="sitio-card-ico"><i class="bi bi-phone" aria-hidden="true"></i></span>
-          <h3>Seguí tu vehículo</h3>
-          <p>Mirá el avance, aprobá el presupuesto y enterate de cada cambio desde el celular.</p>
-        </a>
+{# Testimonios #}
+{% if testimonios %}
+  <section class="sitio-seccion sitio-seccion-alt">
+    <div class="container">
+      <h2 class="sitio-seccion-titulo">Lo que dicen nuestros clientes</h2>
+      <div class="row g-3">
+        {% for t in testimonios %}
+          <div class="col-12 col-md-6 col-lg-4">
+            <figure class="sitio-testimonio">
+              <i class="bi bi-quote" aria-hidden="true"></i>
+              <blockquote>{{ t.texto|linebreaksbr }}</blockquote>
+              <figcaption><strong>{{ t.nombre }}</strong>{% if t.detalle %}<span>{{ t.detalle }}</span>{% endif %}</figcaption>
+            </figure>
+          </div>
+        {% endfor %}
       </div>
     </div>
-  </div>
-</section>
+  </section>
+{% endif %}
 
-<section class="pb-2">
+{# Las otras partes #}
+<section class="sitio-seccion">
   <div class="container d-grid gap-3">
     <a class="sitio-banda" data-parte="prepa" href="{% url 'sitio:prepa' %}">
       <div>
@@ -68,4 +155,36 @@
     </a>
   </div>
 </section>
+
+{# Contacto rápido #}
+{% if empresa.whatsapp or empresa.direccion or empresa.telefono %}
+  <section class="sitio-seccion sitio-seccion-alt pb-5">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-5">
+          <h2 class="sitio-seccion-titulo">Vení al taller</h2>
+          <p class="text-body-secondary">Pedí turno o consultanos lo que necesites. Te respondemos rápido.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn sitio-btn-accion" href="{% url 'sitio:presupuesto' %}"><i class="bi bi-calendar-check" aria-hidden="true"></i> Pedir presupuesto</a>
+            <a class="btn sitio-btn-sec" href="{% url 'sitio:contacto' %}">Contacto</a>
+          </div>
+        </div>
+        <div class="col-12 col-lg-7">
+          {% include "sitio/_contacto_datos.html" %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{% if portada.video_embed_url %}
+  <div class="modal fade" id="videoPortada" tabindex="-1" aria-label="Video" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content sitio-modal-video">
+        <button type="button" class="btn-close btn-close-white sitio-modal-cerrar" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        {% include "sitio/_video.html" with url=portada.video_embed_url titulo=portada.titulo %}
+      </div>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}

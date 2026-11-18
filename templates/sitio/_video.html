@@ -1,0 +1,8 @@
+{# Video liviano: no carga nada de YouTube/Vimeo hasta que se toca "play". url = embed; poster = imagen opcional. #}
+<div class="ratio ratio-16x9 sitio-video">
+  <button type="button" class="sitio-video-poster" data-video="{{ url }}" aria-label="Reproducir video{% if titulo %}: {{ titulo }}{% endif %}"
+          {% if poster %}style="background-image:url('{{ poster }}')"{% endif %}>
+    <span class="sitio-video-play"><i class="bi bi-play-fill" aria-hidden="true"></i></span>
+    {% if titulo %}<span class="sitio-video-titulo">{{ titulo }}</span>{% endif %}
+  </button>
+</div>
