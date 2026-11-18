@@ -23,6 +23,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><span class="dropdown-item-text small text-body-secondary">{{ user.username }}</span></li>
+          <li><a class="dropdown-item" href="{% if user.es_portal %}{% url 'portal:clave' %}{% else %}{% url 'panel:clave' %}{% endif %}"><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
           {% if user.is_staff and not user.es_portal %}
             <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Administrador</a></li>
           {% endif %}

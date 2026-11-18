@@ -1,0 +1,99 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">{{ auto }}</h1>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        {% if auto.visible_en_web %}<span class="badge text-bg-success">Se ve en la web</span>
+          <a class="small" href="{% url 'sitio:auto' auto.slug %}" target="_blank" rel="noopener">Ver página pública</a>
+        {% elif auto.publicado and not auto.aprobado %}<span class="badge text-bg-warning">Publicado · esperando aprobación</span>
+        {% else %}<span class="badge text-bg-secondary">No se ve en la web</span>{% endif %}
+        {% if auto.cambio_tras_aprobacion %}<span class="badge text-bg-warning">Cambios en revisión</span>{% endif %}
+      </div>
+    </div>
+    {% if es_principal %}
+      <form method="post" action="{% url 'portal:auto_publicar' auto.pk %}">
+        {% csrf_token %}
+        {% if auto.publicado %}
+          <input type="hidden" name="publicar" value="0"><button class="btn btn-outline-secondary btn-sm" type="submit">Ocultar de la web</button>
+        {% else %}
+          <input type="hidden" name="publicar" value="1"><button class="btn btn-success btn-sm" type="submit">Publicar en la web</button>
+        {% endif %}
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      {# ---------- Archivos ---------- #}
+      <div class="card mb-3" id="archivos"><div class="card-body">
+        <h2 class="h6">Fotos, videos y archivos</h2>
+        {% url 'portal:auto' auto.pk as volver %}
+        {% include "portal/_archivos.html" with archivos=archivos volver=volver %}
+        <hr>
+        <h3 class="h6">Subir</h3>
+        {% url 'portal:auto_archivo_subir' auto.pk as accion %}
+        {% include "portal/_subir_archivo.html" with accion=accion %}
+      </div></div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      {# ---------- Presentación ---------- #}
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Presentación</h2>
+        {% if form_auto %}
+          <form method="post" action="{% url 'portal:auto_editar' auto.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/_form.html" with form=form_auto %}
+            <button class="btn btn-primary btn-sm" type="submit">Guardar</button>
+          </form>
+        {% else %}
+          <dl class="small mb-0">
+            <dt>Número</dt><dd>{{ auto.numero_competicion|default:"—" }}</dd>
+            <dt>Categoría</dt><dd>{{ auto.categoria|default:"—" }}</dd>
+            <dt>Descripción</dt><dd>{{ auto.descripcion|default:"—"|linebreaksbr }}</dd>
+          </dl>
+          <p class="small text-body-secondary mb-0">La presentación la edita el piloto principal.</p>
+        {% endif %}
+      </div></div>
+
+      {# ---------- Pilotos ---------- #}
+      <div class="card mb-3" id="pilotos"><div class="card-body">
+        <h2 class="h6">Pilotos</h2>
+        <ul class="list-unstyled">
+          {% for pa in pilotos %}
+            <li class="d-flex flex-wrap justify-content-between align-items-center gap-1 py-1 border-bottom">
+              <span>{{ pa.piloto }}
+                {% if pa.principal %}<span class="badge text-bg-primary">principal</span>
+                {% elif pa.estado == "PENDIENTE" %}<span class="badge text-bg-warning">invitación pendiente</span>
+                {% elif pa.estado == "RECHAZADA" %}<span class="badge text-bg-secondary">rechazó</span>{% endif %}
+              </span>
+              <span class="d-flex gap-1">
+                {% if es_principal and not pa.principal and pa.estado == "ACEPTADA" %}
+                  <form method="post" action="{% url 'portal:auto_transferir' auto.pk pa.piloto_id %}" onsubmit="return confirm('¿Pasarle el auto a {{ pa.piloto|escapejs }}? Dejás de ser el principal.');">{% csrf_token %}
+                    <button class="btn btn-sm btn-link p-0" type="submit">Hacer principal</button></form>
+                {% endif %}
+                {% if not pa.principal %}
+                  {% if es_principal or pa.piloto_id == user.perfil_piloto.pk %}
+                    <form method="post" action="{% url 'portal:auto_quitar' auto.pk pa.piloto_id %}">{% csrf_token %}
+                      <button class="btn btn-sm btn-link text-danger p-0" type="submit">{% if pa.piloto_id == user.perfil_piloto.pk %}Salir{% else %}Quitar{% endif %}</button></form>
+                  {% endif %}
+                {% endif %}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if form_invitar %}
+          <form method="post" action="{% url 'portal:auto_invitar' auto.pk %}" novalidate>
+            {% csrf_token %}
+            {% include "partials/_form.html" with form=form_invitar %}
+            <button class="btn btn-outline-primary btn-sm" type="submit">Invitar</button>
+          </form>
+        {% endif %}
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

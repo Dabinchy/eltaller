@@ -1,0 +1,93 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:980px">
+  <h1 class="h4">Mi perfil</h1>
+
+  {# ---------- Estado ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      {% if perfil.visible_en_web %}
+        <span class="badge text-bg-success"><i class="bi bi-globe me-1" aria-hidden="true"></i>Se ve en la web</span>
+        <a class="small" href="{% url 'sitio:piloto' perfil.slug %}" target="_blank" rel="noopener">Ver mi página pública</a>
+      {% else %}
+        <span class="badge text-bg-secondary">No se ve en la web</span>
+      {% endif %}
+      {% if perfil.aprobado %}<span class="badge text-bg-info">Aprobado</span>{% else %}<span class="badge text-bg-warning">Pendiente de aprobación</span>{% endif %}
+      {% if perfil.cambio_tras_aprobacion %}<span class="badge text-bg-warning">Cambios en revisión</span>{% endif %}
+      {% for a in asociaciones %}<span class="badge text-bg-dark">{{ a }}</span>{% endfor %}
+    </div>
+    <ul class="small text-body-secondary mt-2 mb-0">
+      {% if not perfil.perfil_publico %}<li>Tu perfil está oculto: marcá "Mostrar mi perfil en la web" para publicarlo.</li>{% endif %}
+      {% if not perfil.aprobado %}<li>Un moderador de tu asociación tiene que aprobarlo la primera vez.</li>{% endif %}
+      {% if perfil.es_menor and not perfil.consentimiento_tutor %}<li>Sos menor de edad: para publicar, tu asociación tiene que registrar el permiso de tu tutor.</li>{% endif %}
+      {% if perfil.aprobado %}<li>Ya aprobado: podés editar libremente; los cambios públicos quedan marcados para revisión.</li>{% endif %}
+    </ul>
+  </div></div>
+
+  <div class="row g-3">
+    {# ---------- Formulario ---------- #}
+    <div class="col-12 col-lg-7">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Datos</h2>
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% include "partials/_form.html" with form=form %}
+          <p class="small text-body-secondary">Licencia, fecha de nacimiento y teléfono son privados: los ven sólo los moderadores de tu asociación y el taller.</p>
+          <button class="btn btn-primary" type="submit">Guardar</button>
+        </form>
+      </div></div>
+
+      {# ---------- Palmarés ---------- #}
+      <div class="card mb-3" id="palmares"><div class="card-body">
+        <h2 class="h6">Palmarés</h2>
+        <ul class="list-unstyled">
+          {% for p in palmares %}
+            <li class="d-flex justify-content-between align-items-start border-bottom py-1">
+              <span><strong>{{ p.anio }}</strong> · {{ p.campeonato }}{% if p.categoria %} ({{ p.categoria }}){% endif %} · {{ p.resultado }}
+                {% if p.detalle %}<span class="small text-body-secondary">· {{ p.detalle }}</span>{% endif %}</span>
+              <form method="post" action="{% url 'portal:palmares_borrar' p.pk %}">{% csrf_token %}
+                <button class="btn btn-sm btn-link text-danger p-0" type="submit" aria-label="Quitar"><i class="bi bi-trash" aria-hidden="true"></i></button>
+              </form>
+            </li>
+          {% empty %}
+            <li class="text-body-secondary small">Todavía no cargaste resultados.</li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="{% url 'portal:palmares_agregar' %}" novalidate>
+          {% csrf_token %}
+          {% include "partials/_form.html" with form=form_palmares %}
+          <button class="btn btn-outline-primary btn-sm" type="submit">Agregar al palmarés</button>
+        </form>
+      </div></div>
+    </div>
+
+    {# ---------- Vista previa y espacio ---------- #}
+    <div class="col-12 col-lg-5">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Así te ven en la web</h2>
+        <div class="d-flex gap-3 align-items-center">
+          {% if perfil.foto %}
+            <img src="{% url 'foto_perfil' perfil.slug %}?mini=1" alt="{{ perfil.nombre_publico }}" class="rounded-circle" style="width:72px;height:72px;object-fit:cover">
+          {% else %}
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle" style="width:72px;height:72px"><i class="bi bi-person fs-2" aria-hidden="true"></i></span>
+          {% endif %}
+          <div>
+            <div class="fw-semibold">{{ perfil.nombre_publico }}</div>
+            {% if perfil.instagram %}<div class="small"><i class="bi bi-instagram me-1" aria-hidden="true"></i>@{{ perfil.instagram }}</div>{% endif %}
+          </div>
+        </div>
+        {% if perfil.bio %}<p class="small mt-2 mb-0">{{ perfil.bio|linebreaksbr|truncatewords_html:60 }}</p>{% endif %}
+      </div></div>
+
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Tu espacio</h2>
+        <div class="progress" role="progressbar" aria-label="Espacio usado" aria-valuenow="{{ porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar {% if porcentaje >= 90 %}bg-danger{% elif porcentaje >= 70 %}bg-warning{% endif %}" style="width: {{ porcentaje }}%"></div>
+        </div>
+        <p class="small text-body-secondary mt-1 mb-0">Usaste {{ usados_mb|floatformat:1 }} de {{ total_mb|floatformat:0 }} MB.</p>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

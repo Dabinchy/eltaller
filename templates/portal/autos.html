@@ -1,0 +1,54 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:980px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Mis autos</h1>
+    <a class="btn btn-primary btn-sm" href="{% url 'portal:auto_nuevo' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo auto</a>
+  </div>
+
+  {% if invitaciones %}
+    <div class="card border-info mb-3"><div class="card-body">
+      <h2 class="h6"><i class="bi bi-envelope me-1" aria-hidden="true"></i>Invitaciones</h2>
+      {% for inv in invitaciones %}
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-1">
+          <span>{{ inv.invitado_por.get_full_name|default:inv.invitado_por.username }} te invita a ser piloto de <strong>{{ inv.auto }}</strong>.</span>
+          <div class="d-flex gap-2">
+            <form method="post" action="{% url 'portal:invitacion_responder' inv.pk %}">{% csrf_token %}<input type="hidden" name="aceptar" value="1">
+              <button class="btn btn-sm btn-success" type="submit">Aceptar</button></form>
+            <form method="post" action="{% url 'portal:invitacion_responder' inv.pk %}">{% csrf_token %}<input type="hidden" name="aceptar" value="0">
+              <button class="btn btn-sm btn-outline-secondary" type="submit">Rechazar</button></form>
+          </div>
+        </div>
+      {% endfor %}
+    </div></div>
+  {% endif %}
+
+  <div class="row g-3">
+    {% for pa in mios %}
+      {% with a=pa.auto %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <a class="card h-100 text-decoration-none" href="{% url 'portal:auto' a.pk %}">
+            {% if a.portada_id %}
+              <img src="{% url 'archivo' a.portada_id %}?mini=1" alt="{{ a }}" class="card-img-top" style="aspect-ratio:16/9;object-fit:cover">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center bg-body-tertiary" style="aspect-ratio:16/9"><i class="bi bi-car-front fs-1" aria-hidden="true"></i></div>
+            {% endif %}
+            <div class="card-body">
+              <div class="fw-semibold">{{ a }}</div>
+              <div class="small text-body-secondary">{{ a.categoria|default:"" }}{% if pa.principal %} · Sos el principal{% endif %}</div>
+              <div class="mt-1">
+                {% if a.visible_en_web %}<span class="badge text-bg-success">En la web</span>
+                {% elif a.publicado and not a.aprobado %}<span class="badge text-bg-warning">Publicado · en revisión</span>
+                {% else %}<span class="badge text-bg-secondary">No se ve en la web</span>{% endif %}
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endwith %}
+    {% empty %}
+      <p class="text-body-secondary">Todavía no tenés autos. Creá uno o pedile al piloto principal que te invite.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{# Grilla de archivos con acciones del dueño. Contexto: archivos, volver, (auto, es_principal para portada). #}
+<div class="row g-3">
+  {% for a in archivos %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card h-100">
+        {% if a.tipo == "FOTO" and a.miniatura %}
+          <a href="{% url 'archivo' a.pk %}" target="_blank" rel="noopener">
+            <img src="{% url 'archivo' a.pk %}?mini=1" alt="{{ a.titulo }}" class="card-img-top" loading="lazy" style="aspect-ratio:4/3;object-fit:cover">
+          </a>
+        {% elif a.tipo == "VIDEO" and a.video_embed_url %}
+          <div class="ratio ratio-16x9"><iframe src="{{ a.video_embed_url }}" title="{{ a.titulo }}" loading="lazy"
+            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        {% else %}
+          <a href="{% url 'archivo' a.pk %}" class="d-flex align-items-center justify-content-center bg-body-tertiary text-decoration-none" style="aspect-ratio:4/3">
+            <i class="bi {% if a.tipo == 'TELEMETRIA' %}bi-graph-up{% elif a.tipo == 'SETUP' %}bi-sliders{% else %}bi-file-earmark{% endif %} fs-1" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        <div class="card-body p-2">
+          <div class="small fw-semibold text-truncate" title="{{ a.titulo }}">{{ a.titulo }}</div>
+          <div class="small text-body-secondary">
+            {{ a.get_tipo_display }}{% if a.auto %} · {{ a.auto }}{% endif %}{% if a.tamano_bytes %} · {{ a.tamano_bytes|filesizeformat }}{% endif %}
+          </div>
+          <div class="mt-1">
+            {% if a.visibilidad == "PUBLICO" %}
+              {% if a.aprobado %}<span class="badge text-bg-success">Público</span>{% else %}<span class="badge text-bg-warning">Público · en revisión</span>{% endif %}
+            {% elif a.visibilidad == "PILOTO" %}<span class="badge text-bg-info">Con el taller</span>
+            {% else %}<span class="badge text-bg-secondary">Privado</span>{% endif %}
+            {% if auto and auto.portada_id == a.pk %}<span class="badge text-bg-primary">Portada</span>{% endif %}
+          </div>
+        </div>
+        {% if a.subido_por_id == user.pk or es_principal %}
+          <div class="card-footer p-2 d-flex flex-wrap gap-1">
+            {% if a.subido_por_id == user.pk %}
+              <form method="post" action="{% url 'portal:archivo_visibilidad' a.pk %}" class="d-flex gap-1">
+                {% csrf_token %}<input type="hidden" name="volver" value="{{ volver }}">
+                <select name="visibilidad" class="form-select form-select-sm" aria-label="Visibilidad">
+                  <option value="PRIVADO" {% if a.visibilidad == "PRIVADO" %}selected{% endif %}>Privado</option>
+                  <option value="PILOTO" {% if a.visibilidad == "PILOTO" %}selected{% endif %}>Con el taller</option>
+                  <option value="PUBLICO" {% if a.visibilidad == "PUBLICO" %}selected{% endif %}>Público</option>
+                </select>
+                <button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Guardar visibilidad"><i class="bi bi-check" aria-hidden="true"></i></button>
+              </form>
+            {% endif %}
+            {% if auto and es_principal and a.tipo == "FOTO" and auto.portada_id != a.pk %}
+              <form method="post" action="{% url 'portal:auto_portada' auto.pk %}">{% csrf_token %}
+                <input type="hidden" name="archivo" value="{{ a.pk }}">
+                <button class="btn btn-sm btn-outline-primary" type="submit">Portada</button>
+              </form>
+            {% endif %}
+            <form method="post" action="{% url 'portal:archivo_borrar' a.pk %}" onsubmit="return confirm('¿Borrar «{{ a.titulo|escapejs }}»?');">
+              {% csrf_token %}<input type="hidden" name="volver" value="{{ volver }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Borrar"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-body-secondary small">Todavía no hay archivos.</p>
+  {% endfor %}
+</div>

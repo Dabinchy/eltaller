@@ -1,0 +1,26 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <h1 class="h4">Mis archivos</h1>
+  <div class="card mb-3"><div class="card-body">
+    <div class="progress" role="progressbar" aria-label="Espacio usado" aria-valuenow="{{ porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar {% if porcentaje >= 90 %}bg-danger{% elif porcentaje >= 70 %}bg-warning{% endif %}" style="width: {{ porcentaje }}%"></div>
+    </div>
+    <p class="small text-body-secondary mt-1 mb-0">Usaste {{ usados_mb|floatformat:1 }} de {{ total_mb|floatformat:0 }} MB. Si necesitás más espacio, pedíselo a tu asociación.</p>
+  </div></div>
+
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6">Todo lo que subiste</h2>
+    {% url 'portal:archivos' as volver %}
+    {% include "portal/_archivos.html" with archivos=archivos volver=volver %}
+  </div></div>
+
+  <div class="card"><div class="card-body">
+    <h2 class="h6">Subir a mi perfil</h2>
+    <p class="small text-body-secondary">Para archivos de un auto en particular, subilos desde la página del auto.</p>
+    {% url 'portal:archivo_subir' as accion %}
+    {% include "portal/_subir_archivo.html" with accion=accion %}
+  </div></div>
+</div>
+{% endblock %}

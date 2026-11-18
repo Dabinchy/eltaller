@@ -1,0 +1,11 @@
+{# Formulario para subir un archivo o un link de video. Contexto: form_archivo, accion. #}
+<form method="post" action="{{ accion }}" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {% include "partials/_form.html" with form=form_archivo %}
+  <p class="small text-body-secondary">
+    Fotos: JPG, PNG o WEBP (se borra la ubicación). Setup: PDF, TXT, CSV, XLSX, JSON o ZIP (hasta 10 MB).
+    Telemetría: CSV, MoTeC, AiM o ZIP (hasta 50 MB). Videos: sólo el link de YouTube o Vimeo.
+    Si elegís "Público", cualquiera lo va a poder ver una vez aprobado — también setups y telemetría.
+  </p>
+  <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-upload me-1" aria-hidden="true"></i>Subir</button>
+</form>
