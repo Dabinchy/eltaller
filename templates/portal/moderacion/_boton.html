@@ -1,0 +1,18 @@
+{# Botón de acción de moderación. Contexto: url, accion, etiqueta, clase, (motivo=True pide motivo), volver. #}
+{% if motivo %}
+  <details class="d-inline-block">
+    <summary class="btn btn-sm {{ clase|default:'btn-outline-danger' }}">{{ etiqueta }}</summary>
+    <form method="post" action="{{ url }}" class="d-flex gap-1 mt-1">
+      {% csrf_token %}
+      <input type="hidden" name="accion" value="{{ accion }}"><input type="hidden" name="volver" value="{{ volver }}">
+      <input class="form-control form-control-sm" name="motivo" required maxlength="300" placeholder="Motivo (lo ve el piloto)" aria-label="Motivo">
+      <button class="btn btn-sm btn-danger" type="submit">Confirmar</button>
+    </form>
+  </details>
+{% else %}
+  <form method="post" action="{{ url }}" class="d-inline">
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="{{ accion }}"><input type="hidden" name="volver" value="{{ volver }}">
+    <button class="btn btn-sm {{ clase|default:'btn-success' }}" type="submit">{{ etiqueta }}</button>
+  </form>
+{% endif %}

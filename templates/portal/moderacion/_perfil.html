@@ -1,0 +1,21 @@
+{% url 'portal:moderacion_perfil' p.pk as url %}
+<div class="border-top py-2 d-flex flex-wrap justify-content-between gap-2">
+  <div class="d-flex gap-2">
+    {% if p.foto %}<img src="{% url 'foto_perfil' p.slug %}?mini=1" alt="" class="rounded-circle" style="width:48px;height:48px;object-fit:cover">{% endif %}
+    <div>
+      <strong>{{ p.nombre_publico }}</strong>
+      {% if nuevo %}<span class="badge text-bg-warning">primera aprobación</span>{% else %}<span class="badge text-bg-info">cambió después de aprobado</span>{% endif %}
+      {% if p.es_menor %}<span class="badge text-bg-danger">menor{% if p.consentimiento_tutor %} · con consentimiento{% endif %}</span>{% endif %}
+      {% if p.instagram %}<div class="small">@{{ p.instagram }}</div>{% endif %}
+      {% if p.bio %}<div class="small text-body-secondary">{{ p.bio|truncatewords:40 }}</div>{% endif %}
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-1 align-items-start">
+    {% if nuevo %}
+      {% include "portal/moderacion/_boton.html" with accion="aprobar" etiqueta="Aprobar" %}
+    {% else %}
+      {% include "portal/moderacion/_boton.html" with accion="revisado" etiqueta="Aceptar cambios" %}
+      {% include "portal/moderacion/_boton.html" with accion="retirar" etiqueta="Retirar aprobación" motivo=True %}
+    {% endif %}
+  </div>
+</div>

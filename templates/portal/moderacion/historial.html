@@ -1,0 +1,18 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <h1 class="h4">Historial de moderación</h1>
+  <div class="card"><div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Fecha</th><th>Quién</th><th>Acción</th><th>Sobre</th><th class="d-none d-md-table-cell">Motivo</th></tr></thead>
+      <tbody>
+        {% for r in registros %}
+          <tr><td class="text-nowrap">{{ r.fecha|date:"d/m/Y H:i" }}</td><td>{{ r.actor.username|default:"—" }}</td>
+            <td>{{ r.get_accion_display }}</td><td>{{ r.descripcion_objeto }}</td><td class="d-none d-md-table-cell small">{{ r.motivo }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="text-body-secondary">Todavía no hay registros.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

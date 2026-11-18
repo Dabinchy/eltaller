@@ -1,0 +1,17 @@
+{% url 'portal:moderacion_auto' a.pk as url %}
+<div class="border-top py-2 d-flex flex-wrap justify-content-between gap-2">
+  <div>
+    <strong>{{ a }}</strong> <span class="small text-body-secondary">· {{ a.principal }}</span>
+    {% if nuevo %}<span class="badge text-bg-warning">primera aprobación</span>{% else %}<span class="badge text-bg-info">cambió después de aprobado</span>{% endif %}
+    <div class="small">{{ a.categoria|default:"" }}{% if a.anio %} · {{ a.anio }}{% endif %}</div>
+    {% if a.descripcion %}<div class="small text-body-secondary">{{ a.descripcion|truncatewords:40 }}</div>{% endif %}
+  </div>
+  <div class="d-flex flex-wrap gap-1 align-items-start">
+    {% if nuevo %}
+      {% include "portal/moderacion/_boton.html" with accion="aprobar" etiqueta="Aprobar" %}
+    {% else %}
+      {% include "portal/moderacion/_boton.html" with accion="revisado" etiqueta="Aceptar cambios" %}
+      {% include "portal/moderacion/_boton.html" with accion="retirar" etiqueta="Retirar aprobación" motivo=True %}
+    {% endif %}
+  </div>
+</div>

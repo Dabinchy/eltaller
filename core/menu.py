@@ -115,6 +115,12 @@ def _menu_portal(user) -> list[Seccion]:
         Seccion("Moderación", "bi-shield-check", [
             Item("Pendientes", "portal:moderacion", "bi-inbox", "Lo que espera aprobación",
                  puede=lambda u: estado["es_moderador"]),
+            Item("Pilotos", "portal:moderacion_miembros", "bi-people", "Miembros, cuota y suspensiones",
+                 puede=lambda u: estado["es_moderador"]),
+            Item("Campeonatos", "campeonatos_mod:lista", "bi-trophy", "Fechas, puntos y resultados",
+                 puede=lambda u: estado["es_moderador"]),
+            Item("Historial", "portal:moderacion_historial", "bi-clock-history", "Quién aprobó qué",
+                 puede=lambda u: estado["es_moderador"]),
         ]),
     ]
     return secciones

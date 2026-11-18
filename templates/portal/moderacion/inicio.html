@@ -1,0 +1,94 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 mb-0">Pendientes de moderación</h1>
+    <div class="small text-body-secondary">Moderás: {% for a in asociaciones %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+  </div>
+  {% url 'portal:moderacion' as volver %}
+
+  {# ---------- Cuentas nuevas ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6"><i class="bi bi-person-plus me-1" aria-hidden="true"></i>Cuentas nuevas <span class="badge text-bg-secondary">{{ cuentas|length }}</span></h2>
+    {% for m in cuentas %}
+      {% url 'portal:moderacion_membresia' m.pk as url %}
+      <div class="border-top py-2">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <div>
+            <strong>{% firstof m.usuario.get_full_name m.usuario.perfil_piloto.nombre_publico m.usuario.username %}</strong>
+            <span class="small text-body-secondary">· {{ m.asociacion }} · pidió el {{ m.solicitada_el|date:"d/m/Y" }}</span>
+            <div class="small">
+              Usuario {{ m.usuario.username }} · DNI {{ m.usuario.dni|default:"—" }} · {{ m.usuario.email }}
+              {% if m.usuario.perfil_piloto %} · nacido el {{ m.usuario.perfil_piloto.fecha_nacimiento|date:"d/m/Y"|default:"—" }}{% if m.usuario.perfil_piloto.licencia %} · licencia {{ m.usuario.perfil_piloto.licencia }}{% endif %}{% endif %}
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-1 align-items-start">
+            {% include "portal/moderacion/_boton.html" with accion="aprobar" etiqueta="Aprobar" %}
+            {% include "portal/moderacion/_boton.html" with accion="rechazar" etiqueta="Rechazar" motivo=True %}
+            {% include "portal/moderacion/_boton.html" with accion="spam" etiqueta="Spam" clase="btn-outline-secondary" %}
+          </div>
+        </div>
+      </div>
+    {% empty %}<p class="small text-body-secondary mb-0">No hay cuentas esperando.</p>{% endfor %}
+  </div></div>
+
+  {# ---------- Perfiles ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Perfiles</h2>
+    {% for p in perfiles_nuevos %}
+      {% include "portal/moderacion/_perfil.html" with nuevo=True %}
+    {% endfor %}
+    {% for p in perfiles_cambios %}
+      {% include "portal/moderacion/_perfil.html" with nuevo=False %}
+    {% endfor %}
+    {% if not perfiles_nuevos and not perfiles_cambios %}<p class="small text-body-secondary mb-0">Nada para revisar.</p>{% endif %}
+    {% if menores %}
+      <div class="alert alert-warning mt-2 mb-0 small">
+        <strong>Menores sin consentimiento del tutor:</strong>
+        {% for p in menores %}
+          {% url 'portal:moderacion_perfil' p.pk as url %}
+          <span class="d-inline-flex align-items-center gap-1 me-2">{{ p }}
+            {% include "portal/moderacion/_boton.html" with accion="consentimiento" etiqueta="Registrar consentimiento" clase="btn-outline-success" %}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div></div>
+
+  {# ---------- Autos ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6"><i class="bi bi-car-front me-1" aria-hidden="true"></i>Autos</h2>
+    {% for a in autos_nuevos %}{% include "portal/moderacion/_auto.html" with nuevo=True %}{% endfor %}
+    {% for a in autos_cambios %}{% include "portal/moderacion/_auto.html" with nuevo=False %}{% endfor %}
+    {% if not autos_nuevos and not autos_cambios %}<p class="small text-body-secondary mb-0">Nada para revisar.</p>{% endif %}
+  </div></div>
+
+  {# ---------- Archivos públicos ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6"><i class="bi bi-images me-1" aria-hidden="true"></i>Archivos públicos <span class="badge text-bg-secondary">{{ archivos|length }}</span></h2>
+    <div class="row g-2">
+      {% for x in archivos %}
+        {% url 'portal:moderacion_archivo' x.pk as url %}
+        <div class="col-6 col-md-4 col-lg-3"><div class="card h-100">
+          {% if x.tipo == "FOTO" and x.miniatura %}
+            <a href="{% url 'archivo' x.pk %}" target="_blank" rel="noopener"><img src="{% url 'archivo' x.pk %}?mini=1" alt="{{ x.titulo }}" class="card-img-top" style="aspect-ratio:4/3;object-fit:cover"></a>
+          {% elif x.tipo == "VIDEO" and x.video_embed_url %}
+            <div class="ratio ratio-16x9"><iframe src="{{ x.video_embed_url }}" title="{{ x.titulo }}" loading="lazy" allowfullscreen></iframe></div>
+          {% else %}
+            <a class="d-flex align-items-center justify-content-center bg-body-tertiary" style="aspect-ratio:4/3" href="{% url 'archivo' x.pk %}"><i class="bi bi-file-earmark fs-1" aria-hidden="true"></i></a>
+          {% endif %}
+          <div class="card-body p-2 small">
+            <div class="fw-semibold text-truncate">{{ x.titulo }}</div>
+            <div class="text-body-secondary">{{ x.get_tipo_display }} · {{ x.subido_por.username }}{% if x.auto %} · {{ x.auto }}{% endif %}</div>
+            {% if x.descripcion %}<div>{{ x.descripcion }}</div>{% endif %}
+          </div>
+          <div class="card-footer p-2 d-flex flex-wrap gap-1">
+            {% include "portal/moderacion/_boton.html" with accion="aprobar" etiqueta="Aprobar" %}
+            {% include "portal/moderacion/_boton.html" with accion="retirar" etiqueta="Rechazar" motivo=True %}
+          </div>
+        </div></div>
+      {% empty %}<p class="small text-body-secondary mb-0">Nada para revisar.</p>{% endfor %}
+    </div>
+  </div></div>
+</div>
+{% endblock %}
