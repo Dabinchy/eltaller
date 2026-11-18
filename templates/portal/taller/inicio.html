@@ -1,0 +1,62 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container py-3" style="max-width:980px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Mi taller</h1>
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'portal:turnos' %}"><i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>Pedir turno</a>
+  </div>
+
+  {% if presupuestos %}
+    <div class="card border-warning mb-3"><div class="card-body">
+      <h2 class="h6"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Presupuestos esperando tu aprobación</h2>
+      {% for o in presupuestos %}
+        <div class="d-flex justify-content-between align-items-center py-1">
+          <span>Orden #{{ o.numero }} · {{ o.vehiculo.identificacion }} · {{ o.total_presupuestado|money_ar }}</span>
+          <a class="btn btn-sm btn-warning" href="{% url 'portal:taller_orden' o.pk %}">Ver y aprobar</a>
+        </div>
+      {% endfor %}
+    </div></div>
+  {% endif %}
+
+  <h2 class="h6">Trabajos en curso</h2>
+  <div class="list-group mb-3">
+    {% for o in en_curso %}
+      <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="{% url 'portal:taller_orden' o.pk %}">
+        <span>#{{ o.numero }} · {{ o.vehiculo.identificacion }} {{ o.vehiculo.marca }} {{ o.vehiculo.modelo }}
+          <span class="small text-body-secondary">· ingresó {{ o.fecha_ingreso|date:"d/m" }}{% if o.fecha_prometida %} · prometido {{ o.fecha_prometida|date:"d/m" }}{% endif %}</span></span>
+        {% include "panel/taller/_estado.html" %}
+      </a>
+    {% empty %}
+      <div class="list-group-item text-body-secondary">No hay trabajos en curso.</div>
+    {% endfor %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-5">
+      <h2 class="h6">Vehículos</h2>
+      <ul class="list-group">
+        {% for v in vehiculos %}
+          <li class="list-group-item">{{ v.identificacion }} · {{ v.marca }} {{ v.modelo }}<div class="small text-body-secondary">{{ v.km_actual }} km</div></li>
+        {% empty %}
+          <li class="list-group-item text-body-secondary small">Todavía no hay vehículos vinculados. Si manejás un auto del equipo, el taller lo vincula a tu auto del portal.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-12 col-md-7">
+      <h2 class="h6">Historial</h2>
+      <div class="list-group">
+        {% for o in historial %}
+          <a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'portal:taller_orden' o.pk %}">
+            <span>#{{ o.numero }} · {{ o.vehiculo.identificacion }} · {{ o.fecha_ingreso|date:"d/m/Y" }}</span>
+            <span>{{ o.total|money_ar }}</span>
+          </a>
+        {% empty %}
+          <div class="list-group-item text-body-secondary small">Sin trabajos anteriores.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

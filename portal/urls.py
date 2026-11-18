@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
-from . import views, views_contenido as vc, views_cuenta
+from . import views, views_contenido as vc, views_cuenta, views_taller as vt
 
 app_name = "portal"
 
@@ -31,4 +31,11 @@ urlpatterns = [
     path("archivos/subir/", vc.archivo_subir, name="archivo_subir"),
     path("archivos/<int:pk>/visibilidad/", vc.archivo_visibilidad, name="archivo_visibilidad"),
     path("archivos/<int:pk>/borrar/", vc.archivo_borrar, name="archivo_borrar"),
+
+    # Mi taller (clientes)
+    path("taller/", vt.mi_taller, name="mi_taller"),
+    path("taller/ordenes/<int:pk>/", vt.orden, name="taller_orden"),
+    path("taller/ordenes/<int:pk>/aprobar/", vt.orden_aprobar, name="taller_orden_aprobar"),
+    path("taller/ordenes/<int:pk>/comentar/", vt.orden_comentar, name="taller_orden_comentar"),
+    path("taller/turnos/", vt.turnos, name="turnos"),
 ]

@@ -1,0 +1,37 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:980px">
+  <h1 class="h4">Mis campeonatos</h1>
+
+  <h2 class="h6 mt-3">Donde estoy inscripto</h2>
+  <div class="list-group mb-4">
+    {% for i in inscripciones %}
+      <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+         href="{% url 'campeonatos_portal:campeonato' i.categoria.campeonato.slug %}">
+        <span>{{ i.categoria.campeonato }} · {{ i.categoria.nombre }}</span>
+        <span class="badge text-bg-dark">#{{ i.numero }}</span>
+      </a>
+    {% empty %}
+      <div class="list-group-item text-body-secondary small">Todavía no te inscribiste en ningún campeonato.</div>
+    {% endfor %}
+  </div>
+
+  <h2 class="h6">Campeonatos de tus asociaciones</h2>
+  <div class="row g-3">
+    {% for c in campeonatos %}
+      <div class="col-12 col-md-6">
+        <a class="card h-100 text-decoration-none" href="{% url 'campeonatos_portal:campeonato' c.slug %}">
+          <div class="card-body">
+            <div class="fw-semibold">{{ c }}</div>
+            <div class="small text-body-secondary">{{ c.asociacion }}</div>
+            <span class="badge {% if c.estado == 'EN_CURSO' %}text-bg-success{% else %}text-bg-secondary{% endif %} mt-1">{{ c.get_estado_display }}</span>
+          </div>
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-body-secondary small">Tus asociaciones todavía no publicaron campeonatos.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

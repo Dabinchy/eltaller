@@ -1,0 +1,36 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:860px">
+  <h1 class="h4">Turnos</h1>
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Pedir un turno</h2>
+        <form method="post" novalidate>
+          {% csrf_token %}{% include "partials/_form.html" %}
+          <button class="btn btn-primary btn-sm" type="submit">Pedir turno</button>
+        </form>
+        <p class="small text-body-secondary mt-2 mb-0">El turno queda pendiente hasta que el taller lo confirme.</p>
+      </div></div>
+    </div>
+    <div class="col-12 col-md-6">
+      <h2 class="h6">Próximos</h2>
+      <ul class="list-group mb-3">
+        {% for t in proximos %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ t.inicio|date:"D d/m H:i" }} · {{ t.vehiculo.identificacion }}<div class="small text-body-secondary">{{ t.sucursal }} · {{ t.motivo }}</div></span>
+            <span class="badge align-self-start {% if t.estado == 'CONFIRMADO' %}text-bg-success{% elif t.estado == 'PENDIENTE' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">{{ t.get_estado_display }}</span>
+          </li>
+        {% empty %}<li class="list-group-item text-body-secondary small">No tenés turnos próximos.</li>{% endfor %}
+      </ul>
+      {% if pasados %}
+        <h2 class="h6">Anteriores</h2>
+        <ul class="list-group">
+          {% for t in pasados %}<li class="list-group-item small">{{ t.inicio|date:"d/m/Y H:i" }} · {{ t.vehiculo.identificacion }} · {{ t.get_estado_display }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

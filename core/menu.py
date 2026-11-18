@@ -103,7 +103,7 @@ def _menu_portal(user) -> list[Seccion]:
                  puede=lambda u: estado["es_piloto"]),
         ]),
         Seccion("Campeonatos", "bi-trophy", [
-            Item("Mis campeonatos", "portal:campeonatos", "bi-trophy", "Inscripción, resultados y tabla",
+            Item("Mis campeonatos", "campeonatos_portal:inicio", "bi-trophy", "Inscripción, resultados y tabla",
                  puede=lambda u: estado["es_piloto"], rapido=True, corto="Campeonato"),
         ]),
         Seccion("Mi taller", "bi-wrench", [

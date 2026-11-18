@@ -1,0 +1,122 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <a class="small" href="{% url 'campeonatos_portal:inicio' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Mis campeonatos</a>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-1 mb-3">
+    <div>
+      <h1 class="h4 mb-0">{{ campeonato }}</h1>
+      <div class="small text-body-secondary">{{ campeonato.asociacion }} · {{ campeonato.get_estado_display }}
+        {% if campeonato.reglamento_url %} · <a href="{{ campeonato.reglamento_url }}" target="_blank" rel="noopener noreferrer">Reglamento</a>{% endif %}</div>
+    </div>
+    {% if campeonato.visible_en_web %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'sitio:campeonato' campeonato.slug %}" target="_blank" rel="noopener">Ver en la web</a>{% endif %}
+  </div>
+
+  {# ---------- Inscripción ---------- #}
+  <div class="card mb-3"><div class="card-body">
+    <h2 class="h6">Mi inscripción</h2>
+    {% for i in inscripciones %}
+      <div class="d-flex justify-content-between align-items-center py-1">
+        <span>{{ i.categoria.nombre }} · <strong>#{{ i.numero }}</strong>{% if i.auto %} · {{ i.auto }}{% endif %}</span>
+        <form method="post" action="{% url 'campeonatos_portal:baja' i.pk %}" onsubmit="return confirm('¿Darte de baja de {{ i.categoria.nombre|escapejs }}?');">{% csrf_token %}
+          <button class="btn btn-sm btn-link text-danger p-0" type="submit">Darme de baja</button></form>
+      </div>
+    {% empty %}
+      <p class="small text-body-secondary">No estás inscripto en este campeonato.</p>
+    {% endfor %}
+    {% if form_inscripcion %}
+      <form method="post" action="{% url 'campeonatos_portal:inscribirse' campeonato.slug %}" class="mt-2" novalidate>
+        {% csrf_token %}
+        <div class="row g-2 align-items-end">
+          {% for campo in form_inscripcion %}
+            <div class="col-12 col-md-4">
+              <label class="form-label small" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+              {% if campo.name == "numero" %}<input class="form-control" type="text" name="{{ campo.html_name }}" id="{{ campo.id_for_label }}" maxlength="5">
+              {% else %}<select class="form-select" name="{{ campo.html_name }}" id="{{ campo.id_for_label }}">{% for v, n in campo.field.choices %}<option value="{{ v }}">{{ n }}</option>{% endfor %}</select>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <button class="btn btn-primary btn-sm mt-2" type="submit">Inscribirme</button>
+      </form>
+    {% endif %}
+  </div></div>
+
+  <div class="row g-3">
+    {# ---------- Fechas y mis resultados ---------- #}
+    <div class="col-12 col-lg-7">
+      <h2 class="h6">Fechas</h2>
+      {% for f in fechas %}
+        <div class="card mb-2" id="fecha-{{ f.fecha.numero }}"><div class="card-body">
+          <div class="d-flex justify-content-between">
+            <strong>Fecha {{ f.fecha.numero }}{% if f.fecha.nombre %} · {{ f.fecha.nombre }}{% endif %}</strong>
+            <span class="small text-body-secondary">{{ f.fecha.dia|date:"d/m/Y" }} · {{ f.fecha.circuito }}</span>
+          </div>
+          {% if f.fecha.estado == "SUSPENDIDA" %}<span class="badge text-bg-secondary">Suspendida</span>{% endif %}
+          {% if f.fecha.multiplicador != 1 %}<span class="badge text-bg-info">Puntaje x{{ f.fecha.multiplicador|floatformat:"-2" }}</span>{% endif %}
+          {% for c in f.carreras %}
+            <div class="border-top mt-2 pt-2">
+              <div class="small fw-semibold">{{ c.carrera.nombre }} · {{ c.inscripcion.categoria.nombre }}</div>
+              {% if c.resultado %}
+                <div class="small">
+                  {% if c.resultado.posicion %}{{ c.resultado.posicion }}°{% else %}{{ c.resultado.get_condicion_display }}{% endif %}
+                  {% if c.resultado.pole %} · pole{% endif %}{% if c.resultado.vuelta_rapida %} · vuelta rápida{% endif %}
+                  · <strong>{{ c.resultado.puntos|floatformat:"-2" }} pts</strong>
+                  <span class="badge {% if c.resultado.estado == 'VALIDADO' %}text-bg-success{% elif c.resultado.estado == 'OBSERVADO' %}text-bg-warning{% elif c.resultado.estado == 'ANULADO' %}text-bg-dark{% else %}text-bg-secondary{% endif %}">{{ c.resultado.get_estado_display }}</span>
+                  {% if c.resultado.motivo %}<div class="text-warning">{{ c.resultado.motivo }}</div>{% endif %}
+                </div>
+              {% endif %}
+              {% if c.editable %}
+                <form method="post" action="{% url 'campeonatos_portal:cargar_resultado' c.carrera.pk c.inscripcion.pk %}" class="row g-2 align-items-end mt-1" novalidate>
+                  {% csrf_token %}
+                  <div class="col-6 col-md-4"><label class="form-label small" for="{{ c.form.condicion.id_for_label }}">Terminé</label>
+                    <select class="form-select form-select-sm" name="{{ c.form.condicion.html_name }}" id="{{ c.form.condicion.id_for_label }}">
+                      {% for v, n in c.form.condicion.field.choices %}<option value="{{ v }}" {% if c.form.condicion.value == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+                  <div class="col-6 col-md-2"><label class="form-label small" for="{{ c.form.posicion.id_for_label }}">Posición</label>
+                    <input class="form-control form-control-sm" type="number" min="1" name="{{ c.form.posicion.html_name }}" id="{{ c.form.posicion.id_for_label }}" value="{{ c.form.posicion.value|default_if_none:'' }}"></div>
+                  {% if c.carrera.otorga_bonus %}
+                    <div class="col-6 col-md-2 form-check ms-2"><input class="form-check-input" type="checkbox" name="{{ c.form.pole.html_name }}" id="{{ c.form.pole.id_for_label }}" {% if c.form.pole.value %}checked{% endif %}>
+                      <label class="form-check-label small" for="{{ c.form.pole.id_for_label }}">Pole</label></div>
+                    <div class="col-6 col-md-2 form-check"><input class="form-check-input" type="checkbox" name="{{ c.form.vuelta_rapida.html_name }}" id="{{ c.form.vuelta_rapida.id_for_label }}" {% if c.form.vuelta_rapida.value %}checked{% endif %}>
+                      <label class="form-check-label small" for="{{ c.form.vuelta_rapida.id_for_label }}">V. rápida</label></div>
+                  {% endif %}
+                  <div class="col-12 col-md-auto"><button class="btn btn-sm btn-primary" type="submit">{% if c.resultado %}Corregir{% else %}Cargar{% endif %}</button></div>
+                </form>
+              {% elif not c.resultado %}
+                <div class="small text-body-secondary">{% if f.fecha.dia > hoy %}Se carga desde el día de la fecha.{% else %}La carga está cerrada.{% endif %}</div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="small text-body-secondary mt-1">Tu categoría no corre en esta fecha o no estás inscripto.</div>
+          {% endfor %}
+        </div></div>
+      {% empty %}
+        <p class="text-body-secondary small">El calendario todavía no está cargado.</p>
+      {% endfor %}
+    </div>
+
+    {# ---------- Tablas ---------- #}
+    <div class="col-12 col-lg-5">
+      {% for t in tablas %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Tabla · {{ t.categoria.nombre }}</h2>
+          <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Pos</th><th>N°</th><th>Piloto</th><th class="text-end">Pts</th><th class="text-center">Vic</th></tr></thead>
+            <tbody>
+              {% for f in t.filas %}
+                <tr{% if f.inscripcion.pk == t.mi_inscripcion.pk %} class="table-primary"{% endif %}>
+                  <td>{{ f.posicion }}</td><td>{{ f.numero }}</td>
+                  <td>{{ f.nombre }}{% if f.provisorios %}<span class="text-warning" title="Incluye resultados sin validar">*</span>{% endif %}</td>
+                  <td class="text-end fw-semibold">{{ f.puntos|floatformat:"-2" }}</td><td class="text-center">{{ f.victorias }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table></div>
+          {% if t.provisoria %}<p class="small text-body-secondary mt-2 mb-0">* Incluye resultados provisorios.</p>{% endif %}
+        </div></div>
+      {% empty %}
+        <p class="small text-body-secondary">Inscribite para ver tu tabla acá. La tabla completa también está en la web del campeonato.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

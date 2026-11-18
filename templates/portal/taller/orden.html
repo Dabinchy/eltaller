@@ -1,0 +1,81 @@
+{% extends "layouts/base_app.html" %}
+{% load format_ar %}
+
+{% block content %}
+<div class="container py-3" style="max-width:980px">
+  <a class="small" href="{% url 'portal:mi_taller' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Mi taller</a>
+  <h1 class="h4 mt-1 mb-1">Orden #{{ orden.numero }} {% include "panel/taller/_estado.html" with o=orden %}</h1>
+  <p class="small text-body-secondary">{{ orden.vehiculo.identificacion }} · {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }} · {{ orden.sucursal }}
+    · ingresó {{ orden.fecha_ingreso|date:"d/m/Y" }}{% if orden.fecha_prometida %} · prometido para el {{ orden.fecha_prometida|date:"d/m H:i" }}{% endif %}</p>
+
+  {% if puede_aprobar %}
+    <div class="card border-warning mb-3"><div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div><strong>Presupuesto: {{ orden.total_presupuestado|money_ar }}</strong>
+        <div class="small text-body-secondary">Si estás de acuerdo, aprobalo y el taller empieza el trabajo.</div></div>
+      <form method="post" action="{% url 'portal:taller_orden_aprobar' orden.pk %}" onsubmit="return confirm('¿Aprobar el presupuesto de {{ orden.total_presupuestado|money_ar }}?');">
+        {% csrf_token %}<button class="btn btn-warning" type="submit"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Aprobar presupuesto</button>
+      </form>
+    </div></div>
+  {% endif %}
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Trabajos y repuestos</h2>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Descripción</th><th class="text-end">Cant.</th><th class="text-end">Importe</th></tr></thead>
+          <tbody>
+            {% for it in items %}
+              <tr><td>{{ it.descripcion }}{% if not it.aprobado and orden.estado != "PRESUPUESTO" %} <span class="badge text-bg-warning">a confirmar</span>{% endif %}</td>
+                <td class="text-end">{{ it.cantidad|floatformat:"-3" }}</td>
+                <td class="text-end">{% if it.precio_unitario == 0 %}Sin cargo{% else %}{{ it.importe|money_ar }}{% endif %}</td></tr>
+            {% empty %}<tr><td colspan="3" class="text-body-secondary">El taller todavía está armando el presupuesto.</td></tr>{% endfor %}
+          </tbody>
+          <tfoot><tr><th colspan="2" class="text-end">{% if orden.estado == "PRESUPUESTO" %}Presupuesto{% else %}Total aprobado{% endif %}</th>
+            <th class="text-end">{% if orden.estado == "PRESUPUESTO" %}{{ orden.total_presupuestado|money_ar }}{% else %}{{ orden.total|money_ar }}{% endif %}</th></tr></tfoot>
+        </table></div>
+        {% if orden.diagnostico %}<h3 class="h6 mt-3">Diagnóstico</h3><p class="small mb-0">{{ orden.diagnostico|linebreaksbr }}</p>{% endif %}
+      </div></div>
+
+      {% if archivos %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">Fotos del taller</h2>
+          <div class="row g-2">
+            {% for a in archivos %}
+              <div class="col-6 col-md-4"><a href="{% url 'archivo' a.pk %}" target="_blank" rel="noopener">
+                {% if a.miniatura %}<img src="{% url 'archivo' a.pk %}?mini=1" alt="{{ a.titulo }}" class="img-fluid rounded" loading="lazy">{% else %}<span class="d-block border rounded p-3 text-center"><i class="bi bi-file-earmark" aria-hidden="true"></i></span>{% endif %}
+                <span class="small d-block">{{ a.titulo }}</span></a></div>
+            {% endfor %}
+          </div>
+        </div></div>
+      {% endif %}
+
+      <div class="card" id="comentarios"><div class="card-body">
+        <h2 class="h6">Conversación con el taller</h2>
+        {% for c in comentarios %}
+          <div class="border-start border-3 {% if c.autor.es_portal %}border-primary{% else %}border-info{% endif %} ps-2 mb-2">
+            <div class="small text-body-secondary">{% if c.autor.es_portal %}{{ c.autor.get_full_name|default:c.autor.username }}{% else %}Taller{% endif %} · {{ c.fecha|date:"d/m H:i" }}</div>
+            <div>{{ c.texto|linebreaksbr }}</div>
+          </div>
+        {% empty %}<p class="small text-body-secondary">Sin mensajes todavía.</p>{% endfor %}
+        <form method="post" action="{% url 'portal:taller_orden_comentar' orden.pk %}" novalidate>
+          {% csrf_token %}{% include "partials/_form.html" with form=form_comentario %}
+          <button class="btn btn-outline-primary btn-sm" type="submit">Enviar</button>
+        </form>
+      </div></div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card"><div class="card-body">
+        <h2 class="h6">Seguimiento</h2>
+        <ol class="list-unstyled small mb-0">
+          {% for h in historial %}
+            <li class="mb-1"><i class="bi bi-check-circle text-success me-1" aria-hidden="true"></i><strong>{{ h.nuevo_display }}</strong>
+              <span class="text-body-secondary">· {{ h.fecha|date:"d/m H:i" }}</span></li>
+          {% endfor %}
+        </ol>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
