@@ -20,6 +20,7 @@ import hashlib
 import re
 from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
+from urllib.parse import urlparse
 
 from django.apps import apps
 from django.conf import settings
@@ -85,6 +86,13 @@ class Empresa(models.Model):
     horarios = models.TextField(blank=True, help_text="Horarios de atención, uno por línea.")
     logo = models.ImageField(upload_to="empresa/", blank=True, null=True)
     descripcion_web = models.TextField(blank=True, help_text="Texto de presentación del taller.")
+    instagram = models.CharField(max_length=100, blank=True, help_text="'@usuario' o el link; se guarda el usuario.")
+    facebook = models.URLField(blank=True, help_text="Link a la página de Facebook.")
+    youtube = models.URLField(blank=True, help_text="Link al canal de YouTube.")
+    mapa_url = models.URLField(
+        "link de Google Maps", blank=True,
+        help_text="En Google Maps: Compartir → Copiar vínculo (ej.: https://maps.app.goo.gl/...).",
+    )
 
     # AFIP (opcional; sin uso por ahora)
     afip_modo = models.CharField(
@@ -102,6 +110,30 @@ class Empresa(models.Model):
 
     def __str__(self) -> str:
         return self.nombre
+
+    _HOSTS_REDES = {
+        "facebook": ("facebook.com", "fb.com"),
+        "youtube": ("youtube.com", "youtu.be"),
+        "mapa_url": ("google.com", "google.com.ar", "goo.gl", "maps.app.goo.gl"),
+    }
+
+    def clean(self):
+        super().clean()
+        from portal.models import _normalizar_instagram, _validar_instagram  # evita import circular
+
+        self.instagram = _normalizar_instagram(self.instagram)
+        try:
+            _validar_instagram(self.instagram)
+        except ValidationError as e:
+            raise ValidationError({"instagram": e.messages}) from e
+        for campo, hosts in self._HOSTS_REDES.items():
+            valor = getattr(self, campo)
+            if not valor:
+                continue
+            host = (urlparse(valor).hostname or "").lower()
+            if not any(host == h or host.endswith("." + h) for h in hosts):
+                raise ValidationError({campo: "Ese link no es de " + (
+                    "Google Maps" if campo == "mapa_url" else campo.capitalize()) + "."})
 
     def save(self, *args, **kwargs):
         # Una sola fila: no se puede crear una segunda empresa.

@@ -81,6 +81,9 @@ class EmpresaAdmin(admin.ModelAdmin):
         ("Contacto", {
             "fields": ("telefono", "whatsapp", "email_contacto", "horarios"),
         }),
+        ("Redes y mapa (se muestran en el sitio)", {
+            "fields": ("instagram", "facebook", "youtube", "mapa_url"),
+        }),
         ("Dirección", {
             "fields": ("direccion", "localidad", "provincia", "codigo_postal", "pais"),
         }),
