@@ -22,6 +22,7 @@ urlpatterns = [
     path("panel/clientes/", include("panel.urls_clientes")),
     path("panel/compras/", include("panel.urls_compras")),
     path("portal/campeonatos/", include("campeonatos.urls_portal")),
+    path("portal/moderacion/campeonatos/", include("campeonatos.urls_moderacion")),
     path("portal/", include("portal.urls")),
 
     # Archivos privados (cada pedido verifica permisos)

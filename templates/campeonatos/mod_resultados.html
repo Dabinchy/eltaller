@@ -1,0 +1,68 @@
+{% extends "layouts/base_app.html" %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <a class="small" href="{% url 'campeonatos_mod:detalle' fecha.campeonato_id %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> {{ fecha.campeonato }}</a>
+  <h1 class="h4 mt-1">Fecha {{ fecha.numero }}{% if fecha.nombre %} · {{ fecha.nombre }}{% endif %}</h1>
+  <p class="small text-body-secondary">{{ fecha.dia|date:"d/m/Y" }} · {{ fecha.circuito }} · los pilotos cargan hasta el {{ fecha.cierre_carga|date:"d/m/Y" }}. Después, los provisorios sin conflicto se validan solos.</p>
+
+  {% for b in bloques %}
+    <div class="card mb-3" id="c{{ b.carrera.pk }}"><div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="h6 mb-0">{{ b.carrera.nombre }} · {{ b.categoria.nombre }}</h2>
+        {% if b.provisorios %}
+          <form method="post" action="{% url 'campeonatos_mod:validar_todos' b.carrera.pk b.categoria.pk %}">{% csrf_token %}
+            <button class="btn btn-sm btn-success" type="submit">Validar los {{ b.provisorios }} provisorio(s)</button></form>
+        {% endif %}
+      </div>
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Pos</th><th>N°</th><th>Piloto</th><th>Extra</th><th class="text-end">Pts</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+        <tbody>
+          {% for r in b.resultados %}
+            <tr class="{% if r.estado == 'OBSERVADO' %}table-warning{% elif r.estado == 'ANULADO' %}text-decoration-line-through{% endif %}">
+              <td>{% if r.posicion %}{{ r.posicion }}°{% else %}{{ r.get_condicion_display }}{% endif %}</td>
+              <td>{{ r.inscripcion.numero }}</td><td>{{ r.inscripcion.piloto }}</td>
+              <td class="small">{% if r.pole %}Pole {% endif %}{% if r.vuelta_rapida %}VR{% endif %}{% if r.condicion == "ABANDONO" and r.posicion %} (abandonó){% endif %}</td>
+              <td class="text-end">{{ r.puntos|floatformat:"-2" }}</td>
+              <td><span class="badge {% if r.estado == 'VALIDADO' %}text-bg-success{% elif r.estado == 'OBSERVADO' %}text-bg-warning{% elif r.estado == 'ANULADO' %}text-bg-dark{% else %}text-bg-secondary{% endif %}">{{ r.get_estado_display }}</span>
+                {% if r.motivo %}<div class="small">{{ r.motivo }}</div>{% endif %}</td>
+              <td class="text-end">
+                {% if r.inscripcion.piloto.usuario_id == user.pk %}<span class="small text-body-secondary">es tuyo</span>{% else %}
+                <div class="d-flex flex-wrap justify-content-end gap-1">
+                  {% if r.estado == "PROVISORIO" or r.estado == "OBSERVADO" %}
+                    <form method="post" action="{% url 'campeonatos_mod:resultado' r.pk %}">{% csrf_token %}<input type="hidden" name="accion" value="validar">
+                      <button class="btn btn-sm btn-success" type="submit">Validar</button></form>
+                  {% endif %}
+                  <details><summary class="btn btn-sm btn-outline-secondary">Corregir</summary>
+                    <form method="post" action="{% url 'campeonatos_mod:resultado' r.pk %}" class="mt-1 text-start" style="min-width:240px">{% csrf_token %}
+                      <input type="hidden" name="accion" value="corregir">
+                      <select class="form-select form-select-sm mb-1" name="condicion" aria-label="Condición">{% for v, n in condiciones %}<option value="{{ v }}" {% if r.condicion == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+                      <input class="form-control form-control-sm mb-1" type="number" min="1" name="posicion" value="{{ r.posicion|default_if_none:'' }}" placeholder="Posición" aria-label="Posición">
+                      {% if b.carrera.otorga_bonus %}
+                        <label class="small me-2"><input type="checkbox" name="pole" {% if r.pole %}checked{% endif %}> Pole</label>
+                        <label class="small"><input type="checkbox" name="vuelta_rapida" {% if r.vuelta_rapida %}checked{% endif %}> V. rápida</label>
+                      {% endif %}
+                      <input class="form-control form-control-sm my-1" name="motivo" required placeholder="Motivo (ej.: planilla oficial)" aria-label="Motivo">
+                      <button class="btn btn-sm btn-primary" type="submit">Guardar corrección</button>
+                    </form></details>
+                  {% if r.estado != "ANULADO" %}
+                    <details><summary class="btn btn-sm btn-outline-warning">Observar</summary>
+                      <form method="post" action="{% url 'campeonatos_mod:resultado' r.pk %}" class="d-flex gap-1 mt-1">{% csrf_token %}<input type="hidden" name="accion" value="observar">
+                        <input class="form-control form-control-sm" name="motivo" required placeholder="Motivo" aria-label="Motivo"><button class="btn btn-sm btn-warning" type="submit">OK</button></form></details>
+                    <details><summary class="btn btn-sm btn-outline-danger">Anular</summary>
+                      <form method="post" action="{% url 'campeonatos_mod:resultado' r.pk %}" class="d-flex gap-1 mt-1">{% csrf_token %}<input type="hidden" name="accion" value="anular">
+                        <input class="form-control form-control-sm" name="motivo" required placeholder="Motivo" aria-label="Motivo"><button class="btn btn-sm btn-danger" type="submit">OK</button></form></details>
+                  {% endif %}
+                </div>{% endif %}
+              </td>
+            </tr>
+          {% empty %}<tr><td colspan="7" class="text-body-secondary">Nadie cargó resultados todavía.</td></tr>{% endfor %}
+        </tbody>
+      </table></div>
+      {% if b.faltan %}<p class="small text-body-secondary mt-2 mb-0">Sin cargar: {% for i in b.faltan %}#{{ i.numero }} {{ i.piloto }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+    </div></div>
+  {% empty %}
+    <p class="text-body-secondary">Esta fecha no tiene carreras o categorías.</p>
+  {% endfor %}
+</div>
+{% endblock %}
