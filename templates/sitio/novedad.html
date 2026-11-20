@@ -1,0 +1,45 @@
+{% extends "layouts/base_sitio.html" %}
+{# Una novedad, con el encabezado de su parte. #}
+
+{% block description %}{{ pub.resumen|truncatechars:150 }}{% endblock %}
+{% block extra_css %}{% if borrador %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
+
+{% block content %}
+{% include "sitio/_borrador.html" %}
+{% include "sitio/_cabecera.html" with texto=pub.resumen miga_url=url_lista miga_texto="Novedades" %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <article class="sitio-novedad">
+      <p class="sitio-novedad-fecha"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i><time datetime="{{ pub.fecha|date:'c' }}">{{ pub.fecha|date:"j \d\e F \d\e Y" }}</time></p>
+      {% if pub.portada %}
+        <div data-galeria>
+          <a class="sitio-trabajo-portada mb-4" href="{{ pub.portada.url }}" data-foto data-epigrafe="{{ pub.titulo }}">
+            <img src="{{ pub.portada.url }}" alt="{{ pub.titulo }}">
+          </a>
+        </div>
+      {% endif %}
+      {% if pub.cuerpo %}<div class="sitio-texto sitio-novedad-texto">{{ pub.cuerpo|linebreaks }}</div>{% endif %}
+      {% if pub.video_embed_url %}
+        <div class="mt-4">
+          {% if pub.portada_miniatura %}
+            {% include "sitio/_video.html" with url=pub.video_embed_url titulo=pub.titulo poster=pub.portada_miniatura.url %}
+          {% else %}
+            {% include "sitio/_video.html" with url=pub.video_embed_url titulo=pub.titulo %}
+          {% endif %}
+        </div>
+      {% endif %}
+      <a class="btn sitio-btn-sec mt-4" href="{{ url_lista }}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Todas las novedades</a>
+    </article>
+
+    {% if otras %}
+      <h2 class="sitio-seccion-titulo mt-5">Más novedades</h2>
+      <div class="row g-3">
+        {% for n in otras %}
+          <div class="col-12 col-md-6 col-lg-4">{% include "sitio/_novedad_card.html" %}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

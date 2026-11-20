@@ -1,5 +1,5 @@
 """
-Contenido del sitio público, editable desde el admin (sin tocar código).
+Contenido del sitio público, editable desde el panel (/panel/sitio/) o el admin, sin tocar código.
 
 - Portada: el encabezado grande de cada parte (una por parte).
 - Servicio: lo que hace El Taller y cada sección de El Prepa.

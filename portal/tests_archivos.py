@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 from io import BytesIO
@@ -20,6 +21,8 @@ from .models_contenido import Archivo, video_embed
 from .permisos import puede_ver_archivo
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_archivos_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 V = Archivo.Visibilidad
 T = Archivo.Tipo
 
@@ -36,11 +39,6 @@ def archivo(nombre, kb=1):
 
 @override_settings(PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.gerente = Usuario.objects.create_user("gerente", password="x", is_staff=True)
         self.gerente.groups.add(Group.objects.get(name="gerente"))

@@ -1,4 +1,5 @@
 """Contenido del sitio público desde el panel (/panel/sitio/): permisos, altas, publicación, galería y consultas."""
+import atexit
 import shutil
 import tempfile
 from datetime import timedelta
@@ -14,6 +15,8 @@ from core.models import Usuario
 from sitio.models import Consulta, FotoTrabajo, Portada, Publicacion, Servicio, Testimonio, Trabajo
 
 MEDIA = tempfile.mkdtemp(prefix="media_panel_sitio_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, MEDIA, ignore_errors=True)
 
 
 def jpg(nombre="foto.jpg", color="blue") -> SimpleUploadedFile:
@@ -24,11 +27,6 @@ def jpg(nombre="foto.jpg", color="blue") -> SimpleUploadedFile:
 
 @override_settings(MEDIA_ROOT=MEDIA, ALLOWED_HOSTS=["testserver"])
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(MEDIA, ignore_errors=True)
-
     def setUp(self):
         self.gerente = self.personal("gerente", "gerente")
         self.adm = self.personal("adm", "administracion")

@@ -1,0 +1,21 @@
+{# Tarjeta de una novedad (n = Publicacion). con_parte = mostrar a qué parte pertenece. #}
+<div class="sitio-editable">
+  <a class="sitio-card sitio-card-foto" href="{% url 'sitio:publicacion' n.slug %}">
+    <span class="sitio-card-img sitio-card-img-ancha">
+      {% if n.portada_miniatura %}<img src="{{ n.portada_miniatura.url }}" alt="" loading="lazy">
+      {% elif n.portada %}<img src="{{ n.portada.url }}" alt="" loading="lazy">
+      {% else %}<i class="bi bi-newspaper" aria-hidden="true"></i>{% endif %}
+    </span>
+    <span class="sitio-card-cuerpo">
+      <span class="sitio-card-meta">
+        <time datetime="{{ n.fecha|date:'c' }}">{{ n.fecha|date:"j \d\e F Y" }}</time>{% if con_parte %} · <span class="sitio-novedad-parte" data-parte="{{ n.parte }}">{{ n.get_parte_display }}</span>{% endif %}
+      </span>
+      <h3>{{ n.titulo }}</h3>
+      <p>{{ n.resumen }}</p>
+    </span>
+  </a>
+  {% if personal_sitio and perms.sitio.change_publicacion %}
+    {% url 'sitio_panel:novedad' n.pk as url_editar %}
+    {% include "sitio/_lapiz.html" with url=url_editar texto="Editar esta novedad" %}
+  {% endif %}
+</div>

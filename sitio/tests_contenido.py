@@ -1,4 +1,5 @@
 """Contenido editable del sitio (Parte 1 del frontend): modelos, fotos, permisos y admin."""
+import atexit
 import shutil
 import tempfile
 from datetime import timedelta
@@ -17,6 +18,8 @@ from core.models import Empresa, Usuario
 from .models import Consulta, FotoTrabajo, Portada, Publicacion, Servicio, Testimonio, Trabajo
 
 MEDIA = tempfile.mkdtemp(prefix="media_sitio_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, MEDIA, ignore_errors=True)
 VIDEO_OK = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
 
@@ -31,11 +34,6 @@ def jpg_con_metadatos(ancho=3000, alto=1500) -> SimpleUploadedFile:
 
 @override_settings(MEDIA_ROOT=MEDIA, ALLOWED_HOSTS=["testserver"])
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(MEDIA, ignore_errors=True)
-
     def trabajo(self, **kw):
         datos = {"titulo": "Falcon Sprint", "resumen": "Restauración completa."}
         datos.update(kw)

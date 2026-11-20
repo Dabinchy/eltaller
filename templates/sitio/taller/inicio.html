@@ -116,25 +116,9 @@
   </div>
 </section>
 
-{# Testimonios #}
-{% if testimonios %}
-  <section class="sitio-seccion sitio-seccion-alt">
-    <div class="container">
-      <h2 class="sitio-seccion-titulo">Lo que dicen nuestros clientes</h2>
-      <div class="row g-3">
-        {% for t in testimonios %}
-          <div class="col-12 col-md-6 col-lg-4">
-            <figure class="sitio-testimonio">
-              <i class="bi bi-quote" aria-hidden="true"></i>
-              <blockquote>{{ t.texto|linebreaksbr }}</blockquote>
-              <figcaption><strong>{{ t.nombre }}</strong>{% if t.detalle %}<span>{{ t.detalle }}</span>{% endif %}</figcaption>
-            </figure>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-{% endif %}
+{% include "sitio/_testimonios.html" %}
+
+{% include "sitio/_novedades_seccion.html" with clave="taller" %}
 
 {# Las otras partes #}
 <section class="sitio-seccion">

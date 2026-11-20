@@ -4,9 +4,7 @@ Sitio público (se ve sin ingresar), en tres partes (ver partes.py):
 - El Taller, en la portada: autos de calle.
 - El Prepa, en /prepa/: competición, personalización y clásicos.
 - Campeonatos: /campeonatos/, /pilotos/, /autos/ y /asociaciones/.
-
-Las páginas que todavía no tienen contenido muestran "próximamente"; la estructura de
-direcciones queda fija.
+- Novedades: /publicaciones/ (?parte= para las de una parte).
 """
 from django.urls import path
 
@@ -14,7 +12,6 @@ from . import views
 
 app_name = "sitio"
 
-P = views.proximamente
 
 urlpatterns = [
     # El Taller
@@ -27,13 +24,13 @@ urlpatterns = [
     path("consulta-enviada/<str:tipo>/", views.consulta_enviada, name="consulta_enviada"),
 
     # El Prepa
-    path("prepa/", views.portada, {"parte": "prepa"}, name="prepa"),
-    path("prepa/competicion/", P, {"seccion": "Competición"}, name="prepa_competicion"),
-    path("prepa/personalizacion/", P, {"seccion": "Personalización"}, name="prepa_personalizacion"),
-    path("prepa/clasicos/", P, {"seccion": "Restauración de clásicos"}, name="prepa_clasicos"),
-    path("prepa/proyectos/", P, {"seccion": "Proyectos"}, name="prepa_proyectos"),
-    path("prepa/proyectos/<slug:slug>/", P, {"seccion": "Proyectos"}, name="prepa_proyecto"),
-    path("prepa/consulta/", P, {"seccion": "Contanos tu proyecto"}, name="prepa_consulta"),
+    path("prepa/", views.prepa_inicio, name="prepa"),
+    path("prepa/competicion/", views.prepa_seccion, {"seccion": "competicion"}, name="prepa_competicion"),
+    path("prepa/personalizacion/", views.prepa_seccion, {"seccion": "personalizacion"}, name="prepa_personalizacion"),
+    path("prepa/clasicos/", views.prepa_seccion, {"seccion": "clasicos"}, name="prepa_clasicos"),
+    path("prepa/proyectos/", views.prepa_proyectos, name="prepa_proyectos"),
+    path("prepa/proyectos/<slug:slug>/", views.prepa_proyecto, name="prepa_proyecto"),
+    path("prepa/consulta/", views.prepa_consulta, name="prepa_consulta"),
 
     # Campeonatos
     path("campeonatos/", views.campeonatos, name="campeonatos"),
@@ -44,7 +41,7 @@ urlpatterns = [
     path("asociaciones/", views.asociaciones, name="asociaciones"),
     path("asociaciones/<slug:slug>/", views.asociacion, name="asociacion"),
 
-    # Compartido: cada publicación indicará a qué parte pertenece
-    path("publicaciones/", P, {"seccion": "Novedades"}, name="publicaciones"),
-    path("publicaciones/<slug:slug>/", P, {"seccion": "Novedades"}, name="publicacion"),
+    # Compartido: cada novedad se ve con el encabezado de su parte
+    path("publicaciones/", views.publicaciones, name="publicaciones"),
+    path("publicaciones/<slug:slug>/", views.publicacion, name="publicacion"),
 ]

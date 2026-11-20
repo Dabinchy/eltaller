@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 from datetime import date
@@ -15,6 +16,8 @@ from . import servicios
 from .models import Asociacion, Membresia, PerfilPiloto, RegistroModeracion
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_portal_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 M = Membresia
 
 
@@ -30,11 +33,6 @@ def jpg_con_metadatos(ancho=3000, alto=1500) -> SimpleUploadedFile:
 
 @override_settings(PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.asoc_a = Asociacion.objects.create(nombre="Asociación Pista Norte")
         self.asoc_b = Asociacion.objects.create(nombre="Karting Sur", cuota_mb=800)

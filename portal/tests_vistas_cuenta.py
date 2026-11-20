@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 from datetime import date
@@ -12,6 +13,8 @@ from .models import Asociacion, Membresia, PerfilPiloto
 from .models_contenido import Palmares
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_cuenta_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 CLAVE = "UnaClave-Segura-2026"
 
 
@@ -27,11 +30,6 @@ def datos_registro(**kw):
 
 @override_settings(ALLOWED_HOSTS=["testserver"], PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.asoc = Asociacion.objects.create(nombre="Pista Norte")
         self.gerente = Usuario.objects.create_user("gerente", password="x", is_staff=True)

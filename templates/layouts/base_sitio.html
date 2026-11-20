@@ -12,6 +12,20 @@
 <body class="cc-app sitio d-flex flex-column min-vh-100" data-parte="{{ parte.clave }}">
   <a class="cc-skip" href="#mainContent">Saltar al contenido</a>
 
+  {% if personal_sitio %}
+    {# Barra del personal: editar esta página en el panel sin pasar por el admin. #}
+    <div class="sitio-staff" data-bs-theme="dark" role="region" aria-label="Herramientas del personal">
+      <div class="container sitio-staff-inner">
+        <span class="sitio-staff-texto"><i class="bi bi-person-gear me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Estás viendo el sitio como personal</span><span class="d-sm-none">Personal</span></span>
+        <span class="sitio-staff-acciones">
+          {% if editar %}<a class="sitio-staff-btn sitio-staff-btn-principal" href="{{ editar.url }}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>{{ editar.texto }}</a>{% endif %}
+          <a class="sitio-staff-btn" href="{% url 'sitio_panel:inicio' %}"><i class="bi bi-globe2 me-1" aria-hidden="true"></i><span class="d-none d-md-inline">Sitio web</span><span class="d-md-none">Sitio</span></a>
+          <a class="sitio-staff-btn d-none d-sm-inline-flex" href="{% url 'panel:inicio' %}"><i class="bi bi-grid me-1" aria-hidden="true"></i>Panel</a>
+        </span>
+      </div>
+    </div>
+  {% endif %}
+
   <header class="sitio-header">
     {# Pestañas para pasar de una parte a otra #}
     <nav class="sitio-partes" data-bs-theme="dark" data-parte="{{ parte.clave }}" aria-label="Partes del sitio">

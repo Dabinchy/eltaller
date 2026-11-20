@@ -1,0 +1,16 @@
+{# Últimas novedades de una parte (en su portada). novedades = lista; clave = parte. #}
+{% if novedades %}
+  <section class="sitio-seccion">
+    <div class="container">
+      <div class="sitio-seccion-head">
+        <h2 class="sitio-seccion-titulo">Novedades</h2>
+        <a class="sitio-link-mas" href="{% url 'sitio:publicaciones' %}?parte={{ clave }}">Ver todas <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="row g-3">
+        {% for n in novedades %}
+          <div class="col-12 col-md-6 col-lg-4">{% include "sitio/_novedad_card.html" %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}

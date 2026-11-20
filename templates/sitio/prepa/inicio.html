@@ -1,22 +1,37 @@
 {% extends "layouts/base_sitio.html" %}
-{# Portada de El Prepa (provisoria): competición, personalización y clásicos. #}
+{# Portada de El Prepa: competición, personalización y clásicos. Contenido del panel (Sitio web); sin contenido, textos por defecto. #}
 
-{% block description %}Preparación de autos de competición, personalización y restauración de clásicos.{% endblock %}
+{% block description %}{% if portada.subtitulo %}{{ portada.subtitulo|truncatechars:150 }}{% else %}Preparación de autos de competición, personalización y restauración de clásicos.{% endif %}{% endblock %}
 
 {% block content %}
-<section class="sitio-hero">
+<section class="sitio-hero{% if portada.imagen %} sitio-hero-foto{% endif %}"
+         {% if portada.imagen %}data-bs-theme="dark" style="--hero-img:url('{{ portada.imagen.url }}')"{% endif %}>
   <div class="container">
-    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
-    <p class="lead">Preparación de autos de competición, personalización y restauración de clásicos, con el respaldo de {{ empresa.nombre|default:"El Taller" }}.</p>
+    {% if portada.imagen %}
+      <h1 class="sitio-hero-titulo">{{ portada.titulo }}</h1>
+    {% else %}
+      {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+      <h1 class="visually-hidden">{{ portada.titulo|default:parte.nombre }}</h1>
+      {% if portada.titulo %}<p class="sitio-hero-titulo mt-4">{{ portada.titulo }}</p>{% endif %}
+    {% endif %}
+    <p class="lead">
+      {% if portada.subtitulo %}{{ portada.subtitulo|linebreaksbr }}{% else %}Preparación de autos de competición, personalización y restauración de clásicos, con el respaldo de {{ empresa.nombre|default:"El Taller" }}.{% endif %}
+    </p>
     <div class="sitio-hero-acciones">
       {% if parte.accion %}
         <a class="btn btn-lg sitio-btn-accion" href="{{ parte.accion.url }}">
           <i class="bi {{ parte.accion.icono }}" aria-hidden="true"></i> {{ parte.accion.texto }}
         </a>
       {% endif %}
-      <a class="btn btn-lg sitio-btn-sec" href="{% url 'sitio:prepa_proyectos' %}">
-        <i class="bi bi-images me-1" aria-hidden="true"></i> Ver proyectos
-      </a>
+      {% if portada.video_embed_url %}
+        <button type="button" class="btn btn-lg sitio-btn-sec" data-bs-toggle="modal" data-bs-target="#videoPortada">
+          <i class="bi bi-play-circle me-1" aria-hidden="true"></i> Ver video
+        </button>
+      {% else %}
+        <a class="btn btn-lg sitio-btn-sec" href="{% url 'sitio:prepa_proyectos' %}">
+          <i class="bi bi-images me-1" aria-hidden="true"></i> Ver proyectos
+        </a>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -25,32 +40,56 @@
   <div class="container">
     <h2 class="sitio-seccion-titulo">Qué hacemos</h2>
     <div class="row g-3">
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{% url 'sitio:prepa_competicion' %}">
-          <span class="sitio-card-ico"><i class="bi bi-flag" aria-hidden="true"></i></span>
-          <h3>Competición</h3>
-          <p>Preparación de motor, suspensión y seguridad para pista, rally y picadas.</p>
-        </a>
-      </div>
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{% url 'sitio:prepa_personalizacion' %}">
-          <span class="sitio-card-ico"><i class="bi bi-brush" aria-hidden="true"></i></span>
-          <h3>Personalización</h3>
-          <p>Potencia, estética y puesta a punto para que tu auto sea único.</p>
-        </a>
-      </div>
-      <div class="col-12 col-md-4">
-        <a class="sitio-card" href="{% url 'sitio:prepa_clasicos' %}">
-          <span class="sitio-card-ico"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
-          <h3>Clásicos</h3>
-          <p>Restauración respetando el original, con el proceso documentado paso a paso.</p>
-        </a>
-      </div>
+      {% for clave, s, url in secciones %}
+        <div class="col-12 col-md-4">
+          <a class="sitio-card" href="{{ url }}">
+            <span class="sitio-card-ico"><i class="bi {{ s.icono }}" aria-hidden="true"></i></span>
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.texto }}</p>
+          </a>
+        </div>
+      {% endfor %}
     </div>
   </div>
 </section>
 
-<section class="pb-2">
+{% if proyectos %}
+  <section class="sitio-seccion sitio-seccion-alt">
+    <div class="container">
+      <div class="sitio-seccion-head">
+        <h2 class="sitio-seccion-titulo">Proyectos</h2>
+        <a class="sitio-link-mas" href="{% url 'sitio:prepa_proyectos' %}">Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="row g-3">
+        {% for t in proyectos %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            {% url 'sitio:prepa_proyecto' t.slug as url %}
+            {% include "sitio/_trabajo_card.html" with url=url %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="sitio-destacado">
+      <div class="sitio-destacado-ico"><i class="bi bi-chat-dots" aria-hidden="true"></i></div>
+      <div class="flex-grow-1">
+        <h2 class="h4 fw-bold mb-1">¿Tenés un proyecto en mente?</h2>
+        <p class="mb-0">Contanos qué auto tenés y qué querés lograr. Te respondemos con una propuesta.</p>
+      </div>
+      <a class="btn sitio-btn-accion" href="{% url 'sitio:prepa_consulta' %}"><i class="bi bi-chat-dots" aria-hidden="true"></i> Contanos tu proyecto</a>
+    </div>
+  </div>
+</section>
+
+{% include "sitio/_testimonios.html" with titulo_testimonios="Lo que dicen pilotos y clientes" %}
+
+{% include "sitio/_novedades_seccion.html" with clave="prepa" %}
+
+<section class="sitio-seccion">
   <div class="container">
     <a class="sitio-banda" data-parte="campeonatos" href="{% url 'sitio:campeonatos' %}">
       <div>
@@ -61,4 +100,15 @@
     </a>
   </div>
 </section>
+
+{% if portada.video_embed_url %}
+  <div class="modal fade" id="videoPortada" tabindex="-1" aria-label="Video" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content sitio-modal-video">
+        <button type="button" class="btn-close btn-close-white sitio-modal-cerrar" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        {% include "sitio/_video.html" with url=portada.video_embed_url titulo=portada.titulo %}
+      </div>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}

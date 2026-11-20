@@ -1,0 +1,29 @@
+{% extends "layouts/base_sitio.html" %}
+{# "Contanos tu proyecto": guarda una Consulta de El Prepa (panel → Sitio web → Consultas). #}
+
+{% block description %}Contanos tu proyecto en {{ parte.nombre }}: competición, personalización o restauración de clásicos.{% endblock %}
+
+{% block content %}
+{% include "sitio/_cabecera.html" with texto="Qué auto tenés, qué querés lograr y para cuándo. Te respondemos con una propuesta." %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div class="sitio-panel">
+          {% include "sitio/_form_consulta.html" with boton="Enviar mi proyecto" %}
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="sitio-panel">
+          <h2 class="h6 fw-bold mb-3">¿Preferís hablar ya?</h2>
+          {% include "sitio/_contacto_datos.html" %}
+          {% if not empresa.whatsapp and not empresa.telefono and not empresa.direccion %}
+            <p class="sitio-aviso mb-0">Completá el formulario y te contactamos.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

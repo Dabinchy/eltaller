@@ -1,13 +1,20 @@
 {% extends "layouts/base_sitio.html" %}
 {# Portada de Campeonatos: los que están en curso con su podio, próximas fechas y finalizados. #}
 
-{% block description %}Campeonatos: fechas, resultados, tablas de posiciones y pilotos.{% endblock %}
+{% block description %}{% if portada.subtitulo %}{{ portada.subtitulo|truncatechars:150 }}{% else %}Campeonatos: fechas, resultados, tablas de posiciones y pilotos.{% endif %}{% endblock %}
 
 {% block content %}
-<section class="sitio-hero sitio-hero-chico">
+<section class="sitio-hero sitio-hero-chico{% if portada.imagen %} sitio-hero-foto{% endif %}"
+         {% if portada.imagen %}data-bs-theme="dark" style="--hero-img:url('{{ portada.imagen.url }}')"{% endif %}>
   <div class="container">
-    {% include "sitio/_logo_parte.html" with p=parte grande=True %}
-    <p class="lead">Fechas, resultados y tablas de posiciones de cada campeonato, y el perfil de sus pilotos.</p>
+    {% if portada.imagen %}
+      <h1 class="sitio-hero-titulo">{{ portada.titulo }}</h1>
+    {% else %}
+      {% include "sitio/_logo_parte.html" with p=parte grande=True %}
+      <h1 class="visually-hidden">{{ portada.titulo|default:parte.nombre }}</h1>
+      {% if portada.titulo %}<p class="sitio-hero-titulo mt-4">{{ portada.titulo }}</p>{% endif %}
+    {% endif %}
+    <p class="lead">{% if portada.subtitulo %}{{ portada.subtitulo|linebreaksbr }}{% else %}Fechas, resultados y tablas de posiciones de cada campeonato, y el perfil de sus pilotos.{% endif %}</p>
   </div>
 </section>
 
@@ -110,4 +117,5 @@
     </div>
   </section>
 {% endif %}
+{% include "sitio/_novedades_seccion.html" with clave="campeonatos" %}
 {% endblock %}

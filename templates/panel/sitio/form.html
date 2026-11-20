@@ -1,5 +1,5 @@
 {% extends "panel/sitio/_base.html" %}
-{# Alta/edición de contenido del sitio. Contexto: titulo, form, volver, objeto, tipo, ver_en_web, puede_borrar, ayuda #}
+{# Alta/edición de contenido del sitio. Contexto: titulo, form, volver (o la página del sitio de donde se vino), objeto, tipo, ver_en_web, vista_previa, puede_borrar, ayuda #}
 
 {% block content %}
 <div class="container-fluid py-3" style="max-width:1120px">
@@ -7,14 +7,14 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
     <h1 class="h4 mb-0">{{ titulo }}</h1>
     {% if ver_en_web %}
-      <a class="btn btn-sm btn-outline-secondary" href="{{ ver_en_web }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver en la web</a>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ ver_en_web }}" target="_blank" rel="noopener">{% if vista_previa %}<i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa{% else %}<i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver en la web{% endif %}</a>
     {% endif %}
   </div>
   {% if ayuda %}<p class="text-body-secondary small">{{ ayuda }}</p>{% endif %}
 
   <form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
-    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+    {% if request.GET.next or request.POST.next %}<input type="hidden" name="next" value="{% firstof request.GET.next request.POST.next %}">{% endif %}
     {% if form.non_field_errors %}
       <div class="alert alert-danger py-2">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
     {% endif %}

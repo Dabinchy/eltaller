@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+import atexit
 import shutil
 import tempfile
 
@@ -14,16 +15,13 @@ from .models import Asociacion, Membresia, PerfilPiloto, RegistroModeracion
 from .models_contenido import Archivo
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_moderacion_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 M = Membresia
 
 
 @override_settings(ALLOWED_HOSTS=["testserver"], PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.gerente = Usuario.objects.create_user("gerente", password="x", is_staff=True)
         self.gerente.groups.add(Group.objects.get(name="gerente"))

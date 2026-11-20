@@ -1,0 +1,60 @@
+{% extends "layouts/base_sitio.html" %}
+{# Una sección de El Prepa (competición, personalización o clásicos): sus servicios y sus proyectos. #}
+
+{% block description %}{{ seccion.titulo }} en {{ parte.nombre }}: {{ seccion.texto }}{% endblock %}
+
+{% block content %}
+{% include "sitio/_cabecera.html" with texto=seccion.texto %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    {% for s in servicios %}
+      {% include "sitio/_servicio.html" %}
+    {% empty %}
+      <div class="row g-3">
+        {% for icono, titulo_s, texto in seccion.por_defecto %}
+          <div class="col-12 col-md-4">
+            <div class="sitio-card">
+              <span class="sitio-card-ico"><i class="bi {{ icono }}" aria-hidden="true"></i></span>
+              <h3>{{ titulo_s }}</h3>
+              <p>{{ texto }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if proyectos %}
+  <section class="sitio-seccion sitio-seccion-alt">
+    <div class="container">
+      <div class="sitio-seccion-head">
+        <h2 class="sitio-seccion-titulo">Proyectos de {{ seccion.titulo|lower }}</h2>
+        <a class="sitio-link-mas" href="{{ url_proyectos }}">Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="row g-3">
+        {% for t in proyectos %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            {% url 'sitio:prepa_proyecto' t.slug as url %}
+            {% include "sitio/_trabajo_card.html" with url=url %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+<section class="sitio-seccion">
+  <div class="container">
+    <div class="sitio-destacado">
+      <div class="sitio-destacado-ico"><i class="bi {{ seccion.icono }}" aria-hidden="true"></i></div>
+      <div class="flex-grow-1">
+        <h2 class="h5 fw-bold mb-1">Contanos tu proyecto</h2>
+        <p class="mb-0">Qué auto tenés, qué querés lograr y para cuándo. Te respondemos con una propuesta.</p>
+      </div>
+      <a class="btn sitio-btn-accion" href="{% url 'sitio:prepa_consulta' %}"><i class="bi bi-chat-dots" aria-hidden="true"></i> Contanos tu proyecto</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

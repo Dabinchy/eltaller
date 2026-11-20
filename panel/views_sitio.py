@@ -82,7 +82,7 @@ def _guardar_form(request, form_cls, instancia, *, perm, titulo, volver, plantil
             return obj, None
     else:
         form = form_cls(instance=instancia, initial=inicial)
-    contexto = {"titulo": titulo, "form": form, "volver": volver, **(extra or {})}
+    contexto = {"titulo": titulo, "form": form, "volver": _volver(request, volver), **(extra or {})}
     return None, render(request, plantilla, contexto)
 
 
@@ -310,7 +310,8 @@ def novedad_form(request, pk: int | None = None):
         perm="sitio.change_publicacion" if obj else "sitio.add_publicacion",
         titulo="Editar novedad" if obj else "Nueva novedad", volver=volver,
         inicial={"parte": request.GET.get("parte")} if not obj and request.GET.get("parte") in Parte.values else None,
-        extra={"objeto": obj, "tipo": "novedades", "ver_en_web": _url_publica(obj),
+        extra={"objeto": obj, "tipo": "novedades", "ver_en_web": obj and _url_publica(obj),
+               "vista_previa": obj and _es_vista_previa(obj),
                "puede_borrar": obj and _puede(request.user, "sitio.delete_publicacion")},
     )
     return redirect(_volver(request, volver)) if guardado else respuesta
@@ -356,13 +357,14 @@ def trabajo_form(request, pk: int | None = None):
         titulo="Editar trabajo" if obj else "Nuevo trabajo o proyecto",
         volver=reverse("sitio_panel:trabajo", args=[obj.pk]) if obj else reverse("sitio_panel:trabajos"),
         inicial={"tipo": request.GET.get("tipo")} if not obj and request.GET.get("tipo") in Trabajo.Tipo.values else None,
-        extra={"objeto": obj, "tipo": "trabajos", "ver_en_web": _url_publica(obj),
+        extra={"objeto": obj, "tipo": "trabajos", "ver_en_web": obj and _url_publica(obj),
+               "vista_previa": obj and _es_vista_previa(obj),
                "puede_borrar": obj and _puede(request.user, "sitio.delete_trabajo")},
     )
     if guardado:
         if not obj:
             messages.info(request, "Ahora podés sumarle fotos a la galería.")
-        return redirect("sitio_panel:trabajo", guardado.pk)
+        return redirect(_volver(request, reverse("sitio_panel:trabajo", args=[guardado.pk])))
     return respuesta
 
 
@@ -379,7 +381,7 @@ def trabajo(request, pk: int):
         "subir": SubirFotosForm(), "puede_editar": puede_editar,
         "puede_borrar": _puede(user, "sitio.delete_trabajo"),
         "puede_fotos": _puede(user, "sitio.add_fototrabajo"),
-        "ver_en_web": _url_publica(obj),
+        "ver_en_web": _url_publica(obj), "vista_previa": _es_vista_previa(obj),
     })
 
 
@@ -478,7 +480,7 @@ def servicio_form(request, pk: int | None = None):
         extra={"objeto": obj, "tipo": "servicios",
                "puede_borrar": obj and _puede(request.user, "sitio.delete_servicio")},
     )
-    return redirect(volver) if guardado else respuesta
+    return redirect(_volver(request, volver)) if guardado else respuesta
 
 
 @solo_personal
@@ -506,7 +508,7 @@ def testimonio_form(request, pk: int | None = None):
         extra={"objeto": obj, "tipo": "testimonios",
                "puede_borrar": obj and _puede(request.user, "sitio.delete_testimonio")},
     )
-    return redirect(volver) if guardado else respuesta
+    return redirect(_volver(request, volver)) if guardado else respuesta
 
 
 # ===========================
@@ -543,7 +545,7 @@ def portada_form(request, parte: str):
                "ayuda": "Lo que se ve arriba de todo en la página de inicio de esta parte. "
                         "Sin foto, se muestra el logo."},
     )
-    return redirect(volver) if guardado else respuesta
+    return redirect(_volver(request, volver)) if guardado else respuesta
 
 
 # ===========================
@@ -625,11 +627,18 @@ def consulta_borrar(request, pk: int):
 # ===========================
 
 def _url_publica(obj) -> str:
-    """Dirección en la web, sólo si ya se ve (para el botón "Ver en la web")."""
-    if isinstance(obj, Trabajo) and obj.publicado and obj.parte == Parte.TALLER:
-        return reverse("sitio:trabajo", args=[obj.slug])
-    if isinstance(obj, Trabajo) and obj.publicado:
-        return reverse("sitio:prepa_proyecto", args=[obj.slug])
-    if isinstance(obj, Publicacion) and obj.publicada and obj.fecha <= timezone.now():
+    """Dirección en la web (si todavía no se ve, el personal la abre como vista previa)."""
+    if isinstance(obj, Trabajo):
+        nombre = "sitio:trabajo" if obj.parte == Parte.TALLER else "sitio:prepa_proyecto"
+        return reverse(nombre, args=[obj.slug])
+    if isinstance(obj, Publicacion):
         return reverse("sitio:publicacion", args=[obj.slug])
     return ""
+
+
+def _es_vista_previa(obj) -> bool:
+    if isinstance(obj, Trabajo):
+        return not obj.publicado
+    if isinstance(obj, Publicacion):
+        return not obj.publicada or obj.fecha > timezone.now()
+    return False

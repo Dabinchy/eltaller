@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 
@@ -12,15 +13,12 @@ from portal.models import Asociacion, Membresia, PerfilPiloto
 from portal.models_contenido import Archivo
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_vistas_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 
 
 @override_settings(ALLOWED_HOSTS=["testserver"], PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.suc = Sucursal.objects.create(nombre="Central")
         self.gerente = self.personal("gerente", "gerente")

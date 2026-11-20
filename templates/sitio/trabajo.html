@@ -1,12 +1,13 @@
 {% extends "layouts/base_sitio.html" %}
-{# Un trabajo de El Taller con su galería (antes / proceso / después) y su video. #}
-{% load static %}
+{# Un trabajo de El Taller o un proyecto de El Prepa, con su galería (antes / proceso / después) y su video.
+   Contexto: trabajo, etapas, sin_etapa, otros, lista_url, lista_texto, detalle_url, cta, borrador. #}
 
 {% block description %}{{ trabajo.resumen|truncatechars:150 }}{% endblock %}
+{% block extra_css %}{% if borrador %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
 
 {% block content %}
-{% url 'sitio:trabajos' as url_trabajos %}
-{% include "sitio/_cabecera.html" with texto=trabajo.resumen miga_url=url_trabajos miga_texto="Trabajos" %}
+{% include "sitio/_borrador.html" %}
+{% include "sitio/_cabecera.html" with texto=trabajo.resumen miga_url=lista_url miga_texto=lista_texto %}
 
 <section class="sitio-seccion">
   <div class="container">
@@ -36,8 +37,8 @@
           </div>
         {% endif %}
         <div class="sitio-destacado sitio-destacado-chico mt-3">
-          <div class="flex-grow-1"><strong>¿Tu auto necesita algo parecido?</strong></div>
-          <a class="btn sitio-btn-accion" href="{% url 'sitio:presupuesto' %}">Pedir presupuesto</a>
+          <div class="flex-grow-1"><strong>{{ cta.texto }}</strong></div>
+          <a class="btn sitio-btn-accion" href="{{ cta.url }}">{{ cta.boton }}</a>
         </div>
       </div>
     </div>
@@ -57,11 +58,11 @@
     {% endif %}
 
     {% if otros %}
-      <h2 class="sitio-seccion-titulo mt-5">Otros trabajos</h2>
+      <h2 class="sitio-seccion-titulo mt-5">Otros {{ lista_texto|lower }}</h2>
       <div class="row g-3">
         {% for t in otros %}
           <div class="col-12 col-sm-6 col-lg-4">
-            {% url 'sitio:trabajo' t.slug as url %}
+            {% url detalle_url t.slug as url %}
             {% include "sitio/_trabajo_card.html" with url=url %}
           </div>
         {% endfor %}

@@ -1,0 +1,17 @@
+{# Un servicio en su página (s = Servicio). #}
+<article class="sitio-servicio sitio-editable" id="servicio-{{ s.pk }}">
+  {% if s.imagen %}
+    <img class="sitio-servicio-foto" src="{{ s.imagen.url }}" alt="{{ s.titulo }}" loading="lazy">
+  {% else %}
+    <span class="sitio-servicio-foto sitio-servicio-ico"><i class="bi {{ s.icono }}" aria-hidden="true"></i></span>
+  {% endif %}
+  <div>
+    <h2 class="h4 fw-bold">{{ s.titulo }}</h2>
+    <p class="sitio-servicio-resumen">{{ s.resumen }}</p>
+    {% if s.descripcion %}<div class="sitio-texto">{{ s.descripcion|linebreaks }}</div>{% endif %}
+  </div>
+  {% if personal_sitio and perms.sitio.change_servicio %}
+    {% url 'sitio_panel:servicio' s.pk as url_editar %}
+    {% include "sitio/_lapiz.html" with url=url_editar texto="Editar este servicio" %}
+  {% endif %}
+</article>

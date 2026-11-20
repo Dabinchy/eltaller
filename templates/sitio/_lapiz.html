@@ -1,0 +1,4 @@
+{# Lápiz para editar en el panel (sólo personal con permiso). url = dirección en el panel; texto = qué se edita. Vuelve a esta página al guardar. #}
+<a class="sitio-lapiz" href="{{ url }}?next={{ request.get_full_path|urlencode }}" title="{{ texto|default:'Editar' }}" aria-label="{{ texto|default:'Editar' }}">
+  <i class="bi bi-pencil" aria-hidden="true"></i>
+</a>

@@ -1,5 +1,5 @@
 {% extends "layouts/base_sitio.html" %}
-{# Servicios de El Taller (admin → Sitio público → Servicios, parte El Taller). #}
+{# Servicios de El Taller (panel → Sitio web → Servicios, parte El Taller). #}
 
 {% block description %}Servicios de {{ parte.nombre }}: mecánica, mantenimiento y diagnóstico para tu auto.{% endblock %}
 
@@ -9,18 +9,7 @@
 <section class="sitio-seccion">
   <div class="container">
     {% for s in servicios %}
-      <article class="sitio-servicio" id="servicio-{{ s.pk }}">
-        {% if s.imagen %}
-          <img class="sitio-servicio-foto" src="{{ s.imagen.url }}" alt="{{ s.titulo }}" loading="lazy">
-        {% else %}
-          <span class="sitio-servicio-foto sitio-servicio-ico"><i class="bi {{ s.icono }}" aria-hidden="true"></i></span>
-        {% endif %}
-        <div>
-          <h2 class="h4 fw-bold">{{ s.titulo }}</h2>
-          <p class="sitio-servicio-resumen">{{ s.resumen }}</p>
-          {% if s.descripcion %}<div class="sitio-texto">{{ s.descripcion|linebreaks }}</div>{% endif %}
-        </div>
-      </article>
+      {% include "sitio/_servicio.html" %}
     {% empty %}
       <p class="sitio-aviso"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>Estamos cargando nuestros servicios. Mientras tanto, pedinos un presupuesto o escribinos.</p>
     {% endfor %}

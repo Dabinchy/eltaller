@@ -29,7 +29,7 @@ class Parte:
     lema: str                         # texto corto debajo del nombre (pie, pestañas en pantallas grandes)
     logo: str = ""                    # archivo estático; vacío = se muestra el nombre con el ícono
     favicon: str = ""                 # ícono de la pestaña del navegador (archivo estático)
-    menu: tuple = field(default_factory=tuple)   # (título, nombre de URL)
+    menu: tuple = field(default_factory=tuple)   # (título, nombre de URL[, parámetros "?a=b"])
     accion: tuple | None = None       # botón principal: (texto, nombre de URL, ícono, texto corto)
     ingreso: tuple = ("Ingresar", "bi-box-arrow-in-right")   # botón de ingreso: (texto, ícono)
     ingreso_ayuda: str = ""           # texto en la pantalla de ingreso
@@ -47,7 +47,7 @@ PARTES: dict[str, Parte] = {
         menu=(
             ("Servicios", "sitio:servicios"),
             ("Trabajos", "sitio:trabajos"),
-            ("Novedades", "sitio:publicaciones"),
+            ("Novedades", "sitio:publicaciones", "parte=taller"),
             ("Contacto", "sitio:contacto"),
         ),
         accion=("Pedir presupuesto", "sitio:presupuesto", "bi-calendar-check", "Presupuesto"),
@@ -67,6 +67,7 @@ PARTES: dict[str, Parte] = {
             ("Personalización", "sitio:prepa_personalizacion"),
             ("Clásicos", "sitio:prepa_clasicos"),
             ("Proyectos", "sitio:prepa_proyectos"),
+            ("Novedades", "sitio:publicaciones", "parte=prepa"),
         ),
         accion=("Contanos tu proyecto", "sitio:prepa_consulta", "bi-chat-dots", "Consultar"),
         ingreso=("Seguí tu proyecto", "bi-car-front"),
@@ -84,6 +85,7 @@ PARTES: dict[str, Parte] = {
             ("Campeonatos", "sitio:campeonatos"),
             ("Pilotos", "sitio:pilotos"),
             ("Asociaciones", "sitio:asociaciones"),
+            ("Novedades", "sitio:publicaciones", "parte=campeonatos"),
         ),
         ingreso=("Acceso pilotos", "bi-person-badge"),
         ingreso_ayuda="Pilotos y moderadores: ingresá con tu usuario.",
@@ -108,7 +110,13 @@ def parte_de_ruta(ruta: str) -> str:
 
 
 def parte_de_request(request) -> str:
-    """En la pantalla de ingreso manda ?parte=...; en el resto, la dirección."""
+    """
+    La vista puede fijarla (request.parte_sitio: una novedad de El Prepa se ve como El Prepa).
+    En la pantalla de ingreso manda ?parte=...; en el resto, la dirección.
+    """
+    fijada = getattr(request, "parte_sitio", None)
+    if fijada in PARTES:
+        return fijada
     ruta = getattr(request, "path", "") or "/"
     if ruta.startswith("/ingresar/"):
         pedida = request.GET.get("parte") or request.POST.get("parte") or ""
@@ -139,10 +147,11 @@ def contexto(request, clave: str) -> dict:
     def armar(p: Parte) -> dict:
         inicio = reverse(p.inicio)
         menu = []
-        for titulo, nombre in p.menu:
+        for titulo, nombre, *params in p.menu:
             url = _url(nombre)
             if url:
-                menu.append({"titulo": titulo, "url": url, "activo": ruta.startswith(url) and url != "/"})
+                activo = ruta.startswith(url) and url != "/"
+                menu.append({"titulo": titulo, "url": f"{url}?{params[0]}" if params else url, "activo": activo})
         accion = None
         if p.accion and (url := _url(p.accion[1])):
             accion = {"texto": p.accion[0], "url": url, "icono": p.accion[2], "corto": p.accion[3]}

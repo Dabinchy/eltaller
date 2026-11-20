@@ -11,16 +11,16 @@ class SitioTests(TestCase):
             "/", "/servicios/", "/trabajos/", "/presupuesto/", "/contacto/",
             # El Prepa
             "/prepa/", "/prepa/competicion/", "/prepa/personalizacion/", "/prepa/clasicos/",
-            "/prepa/proyectos/", "/prepa/proyectos/falcon-72/", "/prepa/consulta/",
+            "/prepa/proyectos/", "/prepa/consulta/",
             # Campeonatos
             "/campeonatos/", "/pilotos/", "/asociaciones/",
             # Compartido
-            "/publicaciones/", "/publicaciones/nota/",
+            "/publicaciones/", "/publicaciones/?parte=prepa",
         ):
             self.assertEqual(self.client.get(url).status_code, 200, url)
         # Lo que no existe (o no es público) da 404
         for url in ("/campeonatos/tc-2026/", "/pilotos/juan-perez/", "/autos/ford-falcon/",
-                    "/asociaciones/pista-norte/"):
+                    "/asociaciones/pista-norte/", "/prepa/proyectos/falcon-72/", "/publicaciones/nota/"):
             self.assertEqual(self.client.get(url).status_code, 404, url)
 
     def test_parte_segun_direccion(self):

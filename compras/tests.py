@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 from decimal import Decimal
@@ -14,15 +15,12 @@ from productos.models import MovimientoStock, Producto, StockSucursal, ajustar_s
 from .models import Compra, CompraDetalle, Proveedor
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 
 
 @override_settings(PRIVATE_MEDIA_ROOT=PRIVADO, ALLOWED_HOSTS=["testserver"])
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.suc = Sucursal.objects.create(nombre="Central")
         self.gerente = self.usuario("gerente", "gerente")

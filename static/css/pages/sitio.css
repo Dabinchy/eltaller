@@ -676,3 +676,67 @@ body:has(.sitio-wa) .sitio-footer { padding-bottom: 92px; }
 @media (max-width: 767.98px) {
   .sitio-servicio-ico { width: 64px; height: 64px; aspect-ratio: auto; font-size: 30px; border-radius: 16px; }
 }
+
+/* =========================================================
+   Herramientas del personal (sólo con permiso de edición)
+   ========================================================= */
+.sitio-staff {
+  background: #11161F;
+  border-bottom: 1px solid rgba(var(--cc-warning-rgb), .35);
+  color: #E6EDF7;
+  font-size: 13px;
+}
+.sitio-staff-inner { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding-top: 4px; padding-bottom: 4px; }
+.sitio-staff-texto { color: #C9D4E3; white-space: nowrap; }
+.sitio-staff-texto .bi { color: var(--cc-warn); }
+.sitio-staff-acciones { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.sitio-staff-btn {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: #E6EDF7; font-weight: 700; text-decoration: none; white-space: nowrap;
+}
+.sitio-staff-btn:hover { color: #fff; border-color: rgba(255, 255, 255, .4); background: rgba(255, 255, 255, .06); }
+.sitio-staff-btn-principal { background: var(--cc-warn); border-color: var(--cc-warn); color: #1A1200; }
+.sitio-staff-btn-principal:hover { background: #FBBF24; border-color: #FBBF24; color: #1A1200; }
+.sitio-staff-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Lápiz sobre tarjetas, servicios y testimonios */
+.sitio-editable { position: relative; height: 100%; }
+.sitio-servicio.sitio-editable { height: auto; }
+.sitio-lapiz {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--cc-warn); color: #1A1200;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  text-decoration: none; font-size: 15px;
+  opacity: .9; transition: opacity var(--cc-t-fast) var(--cc-ease), transform var(--cc-t-fast) var(--cc-ease);
+}
+.sitio-lapiz:hover { opacity: 1; transform: scale(1.06); color: #1A1200; }
+.sitio-lapiz:focus-visible { outline: 2px solid var(--cc-text); outline-offset: 2px; }
+.sitio-servicio .sitio-lapiz { top: 22px; }
+.sitio-servicio:first-child .sitio-lapiz { top: 0; }
+
+/* Aviso de vista previa (borrador o programado) */
+.sitio-borrador {
+  background: rgba(var(--cc-warning-rgb), .14);
+  border-bottom: 1px solid rgba(var(--cc-warning-rgb), .45);
+  color: var(--cc-text);
+  padding: 10px 0;
+  font-size: 14px;
+}
+.sitio-borrador .bi { color: var(--cc-warn); }
+
+/* =========================================================
+   Novedades
+   ========================================================= */
+.sitio-card-img-ancha { aspect-ratio: 16 / 9; }
+.sitio-novedad { max-width: 820px; }
+.sitio-novedad-fecha { color: var(--cc-text-dim); font-size: 14px; margin-bottom: 14px; }
+.sitio-novedad-texto { font-size: 16.5px; line-height: 1.7; color: var(--cc-text); max-width: 70ch; }
+.sitio-novedad-parte { font-weight: 800; }
+.sitio-novedad-parte[data-parte="taller"] { color: var(--marca-taller-tinta); }
+.sitio-novedad-parte[data-parte="prepa"] { color: var(--marca-prepa-tinta); }
+.sitio-novedad-parte[data-parte="campeonatos"] { color: var(--marca-campeonatos-tinta); }
+[data-bs-theme="light"] .sitio-novedad-parte[data-parte="campeonatos"] { color: #8A6400; }

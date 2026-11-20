@@ -1,0 +1,25 @@
+{# Testimonios de una parte (testimonios = lista). #}
+{% if testimonios %}
+  <section class="sitio-seccion sitio-seccion-alt">
+    <div class="container">
+      <h2 class="sitio-seccion-titulo">{{ titulo_testimonios|default:"Lo que dicen nuestros clientes" }}</h2>
+      <div class="row g-3">
+        {% for t in testimonios %}
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="sitio-editable">
+              <figure class="sitio-testimonio">
+                <i class="bi bi-quote" aria-hidden="true"></i>
+                <blockquote>{{ t.texto|linebreaksbr }}</blockquote>
+                <figcaption><strong>{{ t.nombre }}</strong>{% if t.detalle %}<span>{{ t.detalle }}</span>{% endif %}</figcaption>
+              </figure>
+              {% if personal_sitio and perms.sitio.change_testimonio %}
+                {% url 'sitio_panel:testimonio' t.pk as url_editar %}
+                {% include "sitio/_lapiz.html" with url=url_editar texto="Editar este testimonio" %}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}

@@ -1,3 +1,4 @@
+import atexit
 import shutil
 import tempfile
 from io import BytesIO
@@ -14,6 +15,8 @@ from .models import Asociacion, Membresia, PerfilPiloto
 from .models_contenido import Archivo, Auto, PilotoAuto
 
 PRIVADO = tempfile.mkdtemp(prefix="privado_contenido_test_")
+# Se borra al terminar la corrida (no al terminar cada clase: en paralelo la comparten).
+atexit.register(shutil.rmtree, PRIVADO, ignore_errors=True)
 
 
 def foto():
@@ -24,11 +27,6 @@ def foto():
 
 @override_settings(ALLOWED_HOSTS=["testserver"], PRIVATE_MEDIA_ROOT=PRIVADO)
 class Base(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(PRIVADO, ignore_errors=True)
-
     def setUp(self):
         self.gerente = Usuario.objects.create_user("gerente", password="x", is_staff=True)
         self.gerente.groups.add(Group.objects.get(name="gerente"))
