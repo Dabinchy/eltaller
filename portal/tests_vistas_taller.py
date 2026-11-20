@@ -24,6 +24,8 @@ class Base(TestCase):
         self.suc = Sucursal.objects.create(nombre="Central")
         self.adm = Usuario.objects.create_user("adm", password="x", is_staff=True, sucursal=self.suc)
         self.adm.groups.add(Group.objects.get(name="administracion"))
+        self.gerente = Usuario.objects.create_user("gerente", password="x", is_staff=True)
+        self.gerente.groups.add(Group.objects.get(name="gerente"))
         self.cliente = Cliente.objects.create(nombre="Equipo Rojo")
         self.auto = Vehiculo.objects.create(cliente=self.cliente, patente="AA111AA", marca="Ford", modelo="Falcon")
         self.titular = self.portal("dueno", AccesoCliente.Rol.TITULAR)
@@ -33,7 +35,7 @@ class Base(TestCase):
 
     def portal(self, nombre, rol):
         u = Usuario.objects.create_user(nombre, password="x", tipo=Usuario.Tipo.PORTAL)
-        servicios.aprobar_acceso(AccesoCliente.objects.create(usuario=u), self.adm, cliente=self.cliente, rol=rol)
+        servicios.aprobar_acceso(AccesoCliente.objects.create(usuario=u), self.gerente, cliente=self.cliente, rol=rol)
         return u
 
 

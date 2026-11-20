@@ -146,3 +146,47 @@ class MiembrosTests(Base):
         m = self.piloto("ana", aprobar=False).usuario.membresias.get()
         r = self.client.post(f"/portal/moderacion/membresias/{m.pk}/", {"accion": "aprobar", "volver": "https://malo.com"})
         self.assertRedirects(r, "/portal/moderacion/")
+
+
+class AislamientoTests(Base):
+    """
+    Los moderadores manejan sólo la comunidad de pilotos y los campeonatos de su asociación:
+    no entran al panel ni al admin, no ven clientes, órdenes ni la ficha del taller de un auto,
+    y no tocan el contenido del sitio de El Taller y El Prepa.
+    """
+
+    def test_no_entra_al_panel_ni_al_admin(self):
+        for url in ("/panel/", "/panel/sitio/", "/panel/sitio/novedades/", "/panel/sitio/consultas/",
+                    "/panel/clientes/", "/panel/clientes/accesos/", "/panel/taller/ordenes/",
+                    "/panel/taller/vehiculos/", "/panel/ventas/"):
+            r = self.client.get(url)
+            self.assertEqual(r.status_code, 302, url)
+            self.assertTrue(r["Location"].startswith("/portal/"), url)
+        self.assertTrue(self.client.get("/admin/")["Location"].startswith("/admin/login/"))
+        self.assertNotContains(self.client.get("/"), "Estás viendo el sitio como personal")
+
+    def test_no_ve_la_ficha_del_taller_de_un_auto(self):
+        from clientes.models import Cliente
+        from taller.models import Vehiculo
+
+        p = self.piloto("ana")
+        a = sc.crear_auto(p, marca="Ford", modelo="Falcon")
+        cliente = Cliente.objects.create(nombre="Cliente Secreto SA", doc_tipo="CUIT", doc_numero="30999888")
+        a.vehiculo_taller = Vehiculo.objects.create(cliente=cliente, patente="ZZ999ZZ", marca="Ford", modelo="Falcon")
+        a.save()
+        sc.publicar_auto(a, p, True)
+        r = self.client.get("/portal/moderacion/")
+        self.assertContains(r, "Ford Falcon")                 # lo modera
+        for dato in ("Cliente Secreto SA", "30999888", "ZZ999ZZ"):
+            self.assertNotContains(r, dato)                   # pero no ve nada del taller
+
+    def test_campeonatos_solo_de_su_asociacion(self):
+        from campeonatos.models import Campeonato
+
+        propio = Campeonato.objects.create(asociacion=self.asoc, nombre="Zonal", temporada=2026)
+        ajeno = Campeonato.objects.create(asociacion=self.otra, nombre="Karting Sur", temporada=2026)
+        r = self.client.get("/portal/moderacion/campeonatos/")
+        self.assertContains(r, "Zonal")
+        self.assertNotContains(r, "Karting Sur")
+        self.assertEqual(self.client.get(f"/portal/moderacion/campeonatos/{propio.pk}/").status_code, 200)
+        self.assertEqual(self.client.get(f"/portal/moderacion/campeonatos/{ajeno.pk}/").status_code, 404)

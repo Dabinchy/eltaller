@@ -1,0 +1,116 @@
+{% extends "layouts/base_app.html" %}
+{% load static %}
+{# Una solicitud de acceso al portal: identificar al cliente, elegir el rol y aprobar / rechazar / revocar. #}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_sitio.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1100px">
+  <a class="small text-decoration-none" href="{% url 'clientes:accesos' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Accesos al portal</a>
+  <div class="d-flex flex-wrap align-items-center gap-2 mt-1 mb-3">
+    <h1 class="h4 mb-0">{{ a.nombre_declarado|default:a.usuario.get_full_name|default:a.usuario.username }}</h1>
+    {% if a.estado == "PENDIENTE" %}<span class="cc-chip cc-chip--warn">Pendiente</span>
+    {% elif a.estado == "APROBADO" %}<span class="cc-chip cc-chip--ok">Aprobado</span>
+    {% elif a.estado == "RECHAZADO" %}<span class="cc-chip cc-chip--danger">Rechazado</span>
+    {% else %}<span class="cc-chip cc-chip--off">Revocado</span>{% endif %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="card mb-3"><div class="card-body">
+        <h2 class="h6">Quién pide el acceso</h2>
+        <dl class="row small mb-0">
+          <dt class="col-5">Nombre declarado</dt><dd class="col-7">{{ a.nombre_declarado|default:"—" }}</dd>
+          <dt class="col-5">Documento declarado</dt><dd class="col-7">{{ a.doc_declarado|default:"—" }}</dd>
+          <dt class="col-5">Usuario</dt><dd class="col-7">{{ a.usuario.username }}</dd>
+          <dt class="col-5">Nombre en la cuenta</dt><dd class="col-7">{{ a.usuario.get_full_name|default:"—" }}</dd>
+          <dt class="col-5">Email</dt><dd class="col-7">{{ a.usuario.email|default:"—" }}</dd>
+          {% if a.usuario.dni %}<dt class="col-5">DNI de la cuenta</dt><dd class="col-7">{{ a.usuario.dni }}</dd>{% endif %}
+          <dt class="col-5">Pedido</dt><dd class="col-7">{{ a.solicitado_el|date:"d/m/Y H:i" }}</dd>
+        </dl>
+        {% if a.nota %}<div class="mt-2 p-2 rounded border small" style="white-space:pre-line">“{{ a.nota }}”</div>{% endif %}
+      </div></div>
+
+      {% if a.resuelto_el %}
+        <div class="card mb-3"><div class="card-body small">
+          <h2 class="h6">Resolución</h2>
+          {{ a.get_estado_display }} el {{ a.resuelto_el|date:"d/m/Y H:i" }}{% if a.resuelto_por %} por {{ a.resuelto_por.get_full_name|default:a.resuelto_por.username }}{% endif %}.
+          {% if a.cliente %}<div class="mt-1">Cliente: <a href="{% url 'clientes:detalle' a.cliente.pk %}">{{ a.cliente }}</a> · {{ a.get_rol_display }}</div>{% endif %}
+          {% if a.motivo %}<div class="mt-1 text-body-secondary">Motivo: {{ a.motivo }}</div>{% endif %}
+        </div></div>
+      {% endif %}
+
+      {% if otros_accesos %}
+        <div class="card mb-3"><div class="card-body small">
+          <h2 class="h6">Otros accesos de esta cuenta</h2>
+          <ul class="mb-0 ps-3">
+            {% for o in otros_accesos %}<li><a href="{% url 'clientes:acceso' o.pk %}">{{ o.cliente|default:"(sin cliente)" }}</a> · {{ o.get_estado_display }}</li>{% endfor %}
+          </ul>
+        </div></div>
+      {% endif %}
+    </div>
+
+    <div class="col-12 col-lg-7">
+      {% if a.estado == "PENDIENTE" %}
+        <div class="card mb-3"><div class="card-body">
+          <h2 class="h6">¿A qué cliente corresponde?</h2>
+          <form class="d-flex gap-2 mb-3" method="get" role="search">
+            <input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Buscar cliente: nombre, documento, teléfono, email o patente" aria-label="Buscar cliente">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            {% if form.cliente.errors %}<div class="alert alert-danger py-2">{{ form.cliente.errors.0 }}</div>{% endif %}
+            {% if candidatos %}
+              <div class="list-group mb-3">
+                {% for c, elegido, cant, sugerido in candidatos %}
+                  <label class="list-group-item d-flex gap-2 align-items-start">
+                    <input class="form-check-input mt-1" type="radio" name="cliente" value="{{ c.pk }}" {% if elegido %}checked{% endif %}>
+                    <span class="flex-grow-1">
+                      <strong>{{ c.nombre }}</strong>{% if sugerido %} <span class="cc-chip cc-chip--info ms-1">Coincide</span>{% endif %}
+                      <span class="d-block small text-body-secondary">
+                        {% if c.doc_numero %}{{ c.get_doc_tipo_display|default:"Doc." }} {{ c.doc_numero }}{% endif %}{% if c.telefono %} · {{ c.telefono }}{% endif %}{% if c.email %} · {{ c.email }}{% endif %}
+                      </span>
+                      {% if cant %}<span class="d-block small text-warning">Ya hay {{ cant }} cuenta{{ cant|pluralize }} con acceso a este cliente.</span>{% endif %}
+                    </span>
+                    <a class="small" href="{% url 'clientes:detalle' c.pk %}" target="_blank" rel="noopener">Ver ficha</a>
+                  </label>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="small text-body-secondary">{% if buscado_sin_resultados %}No se encontró ningún cliente con «{{ q }}».{% else %}No hay clientes que coincidan con lo declarado. Buscalo por nombre, documento, teléfono o patente.{% endif %}</p>
+            {% endif %}
+
+            <label class="form-label" for="id_rol">Qué puede ver</label>
+            <select class="form-select mb-1" name="rol" id="id_rol">
+              {% for v, n in form.fields.rol.choices %}<option value="{{ v }}" {% if form.rol.value == v %}selected{% endif %}>{{ n }}</option>{% endfor %}
+            </select>
+            <p class="form-text">Titular: todos los vehículos y órdenes del cliente, y aprueba presupuestos. Piloto del equipo: sólo los autos que maneja.</p>
+            <button class="btn btn-success" type="submit" name="accion" value="aprobar"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Aprobar acceso</button>
+          </form>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+          <h2 class="h6">Rechazar</h2>
+          <form method="post" class="d-flex flex-wrap gap-2" onsubmit="return confirm('¿Rechazar esta solicitud?');">
+            {% csrf_token %}
+            <input class="form-control flex-grow-1" style="min-width:220px;width:auto" name="motivo" required placeholder="Motivo (lo ve la persona)" aria-label="Motivo del rechazo">
+            <button class="btn btn-outline-danger" type="submit" name="accion" value="rechazar">Rechazar</button>
+          </form>
+        </div></div>
+      {% elif a.estado == "APROBADO" %}
+        <div class="card"><div class="card-body">
+          <h2 class="h6">Revocar el acceso</h2>
+          <p class="small text-body-secondary">La persona deja de ver los vehículos y órdenes de {{ a.cliente }}. Para cambiar el cliente o el rol, revocalo y que pida uno nuevo.</p>
+          <form method="post" class="d-flex flex-wrap gap-2" onsubmit="return confirm('¿Revocar este acceso?');">
+            {% csrf_token %}
+            <input class="form-control flex-grow-1" style="min-width:220px;width:auto" name="motivo" required placeholder="Motivo" aria-label="Motivo de la revocación">
+            <button class="btn btn-outline-danger" type="submit" name="accion" value="revocar">Revocar</button>
+          </form>
+        </div></div>
+      {% else %}
+        <p class="text-body-secondary small">Esta solicitud ya está cerrada. Si la persona vuelve a pedir acceso, aparece como una nueva.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

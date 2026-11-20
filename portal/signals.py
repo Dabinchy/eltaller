@@ -13,7 +13,7 @@ from core.roles import (
 )
 
 # Los moderadores de cada asociación NO usan grupos: su permiso sale de la membresía (portal/permisos.py).
-# Accesos de clientes al portal: los identifica y aprueba el personal que atiende clientes.
+# Accesos de clientes al portal (quién ve su taller): sólo la gerencia los aprueba (ver permisos.py).
 _ACCESOS_CLIENTE = [
     "portal.gestionar_accesos_cliente",
     "portal.view_accesocliente",
@@ -38,8 +38,8 @@ PERMISOS_PORTAL_POR_GRUPO = {
         "portal.view_archivo",
         "portal.view_registromoderacion",
     ] + _ACCESOS_CLIENTE + _AUTOS,
-    GRUPO_JEFE: _ACCESOS_CLIENTE + _AUTOS,
-    GRUPO_ADMINISTRACION: _ACCESOS_CLIENTE + _AUTOS,
+    GRUPO_JEFE: _AUTOS,
+    GRUPO_ADMINISTRACION: _AUTOS,
     GRUPO_MECANICO: [],
 }
 

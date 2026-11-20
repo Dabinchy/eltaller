@@ -74,8 +74,9 @@ class RegistroTests(TestCase):
 @override_settings(ALLOWED_HOSTS=["testserver"])
 class AccesoClienteTests(TestCase):
     def setUp(self):
-        self.adm = Usuario.objects.create_user("adm", password="x", is_staff=True)
-        self.adm.groups.add(Group.objects.get(name="administracion"))
+        # Los accesos de cliente los aprueba sólo la gerencia.
+        self.adm = Usuario.objects.create_user("gerente_acc", password="x", is_staff=True)
+        self.adm.groups.add(Group.objects.get(name="gerente"))
         self.cliente = Cliente.objects.create(nombre="Juan Pérez", doc_tipo="DNI", doc_numero="30111222")
         self.usuario = servicios.registrar_cuenta(**datos(es_cliente=True))
         self.acceso = self.usuario.accesos_cliente.get()
@@ -88,11 +89,14 @@ class AccesoClienteTests(TestCase):
                          (AccesoCliente.Estado.APROBADO, self.cliente, self.adm))
         self.assertTrue(servicios.estado_de_cuenta(self.usuario)["es_cliente"])
 
-    def test_solo_el_personal_aprueba(self):
+    def test_solo_la_gerencia_aprueba(self):
         moderador = Usuario.objects.create_user("mod", password="x", tipo=Usuario.Tipo.PORTAL)
-        mecanico = Usuario.objects.create_user("mec", password="x", is_staff=True)
-        mecanico.groups.add(Group.objects.get(name="mecanico"))
-        for actor in (moderador, mecanico):
+        otros = [moderador]
+        for grupo in ("mecanico", "jefe", "administracion"):
+            u = Usuario.objects.create_user(grupo, password="x", is_staff=True)
+            u.groups.add(Group.objects.get(name=grupo))
+            otros.append(u)
+        for actor in otros:
             with self.assertRaises(PermissionDenied):
                 servicios.aprobar_acceso(self.acceso, actor, cliente=self.cliente)
 

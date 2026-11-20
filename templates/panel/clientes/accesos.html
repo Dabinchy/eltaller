@@ -1,0 +1,54 @@
+{% extends "layouts/base_app.html" %}
+{% load static %}
+{# Accesos al portal: personas que piden ver su taller (sólo gerencia). #}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_sitio.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1100px">
+  <h1 class="h4 mb-0">Accesos al portal</h1>
+  <p class="small text-body-secondary">Personas registradas en el portal que piden ver los vehículos y órdenes de un cliente. Revisá quién es, elegí el cliente y aprobá.</p>
+
+  <ul class="nav nav-pills ps-tabs mb-3 flex-nowrap overflow-auto">
+    {% for v, n, cant in pestanas %}
+      <li class="nav-item">
+        <a class="nav-link text-nowrap{% if estado == v %} active{% endif %}" href="?estado={{ v }}" {% if estado == v %}aria-current="page"{% endif %}>
+          {{ n }}{% if cant %} <span class="badge {% if v == 'PENDIENTE' %}text-bg-warning{% else %}text-bg-secondary{% endif %} ms-1">{{ cant }}</span>{% endif %}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <form class="row g-2 mb-3" method="get" role="search">
+    <input type="hidden" name="estado" value="{{ estado }}">
+    <div class="col-12 col-md-9"><input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Nombre, documento, usuario, email o cliente" aria-label="Buscar"></div>
+    <div class="col-12 col-md-3 d-grid"><button class="btn btn-outline-secondary" type="submit">Buscar</button></div>
+  </form>
+
+  <div class="card">
+    {% for a in pagina %}
+      <a class="ps-fila text-decoration-none{% if a.estado == 'PENDIENTE' %} ps-fila-nueva{% endif %}" href="{% url 'clientes:acceso' a.pk %}">
+        <span class="ps-icono"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+        <div class="ps-texto">
+          <span class="ps-titulo">{{ a.nombre_declarado|default:a.usuario.get_full_name|default:a.usuario.username }}</span>
+          <span class="small text-body-secondary"> · {{ a.usuario.username }}{% if a.doc_declarado %} · Doc. {{ a.doc_declarado }}{% endif %}</span>
+          {% if a.nota %}<p class="ps-resumen mb-1">“{{ a.nota }}”</p>{% endif %}
+          <div class="ps-meta">
+            {% if a.estado == "PENDIENTE" %}<span class="cc-chip cc-chip--warn">Pendiente</span>
+            {% elif a.estado == "APROBADO" %}<span class="cc-chip cc-chip--ok">Aprobado</span>
+            {% elif a.estado == "RECHAZADO" %}<span class="cc-chip cc-chip--danger">Rechazado</span>
+            {% else %}<span class="cc-chip cc-chip--off">Revocado</span>{% endif %}
+            {% if a.cliente %}<span><i class="bi bi-person-vcard me-1" aria-hidden="true"></i>{{ a.cliente }} · {{ a.get_rol_display }}</span>{% endif %}
+            <span title="{{ a.solicitado_el|date:'d/m/Y H:i' }}"><i class="bi bi-clock me-1" aria-hidden="true"></i>hace {{ a.solicitado_el|timesince }}</span>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+      </a>
+    {% empty %}
+      <div class="card-body text-body-secondary">
+        {% if estado == "PENDIENTE" and not q %}<i class="bi bi-check2-circle me-1" aria-hidden="true"></i>No hay solicitudes pendientes.{% else %}No hay accesos con ese filtro.{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% include "panel/sitio/_paginas.html" %}
+</div>
+{% endblock %}

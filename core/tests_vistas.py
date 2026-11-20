@@ -80,7 +80,9 @@ class PanelTests(Base):
         r = self.client.get("/panel/")
         self.assertContains(r, "Órdenes en curso")
         self.assertContains(r, "Ventas por cobrar")
-        self.assertContains(r, "Accesos al portal pendientes")
+        self.assertNotContains(r, "Accesos al portal pendientes")   # sólo la gerencia los aprueba
+        self.client.force_login(self.gerente)
+        self.assertContains(self.client.get("/panel/"), "Accesos al portal pendientes")
         self.client.force_login(self.mec)
         r = self.client.get("/panel/")
         self.assertContains(r, "Mis órdenes")
@@ -89,7 +91,9 @@ class PanelTests(Base):
     def test_menu_solo_muestra_lo_permitido(self):
         self.client.force_login(self.adm)
         r = self.client.get("/panel/")
-        self.assertContains(r, "Accesos al portal")  # administración aprueba accesos de clientes
+        self.assertNotContains(r, "Accesos al portal")  # los accesos de clientes los aprueba sólo la gerencia
+        self.client.force_login(self.gerente)
+        self.assertContains(self.client.get("/panel/"), 'href="/panel/clientes/accesos/"')
         self.client.force_login(self.mec)
         self.assertNotContains(self.client.get("/panel/"), "Accesos al portal")
 

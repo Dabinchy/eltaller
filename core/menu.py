@@ -36,6 +36,12 @@ def _perm(*permisos: str) -> Callable:
     return lambda u: u.is_superuser or any(u.has_perm(p) for p in permisos)
 
 
+def _gestiona_accesos(u) -> bool:
+    from portal.permisos import puede_gestionar_accesos
+
+    return puede_gestionar_accesos(u)
+
+
 def _es_mecanico(u) -> bool:
     from taller.permisos import es_solo_mecanico
 
@@ -78,8 +84,8 @@ MENU_PANEL = [
     Seccion("Clientes", "bi-people", [
         Item("Clientes", "clientes:lista", "bi-people", "Datos y cuenta corriente",
              puede=_perm("clientes.ver_clientes")),
-        Item("Accesos al portal", "admin:portal_accesocliente_changelist", "bi-person-check",
-             "Clientes que piden ver su taller", puede=_perm("portal.gestionar_accesos_cliente")),
+        Item("Accesos al portal", "clientes:accesos", "bi-person-check",
+             "Clientes que piden ver su taller", puede=_gestiona_accesos),
     ]),
     Seccion("Sitio web", "bi-globe2", [
         Item("Resumen del sitio", "sitio_panel:inicio", "bi-speedometer", "Qué hay publicado y qué falta",

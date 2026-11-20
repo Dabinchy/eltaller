@@ -4,7 +4,8 @@ Quién modera qué en el portal.
 - Moderador de una asociación: membresía rol MODERADOR y estado APROBADA en esa asociación.
 - Gerente (o superusuario): modera todas las asociaciones y es el único que nombra moderadores.
 - Nadie modera lo propio (su membresía, su perfil, sus resultados).
-- Accesos de cliente: sólo el personal del taller con portal.gestionar_accesos_cliente.
+- Accesos de cliente (quién ve su taller desde el portal): sólo la gerencia o un superusuario.
+  Los moderadores y los usuarios del portal nunca: no ven clientes ni datos del taller.
 """
 from __future__ import annotations
 
@@ -48,16 +49,13 @@ def verificar_puede_moderar(user, asociaciones, sobre_usuario=None) -> None:
 
 
 def puede_gestionar_accesos(user) -> bool:
-    return (
-        getattr(user, "is_authenticated", False)
-        and not getattr(user, "es_portal", False)
-        and (user.is_superuser or user.has_perm(PERM_ACCESOS_CLIENTE))
-    )
+    """Gerencia (grupo gerente o core.administrar_core) o superusuario; nunca usuarios del portal."""
+    return es_gerente(user) and getattr(user, "is_active", False)
 
 
 def verificar_gestiona_accesos(user) -> None:
     if not puede_gestionar_accesos(user):
-        raise PermissionDenied("Sólo el personal del taller gestiona los accesos de clientes.")
+        raise PermissionDenied("Sólo la gerencia aprueba, rechaza o revoca los accesos de clientes.")
 
 
 # ============================================================

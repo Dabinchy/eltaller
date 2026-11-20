@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from .acceso import solo_personal
@@ -64,11 +65,10 @@ def panel_inicio(request):
         from portal.models import AccesoCliente
 
         pendientes = AccesoCliente.objects.filter(estado=AccesoCliente.Estado.PENDIENTE).count()
-        tarjetas.append({"titulo": "Accesos al portal pendientes", "icono": "bi-person-check", "valor": pendientes})
+        tarjetas.append({"titulo": "Accesos al portal pendientes", "icono": "bi-person-check", "valor": pendientes,
+                         "url": reverse("clientes:accesos")})
 
     if user.has_perm("sitio.view_consulta"):
-        from django.urls import reverse
-
         from sitio.models import Consulta
 
         nuevas = Consulta.objects.filter(estado=Consulta.Estado.NUEVA).count()

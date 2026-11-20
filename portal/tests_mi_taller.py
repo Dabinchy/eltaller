@@ -52,7 +52,7 @@ class Base(TestCase):
 
     def acceso(self, usuario, rol, cliente=None):
         a = AccesoCliente.objects.create(usuario=usuario)
-        servicios.aprobar_acceso(a, self.adm, cliente=cliente or self.equipo, rol=rol)
+        servicios.aprobar_acceso(a, self.gerente, cliente=cliente or self.equipo, rol=rol)
         return a
 
     def orden(self, vehiculo):
@@ -80,7 +80,7 @@ class VisibilidadTests(Base):
 
     def test_acceso_revocado_no_ve_nada(self):
         acceso = self.dueno.accesos_cliente.get()
-        servicios.revocar_acceso(acceso, self.adm, "Dejó de ser cliente")
+        servicios.revocar_acceso(acceso, self.gerente, "Dejó de ser cliente")
         self.assertFalse(mt.ordenes_del_cliente(self.dueno).exists())
 
     def test_staff_no_usa_el_portal(self):
