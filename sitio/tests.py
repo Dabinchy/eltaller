@@ -34,7 +34,7 @@ class SitioTests(TestCase):
     def test_encabezado_de_cada_parte(self):
         r = self.client.get("/")
         self.assertContains(r, 'data-parte="taller"')
-        self.assertContains(r, "el-taller.svg")
+        self.assertContains(r, "el-taller.png")
         self.assertContains(r, 'href="/ingresar/?parte=taller"')
         self.assertContains(r, "Pedir presupuesto")
         # Las tres pestañas en todas las páginas
@@ -63,7 +63,7 @@ class SitioTests(TestCase):
         # Sin parte (o una inválida): ingreso general con la marca El Taller
         for url in ("/ingresar/", "/ingresar/?parte=otra"):
             r = self.client.get(url)
-            self.assertContains(r, "el-taller.svg")
+            self.assertContains(r, "el-taller.png")
         self.assertContains(self.client.get("/ingresar/"), "Personal del taller, pilotos y clientes")
 
     def test_las_areas_no_quedan_tapadas(self):

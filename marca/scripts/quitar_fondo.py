@@ -26,7 +26,7 @@ huecos = np.isin(lab_e, [i for i, ar in enumerate(areas_e, start=1) if ar >= 40]
 # El hueco crece sólo por píxeles grises neutros más oscuros que el blanco del logo (no se come
 # el borde blanco); el borde se suaviza después según el brillo (ver más abajo).
 neutro = (im.max(axis=2) - im.min(axis=2)) < 20
-grisaceo = neutro & (im.min(axis=2) < 251)
+grisaceo = neutro & (im.min(axis=2) < 251) & (im.min(axis=2) > 215)
 huecos = ndimage.binary_propagation(huecos, mask=grisaceo)
 fondo |= huecos
 banda_huecos = ndimage.binary_dilation(huecos, iterations=3) & ~huecos & neutro

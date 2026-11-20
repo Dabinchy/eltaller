@@ -108,10 +108,10 @@ LOGIN_REDIRECT_URL = "redireccion"
 LOGOUT_REDIRECT_URL = "sitio:inicio"
 
 # Marcas (se pueden cambiar sin tocar templates). Siempre se usan éstas, aunque Empresa tenga logo.
-# Logos en vector (SVG transparente: nítidos en cualquier tamaño y tema). Los JPG originales quedan en
+# Logos transparentes (El Taller en PNG, El Prepa en SVG). Los JPG originales quedan en
 # img/brand/ como respaldo.
 TALLER_MARCA_NOMBRE = "El Taller"
-TALLER_MARCA_LOGO = "img/brand/el-taller.svg"
+TALLER_MARCA_LOGO = "img/brand/el-taller.png"
 TALLER_MARCA_FAVICON = "img/brand/icono-taller.svg"
 PORTAL_MARCA_NOMBRE = "El Prepa"
 PORTAL_MARCA_LOGO = "img/brand/el-prepa.svg"
