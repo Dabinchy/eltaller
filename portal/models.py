@@ -316,6 +316,12 @@ class RegistroModeracion(models.Model):
         OBSERVAR = "OBSERVAR", "Observar resultado"
         ANULAR = "ANULAR", "Anular resultado"
         BAJA = "BAJA", "Dar de baja inscripción"
+        # Novedades de la asociación
+        CREAR = "CREAR", "Escribir novedad"
+        EDITAR = "EDITAR", "Editar novedad"
+        PUBLICAR = "PUBLICAR", "Publicar novedad"
+        OCULTAR = "OCULTAR", "Ocultar novedad"
+        BORRAR = "BORRAR", "Borrar novedad"
 
     fecha = models.DateTimeField(default=timezone.now)
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")

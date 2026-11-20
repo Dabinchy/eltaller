@@ -8,7 +8,7 @@
     </span>
     <span class="sitio-card-cuerpo">
       <span class="sitio-card-meta">
-        <time datetime="{{ n.fecha|date:'c' }}">{{ n.fecha|date:"j \d\e F Y" }}</time>{% if con_parte %} · <span class="sitio-novedad-parte" data-parte="{{ n.parte }}">{{ n.get_parte_display }}</span>{% endif %}
+        <time datetime="{{ n.fecha|date:'c' }}">{{ n.fecha|date:"j \d\e F Y" }}</time>{% if con_parte %} · <span class="sitio-novedad-parte" data-parte="{{ n.parte }}">{{ n.get_parte_display }}{% if n.asociacion %} · {{ n.asociacion.nombre }}{% endif %}</span>{% elif n.asociacion and con_asociacion %} · {{ n.asociacion.nombre }}{% endif %}
       </span>
       <h3>{{ n.titulo }}</h3>
       <p>{{ n.resumen }}</p>

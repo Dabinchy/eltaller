@@ -35,7 +35,9 @@
           <p class="ps-resumen">{{ o.resumen }}</p>
           <div class="ps-meta">
             {% parte_chip o.parte %}
+            {% if o.asociacion %}<span><i class="bi bi-people me-1" aria-hidden="true"></i>{{ o.asociacion }}</span>{% endif %}
             {% include "panel/sitio/_estado.html" with novedad=True %}
+            {% if o.autor and o.autor.es_portal %}<span title="La escribió un moderador desde el portal"><i class="bi bi-shield-check me-1" aria-hidden="true"></i>{{ o.autor.get_full_name|default:o.autor.username }} (moderador)</span>{% endif %}
             <span><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ o.fecha|date:"d/m/Y H:i" }}</span>
           </div>
         </div>

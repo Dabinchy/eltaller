@@ -10,11 +10,16 @@ from functools import wraps
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core.acceso import solo_portal
+from panel.forms_sitio import NovedadAsociacionForm
+from sitio.models import Publicacion
 
 from . import permisos, servicios
 from . import servicios_contenido as sc
@@ -201,3 +206,65 @@ def reactivar(request, pk):
 def historial(request):
     registros = RegistroModeracion.objects.filter(asociacion__in=request.asociaciones).select_related("actor", "asociacion")
     return render(request, "portal/moderacion/historial.html", {"titulo": "Historial", "registros": registros[:300]})
+
+
+# ============================================================
+# Novedades de la asociación (se ven en Campeonatos)
+# ============================================================
+# Cada moderador escribe y edita sólo novedades de las asociaciones que modera; nunca de
+# El Taller ni de El Prepa (el formulario fija la parte en Campeonatos).
+
+def _novedades_de(request):
+    return (Publicacion.objects.filter(asociacion__in=request.asociaciones)
+            .select_related("asociacion", "campeonato", "autor"))
+
+
+@moderador_requerido
+def novedades(request):
+    return render(request, "portal/moderacion/novedades.html", {
+        "titulo": "Novedades",
+        "pagina": Paginator(_novedades_de(request), 20).get_page(request.GET.get("pagina")),
+        "asociaciones": request.asociaciones, "ahora": timezone.now(),
+    })
+
+
+@moderador_requerido
+def novedad_form(request, pk=None):
+    obj = get_object_or_404(_novedades_de(request), pk=pk) if pk else None
+    form = NovedadAsociacionForm(request.POST or None, request.FILES or None, instance=obj,
+                                 asociaciones=request.asociaciones)
+    if request.method == "POST" and form.is_valid():
+        nueva = obj is None
+        pub = form.save(commit=False)
+        if nueva:
+            pub.autor = request.user
+        pub.save()
+        servicios.registrar(request.user, RegistroModeracion.Accion.CREAR if nueva else RegistroModeracion.Accion.EDITAR,
+                            pub, pub.asociacion)
+        messages.success(request, f"«{pub}» guardada{' y publicada' if pub.publicada else ' como borrador'}.")
+        return redirect("portal:moderacion_novedades")
+    return render(request, "portal/moderacion/novedad_form.html", {
+        "titulo": "Editar novedad" if obj else "Nueva novedad", "form": form, "objeto": obj,
+        "url_web": reverse("sitio:publicacion", args=[obj.slug]) if obj else "",
+    })
+
+
+@require_POST
+@moderador_requerido
+def novedad_accion(request, pk):
+    pub = get_object_or_404(_novedades_de(request), pk=pk)
+    accion = request.POST.get("accion")
+    A = RegistroModeracion.Accion
+    if accion in ("publicar", "ocultar"):
+        pub.publicada = accion == "publicar"
+        pub.save(update_fields=["publicada"])
+        servicios.registrar(request.user, A.PUBLICAR if pub.publicada else A.OCULTAR, pub, pub.asociacion)
+        messages.success(request, f"«{pub}» {'publicada' if pub.publicada else 'ya no se ve en la web'}.")
+    elif accion == "borrar":
+        servicios.registrar(request.user, A.BORRAR, pub, pub.asociacion)
+        titulo = str(pub)
+        pub.delete()
+        messages.success(request, f"«{titulo}» borrada.")
+    else:
+        raise PermissionDenied
+    return redirect("portal:moderacion_novedades")

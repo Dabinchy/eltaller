@@ -4,7 +4,11 @@
 {% block description %}Novedades de {% if filtro %}{{ parte.nombre }}{% else %}El Taller, El Prepa y Campeonatos{% endif %}.{% endblock %}
 
 {% block content %}
-{% include "sitio/_cabecera.html" with texto="Lo último del taller, de los proyectos y de los campeonatos." %}
+{% if asociacion %}
+  {% include "sitio/_cabecera.html" with texto="Novedades de la asociación: fechas, resultados y cambios en las tablas." %}
+{% else %}
+  {% include "sitio/_cabecera.html" with texto="Lo último del taller, de los proyectos y de los campeonatos." %}
+{% endif %}
 
 <section class="sitio-seccion">
   <div class="container">

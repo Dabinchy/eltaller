@@ -1,0 +1,48 @@
+{% extends "layouts/base_app.html" %}
+{% load static %}
+{# Novedades de las asociaciones que modera el usuario (se ven en Campeonatos). #}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_sitio.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:1100px">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+    <h1 class="h4 mb-0">Novedades</h1>
+    <a class="btn btn-primary btn-sm" href="{% url 'portal:moderacion_novedad_nueva' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nueva novedad</a>
+  </div>
+  <p class="small text-body-secondary">Lo que escribas acá se ve en la sección Campeonatos del sitio, en la página de {% for a in asociaciones %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %} y, si elegís un campeonato, en la de ese campeonato. Por ejemplo: cambios en la tabla, próximas fechas o resultados.</p>
+
+  <div class="card">
+    {% for o in pagina %}
+      <div class="ps-fila">
+        {% if o.portada_miniatura %}<img class="ps-mini" src="{{ o.portada_miniatura.url }}" alt="">
+        {% else %}<span class="ps-mini"><i class="bi bi-newspaper" aria-hidden="true"></i></span>{% endif %}
+        <div class="ps-texto">
+          <a class="ps-titulo" href="{% url 'portal:moderacion_novedad' o.pk %}">{{ o.titulo }}</a>
+          <p class="ps-resumen">{{ o.resumen }}</p>
+          <div class="ps-meta">
+            {% include "panel/sitio/_estado.html" with novedad=True %}
+            <span><i class="bi bi-people me-1" aria-hidden="true"></i>{{ o.asociacion }}</span>
+            {% if o.campeonato %}<span><i class="bi bi-trophy me-1" aria-hidden="true"></i>{{ o.campeonato }}</span>{% endif %}
+            <span><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ o.fecha|date:"d/m/Y H:i" }}</span>
+            {% if o.autor %}<span><i class="bi bi-person me-1" aria-hidden="true"></i>{{ o.autor.get_full_name|default:o.autor.username }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="ps-acciones">
+          <form method="post" action="{% url 'portal:moderacion_novedad_accion' o.pk %}">
+            {% csrf_token %}
+            {% if o.publicada %}
+              <button class="btn btn-sm btn-outline-secondary" name="accion" value="ocultar" type="submit"><i class="bi bi-eye-slash" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Ocultar</span></button>
+            {% else %}
+              <button class="btn btn-sm btn-success" name="accion" value="publicar" type="submit"><i class="bi bi-eye" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Publicar</span></button>
+            {% endif %}
+          </form>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'portal:moderacion_novedad' o.pk %}" aria-label="Editar {{ o.titulo }}"><i class="bi bi-pencil" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Editar</span></a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="card-body text-body-secondary">Todavía no hay novedades de tu asociación. <a href="{% url 'portal:moderacion_novedad_nueva' %}">Escribí la primera</a>.</div>
+    {% endfor %}
+  </div>
+  {% include "panel/sitio/_paginas.html" %}
+</div>
+{% endblock %}

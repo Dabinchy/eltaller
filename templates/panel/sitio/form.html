@@ -56,12 +56,17 @@
 
 {% block extra_js %}
 <script>
-  // Servicios: la sección sólo aplica a El Prepa.
+  // Servicios: la sección sólo aplica a El Prepa. Novedades: asociación y campeonato, sólo a Campeonatos.
   (function () {
     var parte = document.getElementById("id_parte");
-    var seccion = document.getElementById("campo-seccion");
-    if (!parte || !seccion) return;
-    function actualizar() { seccion.hidden = parte.value !== "prepa"; }
+    if (!parte) return;
+    var reglas = [["campo-seccion", "prepa"], ["campo-asociacion", "campeonatos"], ["campo-campeonato", "campeonatos"]];
+    function actualizar() {
+      reglas.forEach(function (r) {
+        var el = document.getElementById(r[0]);
+        if (el) el.hidden = parte.value !== r[1];
+      });
+    }
     parte.addEventListener("change", actualizar);
     actualizar();
   })();

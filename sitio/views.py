@@ -225,33 +225,50 @@ def prepa_consulta(request):
 
 def publicaciones(request):
     parte = request.GET.get("parte") or ""
-    qs = Publicacion.objects.publicadas()
+    qs = Publicacion.objects.publicadas().select_related("asociacion")
+    asociacion = None
+    if request.GET.get("asociacion"):
+        asociacion = q.asociaciones_visibles().filter(slug=request.GET["asociacion"]).first()
+        if asociacion is None:
+            raise Http404()
+        qs = qs.filter(asociacion=asociacion)
+        parte = Parte.CAMPEONATOS
     if parte in Parte.values:
         qs = qs.filter(parte=parte)
         request.parte_sitio = parte   # el encabezado de esa parte
     else:
         parte = ""
     return render(request, "sitio/novedades.html", {
-        "titulo": "Novedades", "pagina": Paginator(qs, 9).get_page(request.GET.get("pagina")),
-        "filtro": parte, "filtros": [("", "Todas")] + list(Parte.choices),
+        "titulo": f"Novedades de {asociacion.nombre}" if asociacion else "Novedades",
+        "pagina": Paginator(qs, 9).get_page(request.GET.get("pagina")),
+        "filtro": parte, "filtros": [("", "Todas")] + list(Parte.choices), "asociacion": asociacion,
         "editar": _editar(request, "sitio_panel:novedades", texto="Cargar o editar novedades"),
     })
 
 
+def _modera_la_novedad(request, pub: Publicacion) -> bool:
+    from portal.permisos import es_moderador
+
+    return bool(pub.asociacion_id) and es_moderador(request.user, pub.asociacion)
+
+
 def publicacion(request, slug: str):
-    pub = get_object_or_404(Publicacion, slug=slug)
+    pub = get_object_or_404(Publicacion.objects.select_related("asociacion", "campeonato"), slug=slug)
     ahora = timezone.now()
     borrador = None
     if not pub.publicada:
         borrador = "Borrador: todavía no se ve en la web."
     elif pub.fecha > ahora:
         borrador = f"Programada: se ve en la web desde el {timezone.localtime(pub.fecha):%d/%m/%Y a las %H:%M}."
-    if borrador and not _puede_ver_borrador(request, "sitio.view_publicacion"):
+    if borrador and not (_puede_ver_borrador(request, "sitio.view_publicacion") or _modera_la_novedad(request, pub)):
         raise Http404()
     request.parte_sitio = pub.parte
+    asociacion_visible = pub.asociacion if pub.asociacion_id and q.asociaciones_visibles().filter(pk=pub.asociacion_id).exists() else None
+    campeonato_visible = pub.campeonato if pub.campeonato_id and q.campeonatos_visibles().filter(pk=pub.campeonato_id).exists() else None
     return render(request, "sitio/novedad.html", {
         "titulo": pub.titulo, "pub": pub, "borrador": borrador,
-        "otras": Publicacion.objects.publicadas().filter(parte=pub.parte).exclude(pk=pub.pk)[:3],
+        "asociacion_visible": asociacion_visible, "campeonato_visible": campeonato_visible,
+        "otras": Publicacion.objects.publicadas().filter(parte=pub.parte).exclude(pk=pub.pk).select_related("asociacion")[:3],
         "url_lista": f"{reverse('sitio:publicaciones')}?parte={pub.parte}",
         "editar": _editar(request, "sitio_panel:novedad", pub.pk, texto="Editar esta novedad"),
     })
@@ -344,6 +361,7 @@ def campeonato(request, slug: str):
         "tabla": None,
         "fechas": [],
     }
+    contexto["novedades"] = Publicacion.objects.publicadas().filter(campeonato=camp)[:3]
     if elegida:
         filas, provisoria = tabla_posiciones(elegida)
         contexto.update(tabla=filas, provisoria=provisoria, fechas=q.fechas_de_categoria(camp, elegida))
@@ -405,4 +423,5 @@ def asociacion(request, slug: str):
         "asoc": asoc,
         "campeonatos": q.campeonatos_visibles().filter(asociacion=asoc),
         "pilotos": q.pilotos_visibles(asociacion=asoc),
+        "novedades": Publicacion.objects.publicadas().filter(asociacion=asoc)[:3],
     })

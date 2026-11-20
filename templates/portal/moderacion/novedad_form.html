@@ -1,0 +1,50 @@
+{% extends "layouts/base_app.html" %}
+{% load static %}
+{# Escribir o editar una novedad de la asociación (moderadores). #}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/panel_sitio.css' %}">{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1120px">
+  <a class="small text-decoration-none" href="{% url 'portal:moderacion_novedades' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Novedades</a>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+    <h1 class="h4 mb-0">{{ titulo }}</h1>
+    {% if objeto.publicada %}<a class="btn btn-sm btn-outline-secondary" href="{{ url_web }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver en la web</a>
+    {% elif objeto %}<a class="btn btn-sm btn-outline-secondary" href="{{ url_web }}" target="_blank" rel="noopener"><i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa</a>{% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+    {% endif %}
+    {% with fotos=form.fotos_actuales %}
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="card"><div class="card-body">
+          {% for campo in form.campos_principales %}{% include "panel/sitio/_campo.html" %}{% endfor %}
+        </div></div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="card"><div class="card-body">
+          {% for campo in form.campos_laterales %}{% include "panel/sitio/_campo.html" %}{% endfor %}
+        </div></div>
+      </div>
+    </div>
+    {% endwith %}
+    {% for campo in form.hidden_fields %}{{ campo }}{% endfor %}
+    {% for e in form.asociacion.errors %}<div class="alert alert-danger py-2 mt-2">{{ e }}</div>{% endfor %}
+
+    <div class="ps-barra-guardar">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Guardar</button>
+      <a class="btn btn-outline-secondary" href="{% url 'portal:moderacion_novedades' %}">Cancelar</a>
+      {% if objeto %}
+        <button class="btn btn-outline-danger ms-auto" type="submit" form="form-borrar"><i class="bi bi-trash me-1" aria-hidden="true"></i>Borrar</button>
+      {% endif %}
+    </div>
+  </form>
+  {% if objeto %}
+    <form id="form-borrar" method="post" action="{% url 'portal:moderacion_novedad_accion' objeto.pk %}"
+          onsubmit="return confirm('¿Borrar «{{ objeto|escapejs }}»? No se puede deshacer.');">{% csrf_token %}<input type="hidden" name="accion" value="borrar"></form>
+  {% endif %}
+</div>
+{% endblock %}

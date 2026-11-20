@@ -11,7 +11,10 @@
 <section class="sitio-seccion">
   <div class="container">
     <article class="sitio-novedad">
-      <p class="sitio-novedad-fecha"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i><time datetime="{{ pub.fecha|date:'c' }}">{{ pub.fecha|date:"j \d\e F \d\e Y" }}</time></p>
+      <p class="sitio-novedad-fecha"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i><time datetime="{{ pub.fecha|date:'c' }}">{{ pub.fecha|date:"j \d\e F \d\e Y" }}</time>
+        {% if asociacion_visible %} · <i class="bi bi-people ms-1 me-1" aria-hidden="true"></i><a href="{% url 'sitio:asociacion' asociacion_visible.slug %}">{{ asociacion_visible.nombre }}</a>{% elif pub.asociacion %} · {{ pub.asociacion.nombre }}{% endif %}
+        {% if campeonato_visible %} · <i class="bi bi-trophy ms-1 me-1" aria-hidden="true"></i><a href="{% url 'sitio:campeonato' campeonato_visible.slug %}">{{ campeonato_visible }}</a>{% endif %}
+      </p>
       {% if pub.portada %}
         <div data-galeria>
           <a class="sitio-trabajo-portada mb-4" href="{{ pub.portada.url }}" data-foto data-epigrafe="{{ pub.titulo }}">

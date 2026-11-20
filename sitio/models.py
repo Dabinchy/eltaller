@@ -5,7 +5,8 @@ Contenido del sitio público, editable desde el panel (/panel/sitio/) o el admin
 - Servicio: lo que hace El Taller y cada sección de El Prepa.
 - Trabajo (+ FotoTrabajo): trabajos de El Taller y proyectos de El Prepa, con galería.
 - Testimonio: opiniones de clientes.
-- Publicacion: novedades de cualquiera de las tres partes.
+- Publicacion: novedades de cualquiera de las tres partes. Las de Campeonatos pueden ser de una
+  asociación (y de un campeonato): esas también las escriben sus moderadores desde el portal.
 - Consulta: lo que mandan los visitantes por los formularios (presupuesto, contacto, proyecto).
 
 Reglas comunes:
@@ -300,6 +301,16 @@ class PublicacionQuerySet(models.QuerySet):
 
 class Publicacion(models.Model):
     parte = models.CharField(max_length=12, choices=Parte.choices, default=Parte.TALLER)
+    # Sólo para Campeonatos: de qué asociación es (sus moderadores la pueden editar) y, si se
+    # quiere, de qué campeonato habla (se ve también en la página del campeonato).
+    asociacion = models.ForeignKey(
+        "portal.Asociacion", on_delete=models.SET_NULL, null=True, blank=True, related_name="novedades",
+        verbose_name="asociación", help_text="Sólo novedades de Campeonatos. Sus moderadores también la pueden editar.",
+    )
+    campeonato = models.ForeignKey(
+        "campeonatos.Campeonato", on_delete=models.SET_NULL, null=True, blank=True, related_name="novedades",
+        help_text="Opcional: de qué campeonato habla.",
+    )
     titulo = models.CharField("título", max_length=120)
     slug = models.SlugField(
         max_length=70, unique=True, blank=True, help_text="Para la dirección de la página. Se completa solo.",
@@ -316,6 +327,9 @@ class Publicacion(models.Model):
         default=timezone.now, help_text="Con una fecha futura, aparece recién ese día.",
     )
     publicada = models.BooleanField(default=False)
+    autor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+", editable=False,
+    )
     actualizada = models.DateTimeField(auto_now=True)
 
     objects = PublicacionQuerySet.as_manager()
@@ -336,8 +350,16 @@ class Publicacion(models.Model):
     def clean(self):
         super().clean()
         _validar_video(self.video_url)
+        if self.campeonato_id and not self.asociacion_id:
+            self.asociacion_id = self.campeonato.asociacion_id
+        if (self.asociacion_id or self.campeonato_id) and self.parte != Parte.CAMPEONATOS:
+            raise ValidationError({"asociacion": "La asociación y el campeonato son sólo para novedades de Campeonatos."})
+        if self.campeonato_id and self.campeonato.asociacion_id != self.asociacion_id:
+            raise ValidationError({"campeonato": "Ese campeonato es de otra asociación."})
 
     def save(self, *args, **kwargs):
+        if self.campeonato_id and not self.asociacion_id:
+            self.asociacion_id = self.campeonato.asociacion_id
         if not self.slug:
             self.slug = _slug_unico(Publicacion, self.titulo, self.pk)
         _procesar_foto(self, "portada", "portada_miniatura")

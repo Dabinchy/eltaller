@@ -11,7 +11,7 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 
 from core import imagenes
-from sitio.models import Consulta, FotoTrabajo, Portada, Publicacion, Servicio, Testimonio, Trabajo
+from sitio.models import Consulta, FotoTrabajo, Parte, Portada, Publicacion, Servicio, Testimonio, Trabajo
 
 _FORMATO_FECHA_HORA = "%Y-%m-%dT%H:%M"
 
@@ -79,7 +79,8 @@ class PublicacionForm(_ConFotos):
 
     class Meta:
         model = Publicacion
-        fields = ("parte", "titulo", "resumen", "cuerpo", "portada", "video_url", "fecha", "publicada")
+        fields = ("parte", "asociacion", "campeonato", "titulo", "resumen", "cuerpo", "portada", "video_url",
+                  "fecha", "publicada")
         widgets = {
             "resumen": forms.Textarea,
             "fecha": forms.DateTimeInput(attrs={"type": "datetime-local"}, format=_FORMATO_FECHA_HORA),
@@ -89,6 +90,33 @@ class PublicacionForm(_ConFotos):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["fecha"].input_formats = [_FORMATO_FECHA_HORA, "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"]
+
+
+class NovedadAsociacionForm(PublicacionForm):
+    """
+    Novedad escrita por un moderador desde el portal: siempre de Campeonatos y sólo de las
+    asociaciones que modera (y de sus campeonatos). Nunca de El Taller ni de El Prepa.
+    """
+
+    class Meta(PublicacionForm.Meta):
+        fields = ("asociacion", "campeonato", "titulo", "resumen", "cuerpo", "portada", "video_url", "fecha",
+                  "publicada")
+        labels = {**PublicacionForm.Meta.labels, "campeonato": "Campeonato (opcional)"}
+        help_texts = {"asociacion": "", "campeonato": "Si la novedad es de un campeonato, se ve también en su página."}
+
+    def __init__(self, *args, asociaciones, **kwargs):
+        super().__init__(*args, **kwargs)
+        from campeonatos.models import Campeonato
+
+        self.instance.parte = Parte.CAMPEONATOS
+        self.fields["asociacion"].queryset = asociaciones
+        self.fields["asociacion"].required = True
+        self.fields["campeonato"].queryset = Campeonato.objects.filter(asociacion__in=asociaciones).order_by(
+            "-temporada", "nombre")
+        self.fields["campeonato"].empty_label = "Ninguno: es de toda la asociación"
+        if len(asociaciones) == 1 and not self.instance.pk:
+            self.fields["asociacion"].initial = asociaciones[0].pk
+            self.fields["asociacion"].widget = forms.HiddenInput()
 
 
 class TrabajoForm(_ConFotos):

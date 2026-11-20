@@ -48,4 +48,8 @@ urlpatterns = [
     path("moderacion/pilotos/", vm.miembros, name="moderacion_miembros"),
     path("moderacion/pilotos/<int:pk>/reactivar/", vm.reactivar, name="moderacion_reactivar"),
     path("moderacion/historial/", vm.historial, name="moderacion_historial"),
+    path("moderacion/novedades/", vm.novedades, name="moderacion_novedades"),
+    path("moderacion/novedades/nueva/", vm.novedad_form, name="moderacion_novedad_nueva"),
+    path("moderacion/novedades/<int:pk>/", vm.novedad_form, name="moderacion_novedad"),
+    path("moderacion/novedades/<int:pk>/accion/", vm.novedad_accion, name="moderacion_novedad_accion"),
 ]

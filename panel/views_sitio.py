@@ -277,7 +277,7 @@ ESTADOS_NOVEDAD = [("publicadas", "Publicadas"), ("programadas", "Programadas"),
 def novedades(request):
     user = request.user
     _exigir(user, "sitio.view_publicacion")
-    qs = Publicacion.objects.all()
+    qs = Publicacion.objects.select_related("asociacion", "autor")
     q = (request.GET.get("q") or "").strip()
     parte = request.GET.get("parte") or ""
     estado = request.GET.get("estado") or ""
