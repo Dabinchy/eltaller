@@ -8,3 +8,7 @@ db.sqlite3
 media/
 staticfiles/
 privado/
+demo.sqlite3
+media_demo/
+privado_demo/
+demo/fotos/

@@ -96,6 +96,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Base de demostración (config/settings/dev.py la activa con DJANGO_DEMO=1).
+DEMO = False
+
 # Archivos privados (facturas, archivos internos): fuera de MEDIA_ROOT y sin URL pública.
 PRIVATE_MEDIA_ROOT = BASE_DIR / "privado"
 # En producción nginx entrega los archivos privados (X-Accel-Redirect) después de que Django

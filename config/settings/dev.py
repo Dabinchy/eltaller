@@ -23,3 +23,11 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+# Base de demostración aparte, para mostrar el sistema sin tocar los datos reales.
+# Se activa con la variable de entorno DJANGO_DEMO=1 (ver demo/LEEME.md):
+# usa demo.sqlite3 y sus propias carpetas de archivos (media_demo/ y privado_demo/).
+DEMO = bool(os.environ.get("DJANGO_DEMO"))
+if DEMO:
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "demo.sqlite3"}}
+    MEDIA_ROOT = BASE_DIR / "media_demo"
+    PRIVATE_MEDIA_ROOT = BASE_DIR / "privado_demo"
