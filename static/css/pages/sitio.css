@@ -94,7 +94,7 @@
    anchos y bajos (se limita el ancho). */
 .sitio-logo {
   display: block;
-  height: 54px;
+  height: 60px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -109,7 +109,7 @@
 .sitio-brand:hover { transform: translateY(-1px) rotate(-1deg); }
 @media (prefers-reduced-motion: reduce) { .sitio-brand:hover { transform: none; } }
 @media (max-width: 575.98px) {
-  .sitio-logo:not(.sitio-logo-grande) { height: 46px; }
+  .sitio-logo:not(.sitio-logo-grande) { height: 50px; }
   .sitio-logo-prepa:not(.sitio-logo-grande),
   .sitio-logo-campeonatos:not(.sitio-logo-grande) { height: auto; width: 150px; }
 }

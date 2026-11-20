@@ -63,12 +63,12 @@ class IngresoTests(Base):
         else:
             Empresa(nombre="Otro nombre", logo="empresa/otro_logo.png").save()
         r = self.client.get("/")
-        self.assertContains(r, "el-taller.png")
+        self.assertContains(r, "el-taller.svg")
         self.assertNotContains(r, "otro_logo")
         self.client.force_login(self.piloto)
-        self.assertContains(self.client.get("/portal/"), "el-prepa.png")
+        self.assertContains(self.client.get("/portal/"), "el-prepa.svg")
         self.client.force_login(self.adm)
-        self.assertContains(self.client.get("/panel/"), "el-taller.png")
+        self.assertContains(self.client.get("/panel/"), "el-taller.svg")
 
     def test_salir_es_por_post(self):
         self.client.force_login(self.adm)
