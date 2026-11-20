@@ -1,0 +1,69 @@
+{% extends "panel/sitio/_base.html" %}
+{# Alta/edición de contenido del sitio. Contexto: titulo, form, volver, objeto, tipo, ver_en_web, puede_borrar, ayuda #}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1120px">
+  <a class="small text-decoration-none" href="{{ volver }}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver</a>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+    <h1 class="h4 mb-0">{{ titulo }}</h1>
+    {% if ver_en_web %}
+      <a class="btn btn-sm btn-outline-secondary" href="{{ ver_en_web }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver en la web</a>
+    {% endif %}
+  </div>
+  {% if ayuda %}<p class="text-body-secondary small">{{ ayuda }}</p>{% endif %}
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+    {% endif %}
+    {% with fotos=form.fotos_actuales %}
+    <div class="row g-3">
+      <div class="{% if form.campos_laterales %}col-12 col-lg-8{% else %}col-12{% endif %}">
+        <div class="card"><div class="card-body">
+          {% for campo in form.campos_principales %}{% include "panel/sitio/_campo.html" %}{% endfor %}
+        </div></div>
+      </div>
+      {% if form.campos_laterales %}
+        <div class="col-12 col-lg-4">
+          <div class="card"><div class="card-body">
+            {% for campo in form.campos_laterales %}{% include "panel/sitio/_campo.html" %}{% endfor %}
+          </div></div>
+        </div>
+      {% endif %}
+    </div>
+    {% endwith %}
+    {% for campo in form.hidden_fields %}{{ campo }}{% endfor %}
+
+    <div class="ps-barra-guardar">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Guardar</button>
+      <a class="btn btn-outline-secondary" href="{{ volver }}">Cancelar</a>
+      {% if puede_borrar and objeto %}
+        <button class="btn btn-outline-danger ms-auto" type="submit" form="form-borrar">
+          <i class="bi bi-trash me-1" aria-hidden="true"></i>Borrar
+        </button>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if puede_borrar and objeto %}
+    <form id="form-borrar" method="post" action="{% url 'sitio_panel:borrar' tipo objeto.pk %}"
+          onsubmit="return confirm('¿Borrar «{{ objeto|escapejs }}»? No se puede deshacer.');">{% csrf_token %}</form>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Servicios: la sección sólo aplica a El Prepa.
+  (function () {
+    var parte = document.getElementById("id_parte");
+    var seccion = document.getElementById("campo-seccion");
+    if (!parte || !seccion) return;
+    function actualizar() { seccion.hidden = parte.value !== "prepa"; }
+    parte.addEventListener("change", actualizar);
+    actualizar();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "panel/sitio/_base.html" %}
+{% load panel_sitio %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1100px">
+  <h1 class="h4 mb-3">Consultas del sitio</h1>
+
+  <ul class="nav nav-pills ps-tabs mb-3 flex-nowrap overflow-auto" role="tablist">
+    {% for v, n, cant in estados %}
+      <li class="nav-item">
+        <a class="nav-link text-nowrap{% if estado == v %} active{% endif %}" href="?estado={{ v }}" {% if estado == v %}aria-current="page"{% endif %}>
+          {{ n }}{% if cant %} <span class="badge {% if v == 'nueva' %}text-bg-warning{% else %}text-bg-secondary{% endif %} ms-1">{{ cant }}</span>{% endif %}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <form class="row g-2 mb-3" method="get" role="search">
+    <input type="hidden" name="estado" value="{{ estado }}">
+    <div class="col-12 col-md-5"><input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Nombre, teléfono, email, vehículo o mensaje" aria-label="Buscar"></div>
+    <div class="col-6 col-md-3">
+      <select class="form-select" name="tipo" aria-label="Tipo">
+        <option value="">Todos los tipos</option>
+        {% for v, n in tipos %}<option value="{{ v }}" {% if tipo == v %}selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="parte" aria-label="Parte del sitio">
+        <option value="">Todas</option>
+        {% for v, n in partes %}<option value="{{ v }}" {% if parte == v %}selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-secondary" type="submit">Buscar</button></div>
+  </form>
+
+  <div class="card">
+    {% for c in pagina %}
+      <a class="ps-fila text-decoration-none{% if c.estado == 'nueva' %} ps-fila-nueva{% endif %}" href="{% url 'sitio_panel:consulta' c.pk %}">
+        <span class="ps-icono"><i class="bi {% if c.tipo == 'presupuesto' %}bi-calendar-check{% elif c.tipo == 'proyecto' %}bi-speedometer2{% else %}bi-chat-dots{% endif %}" aria-hidden="true"></i></span>
+        <div class="ps-texto">
+          <span class="ps-titulo">{{ c.nombre }}</span>
+          {% if c.vehiculo %}<span class="small text-body-secondary"> · {{ c.vehiculo }}</span>{% endif %}
+          <p class="ps-resumen mb-1">{{ c.mensaje }}</p>
+          <div class="ps-meta">
+            {% parte_chip c.parte %}
+            <span>{{ c.get_tipo_display }}</span>
+            {% if c.estado == "nueva" %}<span class="cc-chip cc-chip--warn">Nueva</span>
+            {% elif c.estado == "respondida" %}<span class="cc-chip cc-chip--ok">Respondida</span>
+            {% else %}<span class="cc-chip cc-chip--off">Archivada</span>{% endif %}
+            <span title="{{ c.creada|date:'d/m/Y H:i' }}"><i class="bi bi-clock me-1" aria-hidden="true"></i>hace {{ c.creada|timesince }}</span>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+      </a>
+    {% empty %}
+      <div class="card-body text-body-secondary">
+        {% if estado == "nueva" and not q and not tipo and not parte %}<i class="bi bi-check2-circle me-1" aria-hidden="true"></i>No hay consultas nuevas. ¡Todo respondido!{% else %}No hay consultas con ese filtro.{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% include "panel/sitio/_paginas.html" %}
+</div>
+{% endblock %}

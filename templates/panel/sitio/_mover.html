@@ -1,0 +1,11 @@
+{# Flechas para cambiar el orden. o, tipo, primero, ultimo #}
+<div class="btn-group btn-group-sm" role="group" aria-label="Orden">
+  <form method="post" action="{% url 'sitio_panel:mover' tipo o.pk %}">{% csrf_token %}
+    <input type="hidden" name="direccion" value="subir"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="btn btn-sm btn-outline-secondary rounded-end-0" type="submit" title="Subir" aria-label="Subir {{ o }}" {% if primero %}disabled{% endif %}><i class="bi bi-arrow-up" aria-hidden="true"></i></button>
+  </form>
+  <form method="post" action="{% url 'sitio_panel:mover' tipo o.pk %}">{% csrf_token %}
+    <input type="hidden" name="direccion" value="bajar"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="btn btn-sm btn-outline-secondary rounded-start-0 border-start-0" type="submit" title="Bajar" aria-label="Bajar {{ o }}" {% if ultimo %}disabled{% endif %}><i class="bi bi-arrow-down" aria-hidden="true"></i></button>
+  </form>
+</div>

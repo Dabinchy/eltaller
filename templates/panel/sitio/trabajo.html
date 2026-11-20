@@ -1,0 +1,110 @@
+{% extends "panel/sitio/_base.html" %}
+{% load panel_sitio widget_tweaks %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1200px">
+  <a class="small text-decoration-none" href="{% url 'sitio_panel:trabajos' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Trabajos y proyectos</a>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mt-1 mb-3">
+    <div>
+      <h1 class="h4 mb-1">{{ t.titulo }}</h1>
+      <div class="ps-meta">
+        {% parte_chip t.parte %}
+        <span>{{ t.get_tipo_display|cut:" (El Taller)"|cut:" (El Prepa)" }}</span>
+        {% include "panel/sitio/_estado.html" with o=t %}
+        {% if t.destacado %}<span class="cc-chip cc-chip--warn"><i class="bi bi-star-fill" aria-hidden="true"></i>Destacado</span>{% endif %}
+      </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if puede_editar %}
+        {% include "panel/sitio/_publicar.html" with o=t tipo="trabajos" publicado=t.publicado %}
+        <form method="post" action="{% url 'sitio_panel:trabajo_destacar' t.pk %}">{% csrf_token %}
+          <input type="hidden" name="valor" value="{% if t.destacado %}0{% else %}1{% endif %}">
+          <button class="btn btn-sm btn-outline-secondary" type="submit" title="{% if t.destacado %}Sacar de la portada{% else %}Mostrar en la portada{% endif %}">
+            <i class="bi {% if t.destacado %}bi-star-fill text-warning{% else %}bi-star{% endif %} me-1" aria-hidden="true"></i>{% if t.destacado %}Quitar destacado{% else %}Destacar{% endif %}
+          </button>
+        </form>
+        <a class="btn btn-sm btn-primary" href="{% url 'sitio_panel:trabajo_editar' t.pk %}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar datos</a>
+      {% endif %}
+      {% if ver_en_web %}<a class="btn btn-sm btn-outline-secondary" href="{{ ver_en_web }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver en la web</a>{% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-5 col-lg-4">
+      {% if t.portada %}<img class="ps-preview" src="{% if t.portada_miniatura %}{{ t.portada_miniatura.url }}{% else %}{{ t.portada.url }}{% endif %}" alt="Portada de {{ t.titulo }}" style="max-height:260px">
+      {% else %}<div class="ps-portada-vista"><span class="text-body-secondary small"><i class="bi bi-image me-1" aria-hidden="true"></i>Sin foto de portada</span></div>{% endif %}
+    </div>
+    <div class="col-12 col-md-7 col-lg-8">
+      <div class="card h-100"><div class="card-body">
+        <dl class="row mb-0 small">
+          {% if t.auto %}<dt class="col-4 col-lg-3">Auto</dt><dd class="col-8 col-lg-9">{{ t.auto }}</dd>{% endif %}
+          <dt class="col-4 col-lg-3">Terminado</dt><dd class="col-8 col-lg-9">{{ t.fecha|date:"d/m/Y" }}</dd>
+          <dt class="col-4 col-lg-3">Resumen</dt><dd class="col-8 col-lg-9">{{ t.resumen }}</dd>
+          {% if t.video_url %}<dt class="col-4 col-lg-3">Video</dt><dd class="col-8 col-lg-9"><a href="{{ t.video_url }}" target="_blank" rel="noopener">{{ t.video_url|truncatechars:50 }}</a></dd>{% endif %}
+          <dt class="col-4 col-lg-3">Descripción</dt><dd class="col-8 col-lg-9 mb-0" style="white-space:pre-line">{{ t.descripcion|default:"—"|truncatechars:400 }}</dd>
+        </dl>
+      </div></div>
+    </div>
+  </div>
+
+  <h2 class="h5 mb-2" id="galeria">Galería <span class="text-body-secondary fw-normal fs-6">· {{ fotos|length }} foto{{ fotos|length|pluralize }}</span></h2>
+  <p class="small text-body-secondary">En la web se agrupan en Antes, Proceso y Después. El orden de acá es el de la galería.</p>
+
+  {% if puede_fotos %}
+    <form class="ps-subir mb-3" method="post" action="{% url 'sitio_panel:fotos_subir' t.pk %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="{{ subir.fotos.id_for_label }}"><i class="bi bi-cloud-arrow-up me-1" aria-hidden="true"></i>Sumar fotos</label>
+          {% render_field subir.fotos class="form-control" %}
+          <div class="form-text">{{ subir.fotos.help_text }}</div>
+        </div>
+        <div class="col-7 col-md-3">
+          <label class="form-label" for="{{ subir.etapa.id_for_label }}">Etapa</label>
+          {% render_field subir.etapa class="form-select" %}
+        </div>
+        <div class="col-5 col-md-3 d-grid"><button class="btn btn-primary" type="submit">Subir</button></div>
+      </div>
+    </form>
+  {% endif %}
+
+  {% if fotos %}
+    <div class="ps-galeria">
+      {% for f, ff in fotos %}
+        <div class="ps-foto">
+          <a href="{{ f.imagen.url }}" target="_blank" rel="noopener"><img src="{% if f.miniatura %}{{ f.miniatura.url }}{% else %}{{ f.imagen.url }}{% endif %}" alt="{{ f.epigrafe|default:'Foto' }}" loading="lazy"></a>
+          <form class="ps-foto-cuerpo" method="post" action="{% url 'sitio_panel:foto' f.pk %}">
+            {% csrf_token %}
+            {% if puede_editar %}
+              {% render_field ff.epigrafe class="form-control form-control-sm mb-2" placeholder="Epígrafe (opcional)" aria-label="Epígrafe" %}
+              <div class="d-flex gap-2 mb-2">
+                {% render_field ff.etapa class="form-select form-select-sm" aria-label="Etapa" %}
+                <button class="btn btn-sm btn-outline-primary" type="submit" name="accion" value="guardar" title="Guardar epígrafe y etapa"><i class="bi bi-check-lg" aria-hidden="true"></i></button>
+              </div>
+              <div class="d-flex flex-wrap gap-1">
+                <button class="btn btn-sm btn-outline-secondary" type="submit" name="accion" value="subir" title="Mover antes" aria-label="Mover antes" {% if forloop.first %}disabled{% endif %}><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-outline-secondary" type="submit" name="accion" value="bajar" title="Mover después" aria-label="Mover después" {% if forloop.last %}disabled{% endif %}><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-outline-secondary" type="submit" name="accion" value="portada" title="Usar como foto de portada del trabajo"><i class="bi bi-image me-1" aria-hidden="true"></i>Portada</button>
+                <button class="btn btn-sm btn-outline-danger ms-auto" type="submit" name="accion" value="borrar" title="Borrar foto" aria-label="Borrar foto"
+                        onclick="return confirm('¿Borrar esta foto?');"><i class="bi bi-trash" aria-hidden="true"></i></button>
+              </div>
+            {% else %}
+              <div class="small">{{ f.epigrafe|default:"" }} {% if f.etapa %}<span class="text-body-secondary">· {{ f.get_etapa_display }}</span>{% endif %}</div>
+            {% endif %}
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-body-secondary">Todavía no hay fotos en la galería.</p>
+  {% endif %}
+
+  {% if puede_borrar %}
+    <hr class="my-4">
+    <form method="post" action="{% url 'sitio_panel:borrar' 'trabajos' t.pk %}" onsubmit="return confirm('¿Borrar «{{ t.titulo|escapejs }}» con todas sus fotos? No se puede deshacer.');">
+      {% csrf_token %}
+      <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash me-1" aria-hidden="true"></i>Borrar este trabajo</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

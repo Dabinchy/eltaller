@@ -21,6 +21,7 @@ urlpatterns = [
     path("panel/productos/", include("panel.urls_productos")),
     path("panel/clientes/", include("panel.urls_clientes")),
     path("panel/compras/", include("panel.urls_compras")),
+    path("panel/sitio/", include("panel.urls_sitio")),
     path("portal/campeonatos/", include("campeonatos.urls_portal")),
     path("portal/moderacion/campeonatos/", include("campeonatos.urls_moderacion")),
     path("portal/", include("portal.urls")),

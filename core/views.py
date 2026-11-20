@@ -76,8 +76,7 @@ def panel_inicio(request):
             "titulo": "Consultas nuevas del sitio",
             "icono": "bi-chat-left-text",
             "valor": nuevas,
-            # La lista está en el admin (sólo para quien puede entrar al admin).
-            "url": reverse("admin:sitio_consulta_changelist") + "?estado__exact=nueva" if user.is_staff else "",
+            "url": reverse("sitio_panel:consultas"),
         })
 
     return render(request, "panel/inicio.html", {"titulo": "Inicio", "tarjetas": tarjetas})

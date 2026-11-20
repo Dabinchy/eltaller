@@ -129,8 +129,9 @@ class PanelTests(Base):
         self.client.force_login(self.usuario("jefe", "jefe"))
         r = self.client.get("/panel/")
         self.assertContains(r, "Consultas nuevas del sitio")
-        self.assertContains(r, "/admin/sitio/consulta/?estado__exact=nueva")
+        self.assertContains(r, 'href="/panel/sitio/consultas/"')  # la bandeja está en el panel, no en el admin
         self.assertContains(r, "Consultas del sitio")
+        self.assertNotContains(r, "/admin/sitio/consulta/")
 
     def test_mecanico_no_ve_consultas(self):
         self.client.force_login(self.usuario("mec", "mecanico"))

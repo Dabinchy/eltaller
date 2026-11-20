@@ -1,0 +1,64 @@
+{% extends "panel/sitio/_base.html" %}
+{% load panel_sitio %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Trabajos y proyectos</h1>
+      <p class="small text-body-secondary mb-0">Autos de calle (El Taller) y proyectos de competición, personalización y clásicos (El Prepa).</p>
+    </div>
+    {% if puede_crear %}<a class="btn btn-primary btn-sm" href="{% url 'sitio_panel:trabajo_nuevo' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo</a>{% endif %}
+  </div>
+
+  <form class="row g-2 mb-3" method="get" role="search">
+    <div class="col-12 col-md-5"><input class="form-control" type="search" name="q" value="{{ q }}" placeholder="Título, auto o resumen" aria-label="Buscar"></div>
+    <div class="col-6 col-md-3">
+      <select class="form-select" name="tipo" aria-label="Tipo">
+        <option value="">Todos los tipos</option>
+        {% for v, n in tipos %}<option value="{{ v }}" {% if tipo == v %}selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="estado" aria-label="Estado">
+        <option value="">Todos</option>
+        {% for v, n in estados %}<option value="{{ v }}" {% if estado == v %}selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-secondary" type="submit">Buscar</button></div>
+  </form>
+
+  <div class="card">
+    {% for o in pagina %}
+      <div class="ps-fila">
+        {% if o.portada_miniatura %}<img class="ps-mini" src="{{ o.portada_miniatura.url }}" alt="">
+        {% else %}<span class="ps-mini"><i class="bi bi-car-front" aria-hidden="true"></i></span>{% endif %}
+        <div class="ps-texto">
+          <a class="ps-titulo" href="{% url 'sitio_panel:trabajo' o.pk %}">{{ o.titulo }}</a>
+          {% if o.destacado %}<i class="bi bi-star-fill text-warning ms-1" title="Destacado en la portada" aria-label="Destacado"></i>{% endif %}
+          <p class="ps-resumen">{% if o.auto %}<strong>{{ o.auto }}</strong> · {% endif %}{{ o.resumen }}</p>
+          <div class="ps-meta">
+            {% parte_chip o.parte %}
+            <span>{{ o.get_tipo_display|cut:" (El Taller)"|cut:" (El Prepa)" }}</span>
+            {% include "panel/sitio/_estado.html" %}
+            <span><i class="bi bi-images me-1" aria-hidden="true"></i>{{ o.cant_fotos }} foto{{ o.cant_fotos|pluralize }}</span>
+            <span><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ o.fecha|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+        {% if puede_editar %}
+          <div class="ps-acciones">
+            {% include "panel/sitio/_publicar.html" with tipo="trabajos" publicado=o.publicado chico=True %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'sitio_panel:trabajo' o.pk %}" aria-label="Abrir {{ o.titulo }}"><i class="bi bi-images" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Fotos</span></a>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'sitio_panel:trabajo_editar' o.pk %}" aria-label="Editar {{ o.titulo }}"><i class="bi bi-pencil" aria-hidden="true"></i><span class="d-none d-md-inline ms-1">Editar</span></a>
+          </div>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="card-body text-body-secondary">
+        {% if q or tipo or estado %}No hay trabajos con ese filtro.{% else %}Todavía no hay trabajos. {% if puede_crear %}<a href="{% url 'sitio_panel:trabajo_nuevo' %}">Cargá el primero</a>.{% endif %}{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% include "panel/sitio/_paginas.html" %}
+</div>
+{% endblock %}

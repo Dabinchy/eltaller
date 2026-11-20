@@ -1,0 +1,39 @@
+{% extends "panel/sitio/_base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Sitio web</h1>
+      <p class="small text-body-secondary mb-0">Lo que se ve en la web de El Taller, El Prepa y Campeonatos. Lo que cargues acá se publica directo.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if puede_crear_novedad %}<a class="btn btn-sm btn-primary" href="{% url 'sitio_panel:novedad_nueva' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Novedad</a>{% endif %}
+      {% if puede_crear_trabajo %}<a class="btn btn-sm btn-primary" href="{% url 'sitio_panel:trabajo_nuevo' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Trabajo</a>{% endif %}
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'sitio:inicio' %}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Ver el sitio</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {% for t in tarjetas %}
+      <div class="col-12 col-sm-6 col-xl-4">
+        <div class="card h-100 cc-card-link{% if t.alerta %} border-warning{% endif %}">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-semibold">{{ t.titulo }}</span>
+              <i class="bi {{ t.icono }} fs-4 {% if t.alerta %}text-warning{% else %}text-body-secondary{% endif %}" aria-hidden="true"></i>
+            </div>
+            <p class="mb-2"><a class="stretched-link text-reset text-decoration-none" href="{{ t.url }}"><span class="display-6 fw-semibold">{{ t.valor }}</span></a>
+              <span class="text-body-secondary ms-1">{{ t.detalle }}</span></p>
+            {% if t.extra %}
+              <ul class="list-unstyled small mb-0 text-body-secondary">
+                {% for nombre, cantidad in t.extra %}<li class="d-flex justify-content-between"><span>{{ nombre }}</span><span>{{ cantidad }}</span></li>{% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

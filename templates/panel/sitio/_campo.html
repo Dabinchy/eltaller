@@ -1,0 +1,26 @@
+{% load widget_tweaks panel_sitio %}
+{# Un campo del formulario. Las fotos muestran la vista previa de la actual (fotos = {campo: url}). #}
+<div class="mb-3" id="campo-{{ campo.name }}">
+  {% if campo.field.widget.input_type == "checkbox" %}
+    <div class="form-check form-switch">
+      {% render_field campo class="form-check-input" role="switch" %}
+      <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    </div>
+  {% else %}
+    <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {% if campo.field.widget.input_type == "file" %}
+      {% with url=fotos|clave:campo.name %}
+        {% if url %}<img class="ps-preview mb-2" src="{{ url }}" alt="Foto actual">{% endif %}
+      {% endwith %}
+    {% endif %}
+    {% if campo.errors %}
+      {% if campo.field.widget.input_type == "select" %}{% render_field campo class="form-select is-invalid" %}{% else %}{% render_field campo class="form-control is-invalid" %}{% endif %}
+    {% elif campo.field.widget.input_type == "select" %}
+      {% render_field campo class="form-select" %}
+    {% else %}
+      {% render_field campo class="form-control" %}
+    {% endif %}
+  {% endif %}
+  {% for e in campo.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+  {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+</div>

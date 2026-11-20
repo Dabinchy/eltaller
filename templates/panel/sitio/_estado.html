@@ -1,0 +1,9 @@
+{# Estado de un contenido. o = objeto; novedad = True para Publicacion (tiene fecha programable). #}
+{% if novedad %}
+  {% if o.publicada and o.fecha > ahora %}<span class="cc-chip cc-chip--info"><i class="bi bi-clock" aria-hidden="true"></i>Programada</span>
+  {% elif o.publicada %}<span class="cc-chip cc-chip--ok"><i class="bi bi-eye" aria-hidden="true"></i>Publicada</span>
+  {% else %}<span class="cc-chip cc-chip--off"><i class="bi bi-pencil" aria-hidden="true"></i>Borrador</span>{% endif %}
+{% else %}
+  {% if o.publicado %}<span class="cc-chip cc-chip--ok"><i class="bi bi-eye" aria-hidden="true"></i>Publicado</span>
+  {% else %}<span class="cc-chip cc-chip--off"><i class="bi bi-pencil" aria-hidden="true"></i>Borrador</span>{% endif %}
+{% endif %}

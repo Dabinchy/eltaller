@@ -1,0 +1,16 @@
+{# Botón publicar/ocultar. o, tipo, publicado (bool actual), chico (opcional). #}
+<form method="post" action="{% url 'sitio_panel:publicar' tipo o.pk %}" class="d-inline">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% if publicado %}
+    <input type="hidden" name="valor" value="0">
+    <button class="btn btn-sm btn-outline-secondary" type="submit" title="Deja de verse en la web">
+      <i class="bi bi-eye-slash" aria-hidden="true"></i><span class="{% if chico %}d-none d-md-inline {% endif %}ms-1">Ocultar</span>
+    </button>
+  {% else %}
+    <input type="hidden" name="valor" value="1">
+    <button class="btn btn-sm btn-success" type="submit" title="Se ve en la web">
+      <i class="bi bi-eye" aria-hidden="true"></i><span class="{% if chico %}d-none d-md-inline {% endif %}ms-1">Publicar</span>
+    </button>
+  {% endif %}
+</form>

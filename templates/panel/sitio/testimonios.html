@@ -1,0 +1,39 @@
+{% extends "panel/sitio/_base.html" %}
+
+{% block content %}
+<div class="container-fluid py-3" style="max-width:1100px">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-0">Testimonios</h1>
+      <p class="small text-body-secondary mb-0">Opiniones de clientes (siempre con su permiso). Con las flechas elegís el orden.</p>
+    </div>
+    {% if puede_crear %}<a class="btn btn-primary btn-sm" href="{% url 'sitio_panel:testimonio_nuevo' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo testimonio</a>{% endif %}
+  </div>
+
+  {% for titulo_grupo, items in grupos %}
+    <h2 class="h6 mt-4 mb-2">{{ titulo_grupo }} <span class="text-body-secondary fw-normal">· {{ items|length }}</span></h2>
+    <div class="card">
+      {% for o in items %}
+        <div class="ps-fila">
+          <span class="ps-icono"><i class="bi bi-chat-quote" aria-hidden="true"></i></span>
+          <div class="ps-texto">
+            {% if puede_editar %}<a class="ps-titulo" href="{% url 'sitio_panel:testimonio' o.pk %}">{{ o.nombre }}</a>{% else %}<span class="ps-titulo">{{ o.nombre }}</span>{% endif %}
+            {% if o.detalle %}<span class="small text-body-secondary"> · {{ o.detalle }}</span>{% endif %}
+            <p class="ps-resumen mb-1">“{{ o.texto }}”</p>
+            <div class="ps-meta">{% include "panel/sitio/_estado.html" %}</div>
+          </div>
+          {% if puede_editar %}
+            <div class="ps-acciones">
+              {% include "panel/sitio/_mover.html" with tipo="testimonios" primero=forloop.first ultimo=forloop.last %}
+              {% include "panel/sitio/_publicar.html" with tipo="testimonios" publicado=o.publicado chico=True %}
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'sitio_panel:testimonio' o.pk %}" aria-label="Editar testimonio de {{ o.nombre }}"><i class="bi bi-pencil" aria-hidden="true"></i></a>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div class="card-body small text-body-secondary">Sin testimonios.</div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
