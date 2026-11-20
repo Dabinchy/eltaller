@@ -36,8 +36,8 @@
   --marca-campeonatos: #F5B700;
   --marca-campeonatos-rgb: 245, 183, 0;
   --marca-campeonatos-tinta: #F5B700;
-  /* Fondo de los logos actuales (JPG con fondo gris claro). Ver .cc-logo-placa en comun.css. */
-  --marca-logo-fondo: #F7F7F7;
+  /* Fondo detrás de los logos. Son PNG/SVG transparentes: sin placa. Ver .cc-logo-placa en comun.css. */
+  --marca-logo-fondo: transparent;
 
   /* ---------- Superficies y texto (oscuro) ---------- */
   --cc-bg: #070B14;

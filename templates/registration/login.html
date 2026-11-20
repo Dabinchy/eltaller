@@ -12,7 +12,7 @@
       <a href="{{ parte.inicio }}" aria-label="Volver a {{ parte.nombre }}">
         {% if parte.logo %}
           <img src="{{ parte.logo }}" alt="{{ parte.nombre }}" class="cc-logo-placa"
-               style="height:{% if parte.clave == 'prepa' %}auto;width:300px{% else %}110px;width:auto{% endif %};max-width:100%;object-fit:contain">
+               style="height:{% if parte.clave == 'taller' %}120px;width:auto{% else %}auto;width:300px{% endif %};max-width:100%;object-fit:contain">
         {% else %}
           {% include "sitio/_logo_parte.html" with p=parte %}
         {% endif %}

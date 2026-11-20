@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2F6BFF"/><text x="32" y="45" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="38" font-weight="900" fill="#fff">T</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="#fff" stroke="#111111" stroke-width="2"/>
+  <g transform="translate(32 32) rotate(40) scale(.86) translate(-32 -32)" stroke-linejoin="round">
+    <g fill="#111111" stroke="#111111" stroke-width="6" fill-rule="evenodd">
+      <path d="M28 2.7A12 12 0 1 0 36 2.7L36 9A4 4 0 0 1 28 9Z"/><path d="M26.5 20H37.5V33H26.5Z"/><path d="M26.5 32H37.5V44H26.5Z"/><path d="M32 41A10 10 0 1 1 32 61A10 10 0 1 1 32 41ZM32 46.5A4.5 4.5 0 1 0 32 55.5A4.5 4.5 0 1 0 32 46.5Z"/>
+    </g>
+    <g fill-rule="evenodd">
+      <path fill="#F5050B" d="M28 2.7A12 12 0 1 0 36 2.7L36 9A4 4 0 0 1 28 9Z"/><path fill="#F5050B" d="M26.5 20H37.5V33H26.5Z"/>
+      <path fill="#0040CC" d="M26.5 32H37.5V44H26.5Z"/><path fill="#0040CC" d="M32 41A10 10 0 1 1 32 61A10 10 0 1 1 32 41ZM32 46.5A4.5 4.5 0 1 0 32 55.5A4.5 4.5 0 1 0 32 46.5Z"/>
+    </g>
+  </g>
+</svg>

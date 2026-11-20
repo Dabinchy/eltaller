@@ -90,19 +90,32 @@
   padding-bottom: 10px;
 }
 .sitio-brand { padding: 0; margin-right: 0; }
+/* El Taller es una calcomanía casi cuadrada (se limita el alto); El Prepa y Campeonatos son
+   anchos y bajos (se limita el ancho). */
 .sitio-logo {
   display: block;
-  height: 46px;
+  height: 54px;
   width: auto;
-  max-width: 190px;
+  max-width: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .25));
 }
-.sitio-logo-prepa { height: 34px; }
-.sitio-logo-grande { height: 150px; max-width: 100%; margin: 0 auto; }
-.sitio-logo-prepa.sitio-logo-grande { height: auto; width: 520px; }
-@media (max-width: 400px) {
-  .sitio-logo:not(.sitio-logo-grande) { height: 40px; max-width: 140px; }
-  .sitio-logo-prepa:not(.sitio-logo-grande) { height: auto; width: 140px; }
+.sitio-logo-prepa,
+.sitio-logo-campeonatos { height: auto; width: 220px; }
+.sitio-logo-grande { height: 170px; margin: 0 auto; }
+.sitio-logo-prepa.sitio-logo-grande,
+.sitio-logo-campeonatos.sitio-logo-grande { height: auto; width: 540px; }
+.sitio-brand { transition: transform var(--cc-t-med) var(--cc-ease); }
+.sitio-brand:hover { transform: translateY(-1px) rotate(-1deg); }
+@media (prefers-reduced-motion: reduce) { .sitio-brand:hover { transform: none; } }
+@media (max-width: 575.98px) {
+  .sitio-logo:not(.sitio-logo-grande) { height: 46px; }
+  .sitio-logo-prepa:not(.sitio-logo-grande),
+  .sitio-logo-campeonatos:not(.sitio-logo-grande) { height: auto; width: 150px; }
+}
+@media (max-width: 380px) {
+  .sitio-logo-prepa:not(.sitio-logo-grande),
+  .sitio-logo-campeonatos:not(.sitio-logo-grande) { width: 124px; }
 }
 
 .sitio-wordmark {

@@ -16,15 +16,14 @@
 }
 .cc-skip:focus { transform: translateY(0); }
 
-/* Placa detrás de los logos. Los logos actuales son JPG con fondo gris claro: la placa tiene ese
-   mismo gris para que el logo se vea prolijo sobre fondo oscuro. Cuando se reemplacen por PNG o SVG
-   transparentes, poner --marca-logo-fondo: transparent en app/tokens.css. */
+/* Placa detrás de los logos. Los logos actuales son transparentes (con borde blanco y negro tipo
+   calco), así que no hace falta placa. Si algún día se usa un logo con fondo, poner su color en
+   --marca-logo-fondo (app/tokens.css) y descomentar el padding. */
 .cc-logo-placa {
   background: var(--marca-logo-fondo);
   border-radius: 10px;
-  padding: 4px 8px;
+  /* padding: 4px 8px; */
 }
-.cc-logo-placa.sitio-logo-grande { border-radius: 18px; padding: 14px 22px; }
 
 /* Botón de tema en las pantallas sin menú (ingreso, registro, errores) */
 .cc-tema-flotante {

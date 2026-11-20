@@ -34,7 +34,7 @@ class SitioTests(TestCase):
     def test_encabezado_de_cada_parte(self):
         r = self.client.get("/")
         self.assertContains(r, 'data-parte="taller"')
-        self.assertContains(r, "el-taller.jpg")
+        self.assertContains(r, "el-taller.png")
         self.assertContains(r, 'href="/ingresar/?parte=taller"')
         self.assertContains(r, "Pedir presupuesto")
         # Las tres pestañas en todas las páginas
@@ -43,7 +43,7 @@ class SitioTests(TestCase):
 
         r = self.client.get("/prepa/clasicos/")
         self.assertContains(r, '<body class="cc-app sitio d-flex flex-column min-vh-100" data-parte="prepa">')
-        self.assertContains(r, "el-prepa.jpg")
+        self.assertContains(r, "el-prepa.png")
         self.assertContains(r, 'href="/ingresar/?parte=prepa"')
         self.assertContains(r, 'aria-current="page"')   # "Clásicos" marcado en el menú
 
@@ -56,13 +56,14 @@ class SitioTests(TestCase):
     def test_ingreso_con_la_marca_de_la_parte(self):
         r = self.client.get("/ingresar/?parte=campeonatos")
         self.assertContains(r, "Acceso pilotos")
+        self.assertContains(r, "campeonatos.svg")
         self.assertContains(r, 'name="parte" value="campeonatos"')
         r = self.client.get("/ingresar/?parte=prepa")
-        self.assertContains(r, "el-prepa.jpg")
+        self.assertContains(r, "el-prepa.png")
         # Sin parte (o una inválida): ingreso general con la marca El Taller
         for url in ("/ingresar/", "/ingresar/?parte=otra"):
             r = self.client.get(url)
-            self.assertContains(r, "el-taller.jpg")
+            self.assertContains(r, "el-taller.png")
         self.assertContains(self.client.get("/ingresar/"), "Personal del taller, pilotos y clientes")
 
     def test_las_areas_no_quedan_tapadas(self):

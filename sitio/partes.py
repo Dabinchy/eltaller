@@ -78,6 +78,7 @@ PARTES: dict[str, Parte] = {
         inicio="sitio:campeonatos",
         icono="bi-trophy",
         lema="Resultados, tablas y pilotos",
+        logo=settings.CAMPEONATOS_LOGO,
         favicon=settings.CAMPEONATOS_FAVICON,
         menu=(
             ("Campeonatos", "sitio:campeonatos"),
