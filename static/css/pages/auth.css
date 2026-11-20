@@ -82,3 +82,60 @@
   border-color: color-mix(in srgb, var(--cc-mod) 86%, var(--cc-text));
   color: var(--sitio-acento-texto, #fff);
 }
+
+/* Contraseña con botón para mostrarla (ojito dentro del campo, a la derecha) */
+.cc-auth-pass{ position: relative; }
+.cc-auth-pass .form-control{ padding-right: 48px; }
+.cc-auth-eye{
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--cc-text-dim);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--cc-t-fast) var(--cc-ease), background-color var(--cc-t-fast) var(--cc-ease);
+}
+.cc-auth-eye:hover{ color: var(--cc-text); background: rgba(var(--cc-text-rgb), .07); }
+.cc-auth-eye:focus-visible{ outline: none; color: var(--cc-text); box-shadow: 0 0 0 3px rgba(var(--cc-mod-rgb), .45); }
+.cc-auth-eye[aria-pressed="true"]{ color: var(--cc-mod-tinta); }
+/* Con error, Bootstrap pone su ícono a la derecha: el ojito va antes. */
+.cc-auth-pass .form-control.is-invalid{ padding-right: 80px; background-position: right 50px center; }
+
+/* Aviso de Bloq Mayús */
+.cc-auth-caps{
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--cc-warn);
+}
+.cc-auth-caps[hidden]{ display: none; }
+
+/* Mensajes arriba del formulario: error de ingreso y aviso */
+.cc-auth-alert,
+.cc-auth-note{
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.cc-auth-alert{
+  background: rgba(var(--cc-danger-rgb), .12);
+  border: 1px solid rgba(var(--cc-danger-rgb), .45);
+  color: color-mix(in srgb, var(--cc-danger) 70%, var(--cc-text));
+}
+.cc-auth-note{
+  background: rgba(var(--cc-mod-rgb), .10);
+  border: 1px solid rgba(var(--cc-mod-rgb), .35);
+  color: var(--cc-text-muted);
+}

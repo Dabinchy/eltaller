@@ -53,7 +53,8 @@
           <input type="password" name="{{ form.password.html_name }}" id="id_password"
                  class="form-control{% if form.password.errors %} is-invalid{% endif %}"
                  autocomplete="current-password" required>
-          <button class="cc-auth-eye" type="button" id="ccPassToggle" aria-label="Mostrar contraseña">
+          <button class="cc-auth-eye" type="button" id="ccPassToggle" aria-label="Mostrar contraseña"
+                  aria-controls="id_password" aria-pressed="false" title="Mostrar contraseña">
             <i class="bi bi-eye" aria-hidden="true"></i>
           </button>
         </div>
@@ -95,7 +96,10 @@
     btn.addEventListener("click", function () {
       var mostrar = pass.type === "password";
       pass.type = mostrar ? "text" : "password";
-      btn.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+      var texto = mostrar ? "Ocultar contraseña" : "Mostrar contraseña";
+      btn.setAttribute("aria-label", texto);
+      btn.setAttribute("title", texto);
+      btn.setAttribute("aria-pressed", mostrar ? "true" : "false");
       btn.querySelector("i").className = mostrar ? "bi bi-eye-slash" : "bi bi-eye";
     });
     pass.addEventListener("keyup", function (e) {
