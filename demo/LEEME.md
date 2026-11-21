@@ -7,24 +7,26 @@ cliente que sigue su taller) y dos campeonatos con fechas, resultados y tabla de
 **No toca tus datos reales:** usa otra base (`demo.sqlite3`) y otras carpetas de archivos
 (`media_demo/` y `privado_demo/`). Se activa con la variable de entorno `DJANGO_DEMO=1`.
 
-## Cargarla (Windows, PowerShell)
+## Abrirla (Windows)
 
-Desde la carpeta del proyecto y con el entorno virtual activado (`.venv\Scripts\activate`):
+**Doble clic en `demo\iniciar_demo.bat`.** Activa el entorno virtual (`.venv`), prepara la base de
+demo (la primera vez la carga, tarda unos segundos), arranca el servidor y abre el navegador en
+<http://127.0.0.1:8000/>. Para cerrarla: Ctrl+C en esa ventana.
+
+Para dejarla como nueva (por ejemplo, después de probar cosas): doble clic en `demo\reiniciar_demo.bat`.
+
+Las fotos ya vienen en `demo/fotos/`: no hace falta internet.
+
+### A mano (PowerShell)
 
 ```powershell
 $env:DJANGO_DEMO="1"
 python manage.py migrate
-python manage.py cargar_demo
+python manage.py cargar_demo          # --reiniciar para borrarla y cargarla de nuevo
 python manage.py runserver
 ```
 
-La primera vez, `cargar_demo` baja unas 20 fotos de Wikimedia Commons (hace falta internet; tarda
-un par de minutos). Si alguna no se puede bajar, usa una imagen de reemplazo.
-
-Abrí <http://127.0.0.1:8000/>. Para ingresar: <http://127.0.0.1:8000/ingresar/>.
-
-> `$env:DJANGO_DEMO="1"` vale para esa ventana de PowerShell. Si abrís otra, volvé a ponerlo antes
-> de `runserver`; sin esa variable, Django usa tu base real.
+> `$env:DJANGO_DEMO="1"` vale para esa ventana de PowerShell. Sin esa variable, Django usa tu base real.
 
 ## Usuarios (contraseña de todos: `demo1234`)
 
@@ -53,7 +55,7 @@ Abrí <http://127.0.0.1:8000/>. Para ingresar: <http://127.0.0.1:8000/ingresar/>
 
 ## Empezar de cero
 
-Borrá `demo.sqlite3`, `media_demo/` y `privado_demo/`, y repetí los pasos de arriba. Las fotos ya
-bajadas quedan en `demo/fotos/` y no se vuelven a bajar.
+`demo\reiniciar_demo.bat` (o `python manage.py cargar_demo --reiniciar` con `DJANGO_DEMO=1`). Sólo
+borra la base de demo y sus archivos; nunca tu base real.
 
 Las fotos tienen licencias libres; los autores están en [CREDITOS.md](CREDITOS.md).

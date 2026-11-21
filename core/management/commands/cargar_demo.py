@@ -11,9 +11,11 @@ Va en una base aparte (no toca los datos reales). Ver demo/LEEME.md. En Windows 
     python manage.py runserver
 
 Todos los usuarios de la demo tienen la contraseña "demo1234" (se listan al terminar).
-Las fotos son de Wikimedia Commons con licencias libres (demo/fotos.json y demo/CREDITOS.md):
-la primera vez se bajan a demo/fotos/ (hace falta internet); si alguna no se puede bajar, se usa
-una imagen de reemplazo.
+Las fotos (Wikimedia Commons, licencias libres; ver demo/CREDITOS.md) vienen en demo/fotos/.
+Si falta alguna, se intenta bajar (demo/fotos.json) y si no, se usa una imagen de reemplazo.
+
+Opciones: --reiniciar borra la demo y la vuelve a cargar; --si-hace-falta no hace nada si ya está
+cargada (lo usa demo/iniciar_demo.bat).
 """
 from __future__ import annotations
 
@@ -37,7 +39,7 @@ from PIL import Image, ImageDraw
 CLAVE = "demo1234"
 FOTOS = Path(settings.BASE_DIR) / "demo" / "fotos"
 MANIFIESTO = Path(settings.BASE_DIR) / "demo" / "fotos.json"
-AGENTE = "ElTallerDemo/1.0 (carga de demo local; https://meta.wikimedia.org/wiki/User-Agent_policy) Python-urllib"
+AGENTE = "ElTallerDemo/1.0 (carga de demo local; https://meta.wikimedia.org/wiki/User-Agent_policy)"
 
 
 def bajar_fotos(escribir) -> int:
@@ -49,9 +51,10 @@ def bajar_fotos(escribir) -> int:
         escribir(f"Bajando {len(pendientes)} fotos de Wikimedia Commons (sólo la primera vez)...")
     faltan = 0
     for clave, datos in pendientes:
-        ruta, nombre = datos["url"].split("/wikipedia/commons/")[1], datos["url"].rsplit("/", 1)[1]
+        original = datos["url"].split("?")[0]          # sin los parámetros de seguimiento (?utm_...)
+        ruta, nombre = original.split("/wikipedia/commons/")[1], original.rsplit("/", 1)[1]
         miniatura = nombre if len(nombre) <= 160 else "thumbnail.jpg"   # Commons abrevia los nombres largos
-        urls = [f"https://upload.wikimedia.org/wikipedia/commons/thumb/{ruta}/1280px-{miniatura}", datos["url"]]
+        urls = [f"https://upload.wikimedia.org/wikipedia/commons/thumb/{ruta}/1280px-{miniatura}", original]
         contenido = None
         for intento in range(3):
             for url in urls:
@@ -116,6 +119,10 @@ class Command(BaseCommand):
                             help="Cargar aunque no sea la base de demo (sólo en una base vacía).")
         parser.add_argument("--sin-fotos", action="store_true",
                             help="No bajar fotos de internet (usa las que haya y si no, imágenes de reemplazo).")
+        parser.add_argument("--reiniciar", action="store_true",
+                            help="Borrar la demo (base y archivos) y volver a cargarla. Sólo con DJANGO_DEMO=1.")
+        parser.add_argument("--si-hace-falta", action="store_true",
+                            help="Si la demo ya está cargada, no hacer nada.")
 
     # =====================================================================
     def handle(self, *args, **opciones):
@@ -126,10 +133,17 @@ class Command(BaseCommand):
                 "Por seguridad, la demo se carga en una base aparte. Activala con la variable "
                 "DJANGO_DEMO=1 (en PowerShell: $env:DJANGO_DEMO=\"1\"), corré migrate y después cargar_demo."
             )
+        if opciones["reiniciar"]:
+            if not settings.DEMO:
+                raise CommandError("--reiniciar sólo se puede usar en la base de demo (DJANGO_DEMO=1).")
+            self.reiniciar()
         if Usuario.objects.exists():
+            if opciones["si_hace_falta"]:
+                self.stdout.write("La demo ya está cargada.")
+                return
             raise CommandError(
-                "Esta base ya tiene datos. Para empezar de cero: borrá demo.sqlite3 y las carpetas "
-                "media_demo y privado_demo, y volvé a correr migrate y cargar_demo."
+                "Esta base ya tiene datos. Para empezar de cero: python manage.py cargar_demo --reiniciar "
+                "(con DJANGO_DEMO=1)."
             )
         if not opciones["sin_fotos"]:
             bajar_fotos(self.stdout.write)
@@ -144,6 +158,18 @@ class Command(BaseCommand):
             self.novedades_y_consultas()
             self.cliente_del_portal()
         self.resumen()
+
+    def reiniciar(self):
+        """Vacía la base de demo y borra sus archivos subidos (nunca la base real: lo verifica handle)."""
+        import shutil
+
+        from django.core.management import call_command
+
+        self.stdout.write("Borrando la demo anterior...")
+        call_command("flush", interactive=False, verbosity=0)   # vuelve a crear grupos y permisos (post_migrate)
+        for carpeta in (settings.MEDIA_ROOT, settings.PRIVATE_MEDIA_ROOT):
+            if Path(carpeta).name.endswith("_demo"):        # por las dudas: sólo las carpetas de la demo
+                shutil.rmtree(carpeta, ignore_errors=True)
 
     # =====================================================================
     # Empresa, sucursal y personal
@@ -286,8 +312,9 @@ class Command(BaseCommand):
                 "categoría. Después, puesta a punto en cada fecha del campeonato.", "motor",
                 [("banco", "proceso", "Armado en el banco"), ("tc_peloton", "despues", "En carrera")], 30)
         trabajo("competicion", "Karting Senior para el zonal", "Karting · Senior",
-                "Motor y chasis preparados para el Campeonato Zonal.", "", "kart_1",
-                [("kart_2", "proceso", "Banco de pruebas"), ("kart_3", "despues", "Listo para la largada")], 45)
+                "Motor y chasis preparados para el Campeonato Zonal.",
+                "Puesta a punto de motor y chasis, y acompañamiento en las pruebas antes de cada fecha.", "kart_3",
+                [("kart_2", "proceso", "Pruebas en el kartódromo"), ("kart_1", "despues", "En carrera")], 45)
         trabajo("clasico", "Restauración IKA Torino 380 W", "IKA Torino 380 W 1967",
                 "Un año de trabajo: chapa, pintura original y motor a nuevo.",
                 "El auto llegó desarmado y con óxido en el piso. Lo restauramos respetando cada detalle de fábrica, "
@@ -295,7 +322,8 @@ class Command(BaseCommand):
         trabajo("clasico", "Ford Falcon Sprint 1978", "Ford Falcon Sprint 3.6",
                 "Mecánica completa y pintura en sus colores originales.", "", "falcon", [], 90)
         trabajo("clasico", "Fiat 600 S", "Fiat 600 S 1982", "El primer auto del abuelo, otra vez en la calle.",
-                "", "fiat600", [], 120, destacado=False)
+                "Lo trajeron sin funcionar después de veinte años guardado. Motor, frenos, instalación eléctrica y "
+                "tapizado nuevos, manteniendo su pintura original.", "fiat600", [], 120)
         trabajo("personalizacion", "Golf GTI: potencia y estética", "Volkswagen Golf GTI 2017",
                 "Reprogramación, escape completo y llantas 18\".", "", "golf", [], 35)
 
@@ -305,8 +333,11 @@ class Command(BaseCommand):
             ("taller", "Raúl P.", "Toyota Hilux", "Atención impecable. Me mostraron las piezas viejas y el precio fue el del presupuesto."),
             ("taller", "Sofía L.", "VW Gol Trend", "Excelentes. Me salvaron un viaje: me atendieron en el día."),
             ("taller", "Jorge M.", "Ford Ranger", "Gente seria y que sabe. Hace años que llevo mis autos acá."),
+            ("taller", "Carolina B.", "Fiat Cronos", "Me encontraron la falla que otro taller no pudo. Y me cobraron lo justo."),
+            ("taller", "Hugo R.", "Peugeot 208", "Me avisaron por WhatsApp cada paso. Así da gusto dejar el auto."),
             ("prepa", "Martín A.", "Piloto de Turismo Pista", "El auto quedó impecable para la primera fecha y en cada carrera estuvieron al lado nuestro."),
             ("prepa", "Ana S.", "Dueña del Torino", "La restauración superó lo que imaginaba. Ver las fotos de cada etapa fue emocionante."),
+            ("prepa", "Pedro V.", "Golf GTI", "Le ganaron potencia sin perder confiabilidad. Lo uso todos los días."),
         ]:
             Testimonio.objects.create(parte=parte, nombre=nombre, detalle=detalle, texto=texto, publicado=True)
 
@@ -377,8 +408,8 @@ class Command(BaseCommand):
               [E.APROBADA, E.EN_PROCESO], 1)
         hilux = orden("raul", "AA456CD", self.tec2, "Ruido al frenar.", "Discos y pastillas gastados.",
                       [("discos", "1"), ("pastillas", "1"), ("mo", "2")], [E.APROBADA, E.EN_PROCESO, E.TERMINADA], 3)
-        orden("sofia", "AB789EF", self.tec2, "Cambio de pastillas.", "Pastillas al 10 %.",
-              [("pastillas", "1"), ("mo", "1")], [E.APROBADA, E.EN_PROCESO, E.TERMINADA], 4)
+        pastillas = orden("sofia", "AB789EF", self.tec2, "Cambio de pastillas.", "Pastillas al 10 %.",
+                          [("pastillas", "1"), ("mo", "1")], [E.APROBADA, E.EN_PROCESO, E.TERMINADA], 4)
         orden("jorge", "AE654IJ", self.tec2, "Luz de motor encendida.", "Sensor de oxígeno con lectura errática.",
               [("scanner", "1"), ("mo", "1")], [E.APROBADA], 0)
         orden("jorge", "AD321GH", self.tec1, "Hace 140.000 km: cambio de distribución.", "",
@@ -391,6 +422,27 @@ class Command(BaseCommand):
         sesion = SesionCaja.objects.create(caja=caja, abierta_el=timezone.now(), abierta_por=self.adm,
                                            saldo_inicial=Decimal("50000"), saldo_estimado=Decimal("50000"))
         hilux.entregar(user=self.gerente, sesion=sesion)
+        # Otra entregada y cobrada en efectivo: aparece en el listado de ventas
+        pastillas.entregar(user=self.gerente, sesion=sesion)
+        pastillas.refresh_from_db()
+        pastillas.venta.finalizar(user=self.gerente)
+
+        # Proveedores y compras: una confirmada (sumó stock) y otra en borrador
+        from compras.models import Compra, CompraDetalle, Proveedor
+
+        lubri = Proveedor.objects.create(nombre="Lubricentro Patagónico SA", documento="30711222339",
+                                         telefono="(0299) 442-1100", email="ventas@example.com")
+        Proveedor.objects.create(nombre="Repuestos del Valle SRL", documento="30699888771", telefono="(0299) 478-5500")
+        c = Compra.objects.create(proveedor=lubri, sucursal=self.suc, creada_por=self.jefe,
+                                  observaciones="Factura A 0003-00012345")
+        for prod, cant, costo in (("aceite", "12", "31000"), ("filtro_aceite", "20", "5200"), ("filtro_aire", "10", "7100")):
+            CompraDetalle.objects.create(compra=c, producto=P[prod], cantidad=Decimal(cant), costo_unitario=Decimal(costo))
+        c.refresh_from_db()
+        c.confirmar(user=self.gerente)
+        borrador = Compra.objects.create(proveedor=lubri, sucursal=self.suc, creada_por=self.jefe,
+                                         observaciones="Pedido para la semana que viene")
+        CompraDetalle.objects.create(compra=borrador, producto=P["pastillas"], cantidad=Decimal("6"),
+                                     costo_unitario=Decimal("24000"))
 
         manana = self.hoy + timedelta(days=1)
         for cliente, patente, dia, hora, motivo in [
@@ -463,9 +515,9 @@ class Command(BaseCommand):
             ("tur", 0, "Fiat", "Uno Turismo Pista", "12", "Clase 2", None),
             ("tur", 1, "Volkswagen", "Gol Turismo Pista", "7", "Clase 2", None),
             ("tur", 6, "Ford", "Ka Turismo Pista", "33", "Clase 3", None),
-            ("kart", 0, "Kart", "Chasis Mini · motor 125", "21", "Senior", "kart_1"),
-            ("kart", 1, "Kart", "Chasis Kosmic · motor 125", "5", "Senior", "kart_2"),
-            ("kart", 6, "Kart", "Chasis Birel · motor 60", "44", "Junior", "kart_3"),
+            ("kart", 0, "Kart", "Chasis Mini · motor 125", "21", "Senior", "kart_3"),
+            ("kart", 1, "Kart", "Chasis Kosmic · motor 125", "5", "Senior", "kart_1"),
+            ("kart", 6, "Kart", "Chasis Birel · motor 60", "44", "Junior", "kart_2"),
         ]:
             perfil = self.pilotos[grupo][idx]
             mod = self.mod_tur if grupo == "tur" else self.mod_kart
@@ -635,6 +687,6 @@ class Command(BaseCommand):
         faltan = [c for c in manifiesto if not (FOTOS / f"{c}.jpg").exists()]
         if faltan:
             self.stdout.write(self.style.WARNING(
-                f"\nFaltan {len(faltan)} fotos (se usaron imágenes de reemplazo). Con internet, borrá la base de demo "
-                "y volvé a cargarla para que se bajen."))
+                f"\nFaltan {len(faltan)} fotos (se usaron imágenes de reemplazo). Con internet: "
+                "python manage.py cargar_demo --reiniciar"))
         self.stdout.write("Fotos: Wikimedia Commons, licencias libres; autores en demo/CREDITOS.md.")

@@ -30,6 +30,7 @@ class CargarDemoTests(TestCase):
         self.assertIn("Base de demostración cargada", salida.getvalue())
         self.assertTrue(Usuario.objects.filter(username="carlos", groups__name="gerente").exists())
         self.assertEqual(Trabajo.objects.publicados().count(), 11)
+        self.assertEqual(Trabajo.objects.filter(destacado=True, tipo__in=["competicion", "personalizacion", "clasico"]).count(), 6)
         self.assertTrue(Publicacion.objects.filter(asociacion__isnull=False, autor__username="laura").exists())
         self.assertEqual(OrdenTrabajo.objects.filter(estado=OrdenTrabajo.Estado.PRESUPUESTO).count(), 1)
         self.assertTrue(Resultado.objects.filter(estado=Resultado.Estado.VALIDADO).exists())
@@ -43,6 +44,14 @@ class CargarDemoTests(TestCase):
         # No se carga dos veces
         with self.assertRaisesMessage(CommandError, "ya tiene datos"):
             call_command("cargar_demo", "--forzar", "--sin-fotos", stdout=StringIO())
+        # Si ya está cargada y se pide "si hace falta", no hace nada
+        salida = StringIO()
+        call_command("cargar_demo", "--forzar", "--sin-fotos", "--si-hace-falta", stdout=salida)
+        self.assertIn("ya está cargada", salida.getvalue())
+        # Reiniciar sólo en la base de demo (nunca en la real)
+        with self.assertRaisesMessage(CommandError, "sólo se puede usar en la base de demo"):
+            call_command("cargar_demo", "--forzar", "--reiniciar", stdout=StringIO())
+        self.assertTrue(Usuario.objects.filter(username="carlos").exists())
 
 
 class BajarFotosTests(TestCase):
