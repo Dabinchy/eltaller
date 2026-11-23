@@ -1,12 +1,12 @@
 """
 Producción (Raspberry Pi con Debian 13): se activa con DJANGO_ENV=prod en el archivo .env.
 
-Todo lo que cambia entre equipos sale del .env (ver deploy/env.ejemplo):
+Todo lo que cambia entre equipos sale del archivo .env (en la carpeta del proyecto, no se sube a git):
 - DJANGO_SECRET_KEY (obligatoria), DJANGO_ALLOWED_HOSTS, DJANGO_CSRF_TRUSTED_ORIGINS.
 - POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT.
 
 Detrás hay: Cloudflare (HTTPS y dominio) → túnel cloudflared → nginx (estáticos, fotos y archivos
-privados) → gunicorn → Django. Ver deploy/LEEME.md.
+privados) → gunicorn → Django.
 """
 import os
 
@@ -19,7 +19,7 @@ from .base import BASE_DIR
 def _env(nombre: str, *, obligatoria: bool = False, defecto: str = "") -> str:
     valor = os.environ.get(nombre, defecto).strip()
     if obligatoria and not valor:
-        raise ImproperlyConfigured(f"Falta {nombre} en el archivo .env (ver deploy/env.ejemplo).")
+        raise ImproperlyConfigured(f"Falta {nombre} en el archivo .env de la carpeta del proyecto.")
     return valor
 
 
@@ -31,7 +31,8 @@ DEBUG = False
 
 SECRET_KEY = _env("DJANGO_SECRET_KEY", obligatoria=True)
 if SECRET_KEY.startswith("inseguro") or len(SECRET_KEY) < 40:
-    raise ImproperlyConfigured("DJANGO_SECRET_KEY tiene que ser larga y aleatoria (la genera deploy/instalar.sh).")
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY tiene que ser larga y aleatoria: "
+                               "python3 -c \"import secrets; print(secrets.token_urlsafe(50))\"")
 
 # ALLOWED_HOSTS y CSRF_TRUSTED_ORIGINS se leen del .env en base.py.
 
