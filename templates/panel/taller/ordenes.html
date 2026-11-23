@@ -38,7 +38,7 @@
             <td class="d-none d-md-table-cell">{{ o.cliente }}</td>
             <td class="d-none d-lg-table-cell">{{ o.tecnico|default:"—" }}</td>
             <td>{% include "panel/taller/_estado.html" %}</td>
-            <td class="text-end d-none d-sm-table-cell">{{ o.total|money_ar }}</td>
+            <td class="text-end d-none d-sm-table-cell">{% if o.estado == "PRESUPUESTO" %}<span title="Presupuestado (todavía sin aprobar)">{{ o.total_presupuestado|money_ar }}</span>{% else %}{{ o.total|money_ar }}{% endif %}</td>
           </tr>
         {% empty %}
           <tr><td colspan="6" class="text-body-secondary">No hay órdenes con ese filtro.</td></tr>
